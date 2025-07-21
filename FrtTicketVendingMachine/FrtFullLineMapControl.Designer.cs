@@ -28,10 +28,33 @@
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
+            this.FullMapPictureBox = new System.Windows.Forms.PictureBox();
+            ((System.ComponentModel.ISupportInitialize)(this.FullMapPictureBox)).BeginInit();
+            this.SuspendLayout();
+            // 
+            // FullMapPictureBox
+            // 
+            this.FullMapPictureBox.Image = global::FrtTicketVendingMachine.Properties.Resources.FrtTvmAllLinesMap;
+            this.FullMapPictureBox.Location = new System.Drawing.Point(0, 0);
+            this.FullMapPictureBox.Name = "FullMapPictureBox";
+            this.FullMapPictureBox.Size = new System.Drawing.Size(1384, 885);
+            this.FullMapPictureBox.TabIndex = 0;
+            this.FullMapPictureBox.TabStop = false;
+            // 
+            // FrtFullLineMapControl
+            // 
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.FullMapPictureBox);
+            this.Name = "FrtFullLineMapControl";
+            this.Size = new System.Drawing.Size(1384, 885);
+            ((System.ComponentModel.ISupportInitialize)(this.FullMapPictureBox)).EndInit();
+            this.ResumeLayout(false);
+
         }
 
         #endregion
+
+        private System.Windows.Forms.PictureBox FullMapPictureBox;
     }
 }
