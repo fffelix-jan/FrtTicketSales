@@ -96,7 +96,7 @@
     <Compile Include="RoundedButton.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="RoundedPandel.cs">
+    <Compile Include="RoundedPanel.cs">
       <SubType>Component</SubType>
     </Compile>
     <EmbeddedResource Include="FrtFullLineMapControl.resx">
