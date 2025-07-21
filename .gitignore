@@ -3,6 +3,10 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Allow SqlServerTypes
+!/FrtTicketPrinter/SqlServerTypes/
+!/FrtTicketPrinter/SqlServerTypes/**/*
+
 # User-specific files
 *.rsuser
 *.suo
