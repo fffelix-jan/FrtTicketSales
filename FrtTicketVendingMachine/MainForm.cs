@@ -14,27 +14,42 @@ namespace FrtTicketVendingMachine
     {
         readonly Color defaultColor = Color.Crimson;
         readonly Color selectedColor = Color.Blue;
-        AppText.Language language = AppText.Language.English;
+        AppText.Language language = AppText.Language.Chinese;
 
         // Enables double buffering to avoid lag when refreshing the screen
-        protected override CreateParams CreateParams
-        {
-            get
-            {
-                // Skip if running over RDP
-                if (SystemInformation.TerminalServerSession)
-                    return base.CreateParams;
+        // This causes high CPU usage which is why it's not used
+        //protected override CreateParams CreateParams
+        //{
+        //    get
+        //    {
+        //        // Skip if running over RDP
+        //        if (SystemInformation.TerminalServerSession)
+        //            return base.CreateParams;
 
-                CreateParams cp = base.CreateParams;
-                cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED (double-buffer all controls)
-                return cp;
-            }
-        }
+        //        CreateParams cp = base.CreateParams;
+        //        cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED (double-buffer all controls)
+        //        return cp;
+        //    }
+        //}
 
         public MainForm()
         {
             InitializeComponent();
             SetKioskLanguage(this.language);
+
+            // Center a bunch of stuff that should be centered
+            CenterControlHorizontally(WelcomePanel);
+            CenterControlHorizontally(SelectTicketQuantityPanel);
+            CenterControlHorizontally(SelectPaymentMethodPanel);
+            CenterControlHorizontally(ChineseWelcomeLabel);
+            CenterControlHorizontally(EnglishWelcomeLabel);
+            CenterControlHorizontally(ChineseStationNameLabel);
+            CenterControlHorizontally(EnglishStationNameLabel);
+
+            // Hide the panels that are not needed at the start
+            SelectTicketQuantityPanel.Hide();
+            SelectPaymentMethodPanel.Hide();
+
             CenterControlHorizontally(ClockRoundedPanel);
             UpdateClockDisplay();
         }
@@ -49,6 +64,32 @@ namespace FrtTicketVendingMachine
             {
                 // Set select ticket label
                 SelectTicketQuantityLabel.Text = AppText.SelectTicketsChinese;
+                // Set select payment method label
+                SelectPaymentMethodLabel.Text = AppText.SelectPaymentMethodChinese;
+                // Set cash button text
+                CashButton.Text = AppText.CashChinese;
+                // Set fake Alipay/WeChat button text
+                QRPayButton.Text = AppText.FakeAlipayWeChatChinese;
+                // Set line buttons text
+                AllLinesButton.Text = AppText.AllLinesChinese;
+                Line1Button.Text = AppText.Line1Chinese;
+                Line2Button.Text = AppText.Line2Chinese;
+            }
+            // Else, set it to English
+            else
+            {
+                // Set select ticket label
+                SelectTicketQuantityLabel.Text = AppText.SelectTicketsEnglish;
+                // Set select payment method label
+                SelectPaymentMethodLabel.Text = AppText.SelectPaymentMethodEnglish;
+                // Set cash button text
+                CashButton.Text = AppText.CashEnglish;
+                // Set fake Alipay/WeChat button text
+                QRPayButton.Text = AppText.FakeAlipayWeChatEnglish;
+                // Set line buttons text
+                AllLinesButton.Text = AppText.AllLinesEnglish;
+                Line1Button.Text = AppText.Line1English;
+                Line2Button.Text = AppText.Line2English;
             }
         }
 
