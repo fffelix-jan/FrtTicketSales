@@ -102,9 +102,6 @@
     <Compile Include="RoundedPanel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="TransparentPanel.cs">
-      <SubType>Component</SubType>
-    </Compile>
     <EmbeddedResource Include="FrtFullLineMapControl.resx">
       <DependentUpon>FrtFullLineMapControl.cs</DependentUpon>
     </EmbeddedResource>
