@@ -79,6 +79,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppText.cs" />
+    <Compile Include="ClickThroughPictureBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="FrtFullLineMapControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -97,6 +100,9 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="RoundedPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="TransparentPanel.cs">
       <SubType>Component</SubType>
     </Compile>
     <EmbeddedResource Include="FrtFullLineMapControl.resx">

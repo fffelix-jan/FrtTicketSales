@@ -16,5 +16,10 @@ namespace FrtTicketVendingMachine
         {
             InitializeComponent();
         }
+
+        private void MingtingButton_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show("Mingting button clicked!", "Info", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
     }
 }

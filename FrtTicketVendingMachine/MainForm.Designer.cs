@@ -34,9 +34,7 @@
             this.ClockUpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.MapSelectionRoundedPanel = new FrtTicketVendingMachine.RoundedPanel();
             this.StationSelectionPanel = new System.Windows.Forms.Panel();
-            this.AllLinesButton = new FrtTicketVendingMachine.RoundedButton();
-            this.Line1Button = new FrtTicketVendingMachine.RoundedButton();
-            this.Line2Button = new FrtTicketVendingMachine.RoundedButton();
+            this.frtFullLineMapControl1 = new FrtTicketVendingMachine.FrtFullLineMapControl();
             this.RightHandSelectionsRoundedPanel = new FrtTicketVendingMachine.RoundedPanel();
             this.WelcomePanel = new System.Windows.Forms.Panel();
             this.ChineseWelcomeLabel = new System.Windows.Forms.Label();
@@ -60,7 +58,9 @@
             this.ClockRoundedPanel = new FrtTicketVendingMachine.RoundedPanel();
             this.DateTimeLabel = new System.Windows.Forms.Label();
             this.LogoPictureBox = new System.Windows.Forms.PictureBox();
-            this.frtFullLineMapControl1 = new FrtTicketVendingMachine.FrtFullLineMapControl();
+            this.AllLinesButton = new FrtTicketVendingMachine.RoundedButton();
+            this.Line1Button = new FrtTicketVendingMachine.RoundedButton();
+            this.Line2Button = new FrtTicketVendingMachine.RoundedButton();
             this.MainPanel.SuspendLayout();
             this.LineSelectFlowLayoutPanel.SuspendLayout();
             this.MapSelectionRoundedPanel.SuspendLayout();
@@ -79,8 +79,8 @@
             // 
             this.MainPanel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.MainPanel.Controls.Add(this.MapSelectionRoundedPanel);
-            this.MainPanel.Controls.Add(this.LineSelectFlowLayoutPanel);
             this.MainPanel.Controls.Add(this.RightHandSelectionsRoundedPanel);
+            this.MainPanel.Controls.Add(this.LineSelectFlowLayoutPanel);
             this.MainPanel.Location = new System.Drawing.Point(0, 0);
             this.MainPanel.Margin = new System.Windows.Forms.Padding(10);
             this.MainPanel.Name = "MainPanel";
@@ -123,59 +123,12 @@
             this.StationSelectionPanel.Size = new System.Drawing.Size(1384, 885);
             this.StationSelectionPanel.TabIndex = 0;
             // 
-            // AllLinesButton
+            // frtFullLineMapControl1
             // 
-            this.AllLinesButton.BackColor = System.Drawing.Color.Blue;
-            this.AllLinesButton.BorderColor = System.Drawing.Color.Transparent;
-            this.AllLinesButton.FlatAppearance.BorderSize = 0;
-            this.AllLinesButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.AllLinesButton.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.AllLinesButton.ForeColor = System.Drawing.Color.White;
-            this.AllLinesButton.Location = new System.Drawing.Point(3, 3);
-            this.AllLinesButton.Name = "AllLinesButton";
-            this.AllLinesButton.Radius = 25;
-            this.AllLinesButton.Size = new System.Drawing.Size(160, 103);
-            this.AllLinesButton.TabIndex = 6;
-            this.AllLinesButton.TabStop = false;
-            this.AllLinesButton.Text = "All Lines";
-            this.AllLinesButton.Thickness = 3F;
-            this.AllLinesButton.UseVisualStyleBackColor = false;
-            // 
-            // Line1Button
-            // 
-            this.Line1Button.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(229)))), ((int)(((byte)(23)))), ((int)(((byte)(21)))));
-            this.Line1Button.BorderColor = System.Drawing.Color.Transparent;
-            this.Line1Button.FlatAppearance.BorderSize = 0;
-            this.Line1Button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Line1Button.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Line1Button.ForeColor = System.Drawing.Color.White;
-            this.Line1Button.Location = new System.Drawing.Point(169, 3);
-            this.Line1Button.Name = "Line1Button";
-            this.Line1Button.Radius = 25;
-            this.Line1Button.Size = new System.Drawing.Size(160, 103);
-            this.Line1Button.TabIndex = 7;
-            this.Line1Button.TabStop = false;
-            this.Line1Button.Text = "Line 1";
-            this.Line1Button.Thickness = 3F;
-            this.Line1Button.UseVisualStyleBackColor = false;
-            // 
-            // Line2Button
-            // 
-            this.Line2Button.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(177)))), ((int)(((byte)(106)))));
-            this.Line2Button.BorderColor = System.Drawing.Color.Transparent;
-            this.Line2Button.FlatAppearance.BorderSize = 0;
-            this.Line2Button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Line2Button.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.Line2Button.ForeColor = System.Drawing.Color.White;
-            this.Line2Button.Location = new System.Drawing.Point(335, 3);
-            this.Line2Button.Name = "Line2Button";
-            this.Line2Button.Radius = 25;
-            this.Line2Button.Size = new System.Drawing.Size(160, 103);
-            this.Line2Button.TabIndex = 8;
-            this.Line2Button.TabStop = false;
-            this.Line2Button.Text = "Line 2";
-            this.Line2Button.Thickness = 3F;
-            this.Line2Button.UseVisualStyleBackColor = false;
+            this.frtFullLineMapControl1.Location = new System.Drawing.Point(0, 0);
+            this.frtFullLineMapControl1.Name = "frtFullLineMapControl1";
+            this.frtFullLineMapControl1.Size = new System.Drawing.Size(1384, 885);
+            this.frtFullLineMapControl1.TabIndex = 0;
             // 
             // RightHandSelectionsRoundedPanel
             // 
@@ -488,12 +441,59 @@
             this.LogoPictureBox.TabIndex = 0;
             this.LogoPictureBox.TabStop = false;
             // 
-            // frtFullLineMapControl1
+            // AllLinesButton
             // 
-            this.frtFullLineMapControl1.Location = new System.Drawing.Point(0, 0);
-            this.frtFullLineMapControl1.Name = "frtFullLineMapControl1";
-            this.frtFullLineMapControl1.Size = new System.Drawing.Size(1384, 885);
-            this.frtFullLineMapControl1.TabIndex = 0;
+            this.AllLinesButton.BackColor = System.Drawing.Color.Blue;
+            this.AllLinesButton.BorderColor = System.Drawing.Color.Transparent;
+            this.AllLinesButton.FlatAppearance.BorderSize = 0;
+            this.AllLinesButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.AllLinesButton.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.AllLinesButton.ForeColor = System.Drawing.Color.White;
+            this.AllLinesButton.Location = new System.Drawing.Point(3, 3);
+            this.AllLinesButton.Name = "AllLinesButton";
+            this.AllLinesButton.Radius = 25;
+            this.AllLinesButton.Size = new System.Drawing.Size(160, 103);
+            this.AllLinesButton.TabIndex = 6;
+            this.AllLinesButton.TabStop = false;
+            this.AllLinesButton.Text = "All Lines";
+            this.AllLinesButton.Thickness = 3F;
+            this.AllLinesButton.UseVisualStyleBackColor = false;
+            // 
+            // Line1Button
+            // 
+            this.Line1Button.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(229)))), ((int)(((byte)(23)))), ((int)(((byte)(21)))));
+            this.Line1Button.BorderColor = System.Drawing.Color.Transparent;
+            this.Line1Button.FlatAppearance.BorderSize = 0;
+            this.Line1Button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Line1Button.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Line1Button.ForeColor = System.Drawing.Color.White;
+            this.Line1Button.Location = new System.Drawing.Point(169, 3);
+            this.Line1Button.Name = "Line1Button";
+            this.Line1Button.Radius = 25;
+            this.Line1Button.Size = new System.Drawing.Size(160, 103);
+            this.Line1Button.TabIndex = 7;
+            this.Line1Button.TabStop = false;
+            this.Line1Button.Text = "Line 1";
+            this.Line1Button.Thickness = 3F;
+            this.Line1Button.UseVisualStyleBackColor = false;
+            // 
+            // Line2Button
+            // 
+            this.Line2Button.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(177)))), ((int)(((byte)(106)))));
+            this.Line2Button.BorderColor = System.Drawing.Color.Transparent;
+            this.Line2Button.FlatAppearance.BorderSize = 0;
+            this.Line2Button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.Line2Button.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Line2Button.ForeColor = System.Drawing.Color.White;
+            this.Line2Button.Location = new System.Drawing.Point(335, 3);
+            this.Line2Button.Name = "Line2Button";
+            this.Line2Button.Radius = 25;
+            this.Line2Button.Size = new System.Drawing.Size(160, 103);
+            this.Line2Button.TabIndex = 8;
+            this.Line2Button.TabStop = false;
+            this.Line2Button.Text = "Line 2";
+            this.Line2Button.Thickness = 3F;
+            this.Line2Button.UseVisualStyleBackColor = false;
             // 
             // MainForm
             // 
