@@ -73,6 +73,26 @@ namespace FrtTicketVendingMachine.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap FrtTvmLine1Map {
+            get {
+                object obj = ResourceManager.GetObject("FrtTvmLine1Map", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap FrtTvmLine2Map {
+            get {
+                object obj = ResourceManager.GetObject("FrtTvmLine2Map", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap rsz_frt_logo {
             get {
                 object obj = ResourceManager.GetObject("rsz_frt_logo", resourceCulture);

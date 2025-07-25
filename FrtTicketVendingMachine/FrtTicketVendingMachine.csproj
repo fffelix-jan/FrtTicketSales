@@ -138,5 +138,11 @@
   <ItemGroup>
     <None Include="Resources\FrtTvmAllLinesMap.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\FrtTvmLine1Map.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\FrtTvmLine2Map.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -127,5 +127,20 @@ namespace FrtTicketVendingMachine
             // Update the clock display
             UpdateClockDisplay();
         }
+
+        private void AllLinesButton_Click(object sender, EventArgs e)
+        {
+            MainFrtFullLineMapControl.ShowLine(0);
+        }
+
+        private void Line1Button_Click(object sender, EventArgs e)
+        {
+            MainFrtFullLineMapControl.ShowLine(1);
+        }
+
+        private void Line2Button_Click(object sender, EventArgs e)
+        {
+            MainFrtFullLineMapControl.ShowLine(2);
+        }
     }
 }

@@ -124,4 +124,10 @@
   <data name="FrtTvmAllLinesMap" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\FrtTvmAllLinesMap.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="FrtTvmLine1Map" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\FrtTvmLine1Map.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="FrtTvmLine2Map" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\FrtTvmLine2Map.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
 </root>

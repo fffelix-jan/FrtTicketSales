@@ -30,11 +30,9 @@
         {
             this.components = new System.ComponentModel.Container();
             this.MainPanel = new System.Windows.Forms.Panel();
-            this.LineSelectFlowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
-            this.ClockUpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.MapSelectionRoundedPanel = new FrtTicketVendingMachine.RoundedPanel();
             this.StationSelectionPanel = new System.Windows.Forms.Panel();
-            this.frtFullLineMapControl1 = new FrtTicketVendingMachine.FrtFullLineMapControl();
+            this.MainFrtFullLineMapControl = new FrtTicketVendingMachine.FrtFullLineMapControl();
             this.RightHandSelectionsRoundedPanel = new FrtTicketVendingMachine.RoundedPanel();
             this.WelcomePanel = new System.Windows.Forms.Panel();
             this.ChineseWelcomeLabel = new System.Windows.Forms.Label();
@@ -58,11 +56,12 @@
             this.ClockRoundedPanel = new FrtTicketVendingMachine.RoundedPanel();
             this.DateTimeLabel = new System.Windows.Forms.Label();
             this.LogoPictureBox = new System.Windows.Forms.PictureBox();
+            this.LineSelectFlowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.AllLinesButton = new FrtTicketVendingMachine.RoundedButton();
             this.Line1Button = new FrtTicketVendingMachine.RoundedButton();
             this.Line2Button = new FrtTicketVendingMachine.RoundedButton();
+            this.ClockUpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.MainPanel.SuspendLayout();
-            this.LineSelectFlowLayoutPanel.SuspendLayout();
             this.MapSelectionRoundedPanel.SuspendLayout();
             this.StationSelectionPanel.SuspendLayout();
             this.RightHandSelectionsRoundedPanel.SuspendLayout();
@@ -73,6 +72,7 @@
             this.QuantitySelectFlowLayoutPanel.SuspendLayout();
             this.ClockRoundedPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.LogoPictureBox)).BeginInit();
+            this.LineSelectFlowLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // MainPanel
@@ -86,22 +86,6 @@
             this.MainPanel.Name = "MainPanel";
             this.MainPanel.Size = new System.Drawing.Size(1920, 1080);
             this.MainPanel.TabIndex = 0;
-            // 
-            // LineSelectFlowLayoutPanel
-            // 
-            this.LineSelectFlowLayoutPanel.Controls.Add(this.AllLinesButton);
-            this.LineSelectFlowLayoutPanel.Controls.Add(this.Line1Button);
-            this.LineSelectFlowLayoutPanel.Controls.Add(this.Line2Button);
-            this.LineSelectFlowLayoutPanel.Location = new System.Drawing.Point(44, 941);
-            this.LineSelectFlowLayoutPanel.Name = "LineSelectFlowLayoutPanel";
-            this.LineSelectFlowLayoutPanel.Size = new System.Drawing.Size(1370, 110);
-            this.LineSelectFlowLayoutPanel.TabIndex = 2;
-            // 
-            // ClockUpdateTimer
-            // 
-            this.ClockUpdateTimer.Enabled = true;
-            this.ClockUpdateTimer.Interval = 500;
-            this.ClockUpdateTimer.Tick += new System.EventHandler(this.ClockUpdateTimer_Tick);
             // 
             // MapSelectionRoundedPanel
             // 
@@ -117,18 +101,18 @@
             // 
             // StationSelectionPanel
             // 
-            this.StationSelectionPanel.Controls.Add(this.frtFullLineMapControl1);
+            this.StationSelectionPanel.Controls.Add(this.MainFrtFullLineMapControl);
             this.StationSelectionPanel.Location = new System.Drawing.Point(0, 20);
             this.StationSelectionPanel.Name = "StationSelectionPanel";
             this.StationSelectionPanel.Size = new System.Drawing.Size(1384, 885);
             this.StationSelectionPanel.TabIndex = 0;
             // 
-            // frtFullLineMapControl1
+            // MainFrtFullLineMapControl
             // 
-            this.frtFullLineMapControl1.Location = new System.Drawing.Point(0, 0);
-            this.frtFullLineMapControl1.Name = "frtFullLineMapControl1";
-            this.frtFullLineMapControl1.Size = new System.Drawing.Size(1384, 885);
-            this.frtFullLineMapControl1.TabIndex = 0;
+            this.MainFrtFullLineMapControl.Location = new System.Drawing.Point(0, 0);
+            this.MainFrtFullLineMapControl.Name = "MainFrtFullLineMapControl";
+            this.MainFrtFullLineMapControl.Size = new System.Drawing.Size(1384, 885);
+            this.MainFrtFullLineMapControl.TabIndex = 0;
             // 
             // RightHandSelectionsRoundedPanel
             // 
@@ -441,6 +425,16 @@
             this.LogoPictureBox.TabIndex = 0;
             this.LogoPictureBox.TabStop = false;
             // 
+            // LineSelectFlowLayoutPanel
+            // 
+            this.LineSelectFlowLayoutPanel.Controls.Add(this.AllLinesButton);
+            this.LineSelectFlowLayoutPanel.Controls.Add(this.Line1Button);
+            this.LineSelectFlowLayoutPanel.Controls.Add(this.Line2Button);
+            this.LineSelectFlowLayoutPanel.Location = new System.Drawing.Point(44, 941);
+            this.LineSelectFlowLayoutPanel.Name = "LineSelectFlowLayoutPanel";
+            this.LineSelectFlowLayoutPanel.Size = new System.Drawing.Size(1370, 110);
+            this.LineSelectFlowLayoutPanel.TabIndex = 2;
+            // 
             // AllLinesButton
             // 
             this.AllLinesButton.BackColor = System.Drawing.Color.Blue;
@@ -458,6 +452,7 @@
             this.AllLinesButton.Text = "All Lines";
             this.AllLinesButton.Thickness = 3F;
             this.AllLinesButton.UseVisualStyleBackColor = false;
+            this.AllLinesButton.Click += new System.EventHandler(this.AllLinesButton_Click);
             // 
             // Line1Button
             // 
@@ -476,6 +471,7 @@
             this.Line1Button.Text = "Line 1";
             this.Line1Button.Thickness = 3F;
             this.Line1Button.UseVisualStyleBackColor = false;
+            this.Line1Button.Click += new System.EventHandler(this.Line1Button_Click);
             // 
             // Line2Button
             // 
@@ -494,6 +490,13 @@
             this.Line2Button.Text = "Line 2";
             this.Line2Button.Thickness = 3F;
             this.Line2Button.UseVisualStyleBackColor = false;
+            this.Line2Button.Click += new System.EventHandler(this.Line2Button_Click);
+            // 
+            // ClockUpdateTimer
+            // 
+            this.ClockUpdateTimer.Enabled = true;
+            this.ClockUpdateTimer.Interval = 500;
+            this.ClockUpdateTimer.Tick += new System.EventHandler(this.ClockUpdateTimer_Tick);
             // 
             // MainForm
             // 
@@ -508,7 +511,6 @@
             this.Text = "FRT Ticket Vending Machine Main Window";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.MainPanel.ResumeLayout(false);
-            this.LineSelectFlowLayoutPanel.ResumeLayout(false);
             this.MapSelectionRoundedPanel.ResumeLayout(false);
             this.StationSelectionPanel.ResumeLayout(false);
             this.RightHandSelectionsRoundedPanel.ResumeLayout(false);
@@ -523,6 +525,7 @@
             this.ClockRoundedPanel.ResumeLayout(false);
             this.ClockRoundedPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.LogoPictureBox)).EndInit();
+            this.LineSelectFlowLayoutPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -560,7 +563,7 @@
         private RoundedButton AllLinesButton;
         private RoundedButton Line1Button;
         private RoundedButton Line2Button;
-        private FrtFullLineMapControl frtFullLineMapControl1;
+        private FrtFullLineMapControl MainFrtFullLineMapControl;
     }
 }
 
