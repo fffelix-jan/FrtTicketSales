@@ -15,6 +15,7 @@ namespace FrtTicketVendingMachine
         readonly Color defaultColor = Color.Crimson;
         readonly Color selectedColor = Color.Blue;
         AppText.Language language = AppText.Language.Chinese;
+        State kioskState = State.HomeScreen;
 
         // Enables double buffering to avoid lag when refreshing the screen
         // This causes high CPU usage which is why it's not used
@@ -31,6 +32,16 @@ namespace FrtTicketVendingMachine
         //        return cp;
         //    }
         //}
+
+        enum State
+        {
+            HomeScreen,
+            WaitSelectTicketQuantity,
+            WaitSelectPaymentMethod,
+            WaitForPayment,
+            PaymentProcessing,
+            PrintingTicket,
+        }
 
         public MainForm()
         {
@@ -62,6 +73,8 @@ namespace FrtTicketVendingMachine
             // Set all the text on the controls accordingly
             if (language == AppText.Language.Chinese)
             {
+                // Set language toggle button text
+                LanguageToggleButton.Text = "English";
                 // Set select ticket label
                 SelectTicketQuantityLabel.Text = AppText.SelectTicketsChinese;
                 // Set select payment method label
@@ -78,6 +91,8 @@ namespace FrtTicketVendingMachine
             // Else, set it to English
             else
             {
+                // Set language toggle button text
+                LanguageToggleButton.Text = "中文";
                 // Set select ticket label
                 SelectTicketQuantityLabel.Text = AppText.SelectTicketsEnglish;
                 // Set select payment method label
@@ -141,6 +156,32 @@ namespace FrtTicketVendingMachine
         private void Line2Button_Click(object sender, EventArgs e)
         {
             MainFrtFullLineMapControl.ShowLine(2);
+        }
+
+        private void LanguageToggleButton_Click(object sender, EventArgs e)
+        {
+            // Toggle the language
+            if (this.language == AppText.Language.Chinese)
+            {
+                SetKioskLanguage(AppText.Language.English);
+            }
+            else
+            {
+                SetKioskLanguage(AppText.Language.Chinese);
+            }
+        }
+
+        private void MainFrtFullLineMapControl_StationSelected(object sender, StationSelectedEventArgs e)
+        {
+            // Transition to quantity selection state
+            kioskState = State.WaitSelectTicketQuantity;
+
+            // Show the ticket quantity selection panel
+            SelectTicketQuantityPanel.Show();
+            SelectTicketQuantityPanel.BringToFront();
+
+            // Hide the welcome panel
+            WelcomePanel.Hide();
         }
     }
 }

@@ -30,10 +30,13 @@
         {
             this.components = new System.ComponentModel.Container();
             this.MainPanel = new System.Windows.Forms.Panel();
+            this.LineSelectFlowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.ClockUpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.MapSelectionRoundedPanel = new FrtTicketVendingMachine.RoundedPanel();
             this.StationSelectionPanel = new System.Windows.Forms.Panel();
             this.MainFrtFullLineMapControl = new FrtTicketVendingMachine.FrtFullLineMapControl();
             this.RightHandSelectionsRoundedPanel = new FrtTicketVendingMachine.RoundedPanel();
+            this.LanguageToggleButton = new FrtTicketVendingMachine.RoundedButton();
             this.WelcomePanel = new System.Windows.Forms.Panel();
             this.ChineseWelcomeLabel = new System.Windows.Forms.Label();
             this.EnglishStationNameLabel = new System.Windows.Forms.Label();
@@ -56,12 +59,11 @@
             this.ClockRoundedPanel = new FrtTicketVendingMachine.RoundedPanel();
             this.DateTimeLabel = new System.Windows.Forms.Label();
             this.LogoPictureBox = new System.Windows.Forms.PictureBox();
-            this.LineSelectFlowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
             this.AllLinesButton = new FrtTicketVendingMachine.RoundedButton();
             this.Line1Button = new FrtTicketVendingMachine.RoundedButton();
             this.Line2Button = new FrtTicketVendingMachine.RoundedButton();
-            this.ClockUpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.MainPanel.SuspendLayout();
+            this.LineSelectFlowLayoutPanel.SuspendLayout();
             this.MapSelectionRoundedPanel.SuspendLayout();
             this.StationSelectionPanel.SuspendLayout();
             this.RightHandSelectionsRoundedPanel.SuspendLayout();
@@ -72,7 +74,6 @@
             this.QuantitySelectFlowLayoutPanel.SuspendLayout();
             this.ClockRoundedPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.LogoPictureBox)).BeginInit();
-            this.LineSelectFlowLayoutPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // MainPanel
@@ -86,6 +87,22 @@
             this.MainPanel.Name = "MainPanel";
             this.MainPanel.Size = new System.Drawing.Size(1920, 1080);
             this.MainPanel.TabIndex = 0;
+            // 
+            // LineSelectFlowLayoutPanel
+            // 
+            this.LineSelectFlowLayoutPanel.Controls.Add(this.AllLinesButton);
+            this.LineSelectFlowLayoutPanel.Controls.Add(this.Line1Button);
+            this.LineSelectFlowLayoutPanel.Controls.Add(this.Line2Button);
+            this.LineSelectFlowLayoutPanel.Location = new System.Drawing.Point(44, 941);
+            this.LineSelectFlowLayoutPanel.Name = "LineSelectFlowLayoutPanel";
+            this.LineSelectFlowLayoutPanel.Size = new System.Drawing.Size(1370, 110);
+            this.LineSelectFlowLayoutPanel.TabIndex = 2;
+            // 
+            // ClockUpdateTimer
+            // 
+            this.ClockUpdateTimer.Enabled = true;
+            this.ClockUpdateTimer.Interval = 500;
+            this.ClockUpdateTimer.Tick += new System.EventHandler(this.ClockUpdateTimer_Tick);
             // 
             // MapSelectionRoundedPanel
             // 
@@ -113,11 +130,13 @@
             this.MainFrtFullLineMapControl.Name = "MainFrtFullLineMapControl";
             this.MainFrtFullLineMapControl.Size = new System.Drawing.Size(1384, 885);
             this.MainFrtFullLineMapControl.TabIndex = 0;
+            this.MainFrtFullLineMapControl.StationSelected += new System.EventHandler<FrtTicketVendingMachine.StationSelectedEventArgs>(this.MainFrtFullLineMapControl_StationSelected);
             // 
             // RightHandSelectionsRoundedPanel
             // 
             this.RightHandSelectionsRoundedPanel.BackColor = System.Drawing.Color.DodgerBlue;
             this.RightHandSelectionsRoundedPanel.BorderColor = System.Drawing.Color.White;
+            this.RightHandSelectionsRoundedPanel.Controls.Add(this.LanguageToggleButton);
             this.RightHandSelectionsRoundedPanel.Controls.Add(this.WelcomePanel);
             this.RightHandSelectionsRoundedPanel.Controls.Add(this.SelectPaymentMethodPanel);
             this.RightHandSelectionsRoundedPanel.Controls.Add(this.SelectTicketQuantityPanel);
@@ -129,6 +148,25 @@
             this.RightHandSelectionsRoundedPanel.Size = new System.Drawing.Size(418, 1009);
             this.RightHandSelectionsRoundedPanel.TabIndex = 1;
             this.RightHandSelectionsRoundedPanel.Thickness = 5F;
+            // 
+            // LanguageToggleButton
+            // 
+            this.LanguageToggleButton.BackColor = System.Drawing.Color.ForestGreen;
+            this.LanguageToggleButton.BorderColor = System.Drawing.Color.Transparent;
+            this.LanguageToggleButton.FlatAppearance.BorderSize = 0;
+            this.LanguageToggleButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.LanguageToggleButton.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LanguageToggleButton.ForeColor = System.Drawing.Color.White;
+            this.LanguageToggleButton.Location = new System.Drawing.Point(257, 937);
+            this.LanguageToggleButton.Name = "LanguageToggleButton";
+            this.LanguageToggleButton.Radius = 25;
+            this.LanguageToggleButton.Size = new System.Drawing.Size(144, 57);
+            this.LanguageToggleButton.TabIndex = 7;
+            this.LanguageToggleButton.TabStop = false;
+            this.LanguageToggleButton.Text = "English";
+            this.LanguageToggleButton.Thickness = 3F;
+            this.LanguageToggleButton.UseVisualStyleBackColor = false;
+            this.LanguageToggleButton.Click += new System.EventHandler(this.LanguageToggleButton_Click);
             // 
             // WelcomePanel
             // 
@@ -425,16 +463,6 @@
             this.LogoPictureBox.TabIndex = 0;
             this.LogoPictureBox.TabStop = false;
             // 
-            // LineSelectFlowLayoutPanel
-            // 
-            this.LineSelectFlowLayoutPanel.Controls.Add(this.AllLinesButton);
-            this.LineSelectFlowLayoutPanel.Controls.Add(this.Line1Button);
-            this.LineSelectFlowLayoutPanel.Controls.Add(this.Line2Button);
-            this.LineSelectFlowLayoutPanel.Location = new System.Drawing.Point(44, 941);
-            this.LineSelectFlowLayoutPanel.Name = "LineSelectFlowLayoutPanel";
-            this.LineSelectFlowLayoutPanel.Size = new System.Drawing.Size(1370, 110);
-            this.LineSelectFlowLayoutPanel.TabIndex = 2;
-            // 
             // AllLinesButton
             // 
             this.AllLinesButton.BackColor = System.Drawing.Color.Blue;
@@ -492,12 +520,6 @@
             this.Line2Button.UseVisualStyleBackColor = false;
             this.Line2Button.Click += new System.EventHandler(this.Line2Button_Click);
             // 
-            // ClockUpdateTimer
-            // 
-            this.ClockUpdateTimer.Enabled = true;
-            this.ClockUpdateTimer.Interval = 500;
-            this.ClockUpdateTimer.Tick += new System.EventHandler(this.ClockUpdateTimer_Tick);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -511,6 +533,7 @@
             this.Text = "FRT Ticket Vending Machine Main Window";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.MainPanel.ResumeLayout(false);
+            this.LineSelectFlowLayoutPanel.ResumeLayout(false);
             this.MapSelectionRoundedPanel.ResumeLayout(false);
             this.StationSelectionPanel.ResumeLayout(false);
             this.RightHandSelectionsRoundedPanel.ResumeLayout(false);
@@ -525,7 +548,6 @@
             this.ClockRoundedPanel.ResumeLayout(false);
             this.ClockRoundedPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.LogoPictureBox)).EndInit();
-            this.LineSelectFlowLayoutPanel.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -564,6 +586,7 @@
         private RoundedButton Line1Button;
         private RoundedButton Line2Button;
         private FrtFullLineMapControl MainFrtFullLineMapControl;
+        private RoundedButton LanguageToggleButton;
     }
 }
 

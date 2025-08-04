@@ -15,6 +15,9 @@ namespace FrtTicketVendingMachine
         List<Button> line1Buttons;
         List<Button> line2Buttons;
 
+        // Define the event for station selection
+        public event EventHandler<StationSelectedEventArgs> StationSelected;
+
         public FrtFullLineMapControl()
         {
             InitializeComponent();
@@ -92,12 +95,16 @@ namespace FrtTicketVendingMachine
             }
         }
 
+        // Method to raise the StationSelected event
+        protected virtual void OnStationSelected(string stationCode)
+        {
+            StationSelected?.Invoke(this, new StationSelectedEventArgs(stationCode));
+        }
+
         private void StationClick(string stationCode)
         {
-            // TODO: Call the payment selection screen
-
-            // But for now, let's show a message box
-            MessageBox.Show($"You clicked on station: {stationCode}", "Station Clicked", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Raise the event instead of showing a message box
+            OnStationSelected(stationCode);
         }
 
         // Line 2 buttons
@@ -188,6 +195,17 @@ namespace FrtTicketVendingMachine
         private void YuguRoadButton_Click(object sender, EventArgs e)
         {
             StationClick("YGL");
+        }
+    }
+
+    // Event arguments class for station selection
+    public class StationSelectedEventArgs : EventArgs
+    {
+        public string StationCode { get; }
+
+        public StationSelectedEventArgs(string stationCode)
+        {
+            StationCode = stationCode;
         }
     }
 }
