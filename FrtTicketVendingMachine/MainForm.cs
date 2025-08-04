@@ -16,6 +16,9 @@ namespace FrtTicketVendingMachine
         readonly Color selectedColor = Color.Blue;
         AppText.Language language = AppText.Language.Chinese;
         State kioskState = State.HomeScreen;
+        CheckoutControl checkout = new CheckoutControl();
+        // Set this to false when processing payments and printing tickets to prevent the machine from swallowing the user's money
+        bool canCancel = true;
 
         // Enables double buffering to avoid lag when refreshing the screen
         // This causes high CPU usage which is why it's not used
@@ -57,11 +60,51 @@ namespace FrtTicketVendingMachine
             CenterControlHorizontally(ChineseStationNameLabel);
             CenterControlHorizontally(EnglishStationNameLabel);
 
-            // Hide the panels that are not needed at the start
+            // Add the checkout control to the station selection panel (so it doesn't overlap in the designer)
+            StationSelectionPanel.Controls.Add(checkout);
+            checkout.Dock = DockStyle.Fill;
+
+            // Hide the panels that are not needed at the start (to be replaced with ResetKiosk)
+            // TODO: replace with ResetKiosk
             SelectTicketQuantityPanel.Hide();
             SelectPaymentMethodPanel.Hide();
 
             CenterControlHorizontally(ClockRoundedPanel);
+            UpdateClockDisplay();
+        }
+
+        // Resets the kiosk to the start state if allowed
+        public void ResetKiosk()
+        {
+            if (canCancel)
+            {
+                //
+
+                // Eject the coins here and wait for them to be ejected without blocking the UI
+                // TODO: Implement coin ejection logic
+                // TODO: Show a "Cancelling..." message to the user
+
+
+                // Stage 2 would normally be called by the coin ejection logic
+                // But we call it directly here for simplicity
+            }
+        }
+
+        // After ejecting the coins, the reset logic continues here
+        // DO NOT CALL THIS FUNCTION DIRECTLY
+        private void ResetKioskStage2()
+        {
+            // Reset the kiosk state
+            kioskState = State.HomeScreen;
+            // Hide all panels
+            SelectTicketQuantityPanel.Hide();
+            SelectPaymentMethodPanel.Hide();
+            checkout.Hide();
+            MainFrtFullLineMapControl.Hide();
+            // Show the welcome panel
+            WelcomePanel.Show();
+            WelcomePanel.BringToFront();
+            // Update the clock display
             UpdateClockDisplay();
         }
 
@@ -73,6 +116,8 @@ namespace FrtTicketVendingMachine
             // Set all the text on the controls accordingly
             if (language == AppText.Language.Chinese)
             {
+                // Set the checkout control language
+                checkout.Language = AppText.Language.Chinese;
                 // Set language toggle button text
                 LanguageToggleButton.Text = "English";
                 // Set select ticket label
@@ -91,6 +136,8 @@ namespace FrtTicketVendingMachine
             // Else, set it to English
             else
             {
+                // Set the checkout control language
+                checkout.Language = AppText.Language.English;
                 // Set language toggle button text
                 LanguageToggleButton.Text = "中文";
                 // Set select ticket label
@@ -106,6 +153,9 @@ namespace FrtTicketVendingMachine
                 Line1Button.Text = AppText.Line1English;
                 Line2Button.Text = AppText.Line2English;
             }
+
+            // Update the clock display
+            UpdateClockDisplay();
         }
 
         // Centers controls horizontally
@@ -171,17 +221,29 @@ namespace FrtTicketVendingMachine
             }
         }
 
-        private void MainFrtFullLineMapControl_StationSelected(object sender, StationSelectedEventArgs e)
+        private void SelectStation(string stationCode)
         {
-            // Transition to quantity selection state
+            // Set the selected station in the checkout control
+            checkout.DestinationText = stationCode;
+            // Set the quantity and price to default values
+            checkout.QuantityText = "?";
+            checkout.PriceText = "?";
+            // Transition to the next state
             kioskState = State.WaitSelectTicketQuantity;
-
             // Show the ticket quantity selection panel
             SelectTicketQuantityPanel.Show();
             SelectTicketQuantityPanel.BringToFront();
-
             // Hide the welcome panel
             WelcomePanel.Hide();
+            // Hide the map
+            MainFrtFullLineMapControl.Hide();
+            // Show the checkout panel
+            checkout.Show();
+        }
+
+        private void MainFrtFullLineMapControl_StationSelected(object sender, StationSelectedEventArgs e)
+        {
+            SelectStation(e.StationCode);
         }
     }
 }

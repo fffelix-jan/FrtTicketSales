@@ -26,6 +26,15 @@ namespace FrtTicketVendingMachine
         public const string FakeAlipayWeChatEnglish = "FAlipay/FWeChat";
         public const string FakeAlipayWeChatChinese = "假付宝/伪信支付";
 
+        public const string DestinationEnglish = "Destination:";
+        public const string DestinationChinese = "目的地:";
+
+        public const string TotalPriceEnglish = "Total Price:";
+        public const string TotalPriceChinese = "总价:";
+
+        public const string QuantityEnglish = "Quantity:";
+        public const string QuantityChinese = "购票数量:";
+
         public const string AllLinesEnglish = "All Lines";
         public const string AllLinesChinese = "全线网";
 
@@ -34,5 +43,6 @@ namespace FrtTicketVendingMachine
 
         public const string Line2English = "Line 2";
         public const string Line2Chinese = "2号线";
+
     }
 }

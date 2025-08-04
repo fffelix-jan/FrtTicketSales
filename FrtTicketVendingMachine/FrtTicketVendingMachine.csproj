@@ -79,6 +79,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AppText.cs" />
+    <Compile Include="CheckoutControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="CheckoutControl.Designer.cs">
+      <DependentUpon>CheckoutControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="ClickThroughPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -102,6 +108,9 @@
     <Compile Include="RoundedPanel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <EmbeddedResource Include="CheckoutControl.resx">
+      <DependentUpon>CheckoutControl.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="FrtFullLineMapControl.resx">
       <DependentUpon>FrtFullLineMapControl.cs</DependentUpon>
     </EmbeddedResource>
