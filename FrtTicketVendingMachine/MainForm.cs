@@ -20,6 +20,7 @@ namespace FrtTicketVendingMachine
         CheckoutControl checkout = new CheckoutControl();
 
         StationInfo selectedStationInfo;
+        int selectedQuantity;
 
         // Set this to false when processing payments and printing tickets to prevent the machine from swallowing the user's money
         bool canCancel = true;
@@ -103,7 +104,7 @@ namespace FrtTicketVendingMachine
             // Clear checkout control data
             checkout.DestinationText = "";
             checkout.QuantityText = "";
-            checkout.PriceText = "";
+            checkout.TotalPriceText = "";
             
             // Hide all transaction panels
             SelectTicketQuantityPanel.Hide();
@@ -271,12 +272,24 @@ namespace FrtTicketVendingMachine
             {
                 // Use await instead of .Result to avoid blocking the UI thread
                 selectedStationInfo = await fareApiClient.GetStationNameAsync(stationCode);
+                
+                // Get the current station from config (where this kiosk is located)
+                string currentStationCode = SimpleConfig.Get("CURRENT_STATION", "FLZ"); // Default to FLZ if not configured
+                
+                // Get the fare from current station to selected destination
+                var fareInfo = await fareApiClient.GetFareAsync(currentStationCode, selectedStationInfo.StationCode);
+                
+                // Format price each (assuming cents, convert to currency)
+                string priceEach = $"¥{fareInfo.FareCents / 100.0:F2}";
+
+                // Set the price each in checkout
+                checkout.PriceEachText = priceEach;
             }
             catch (Exception ex)
             {
                 // Handle API errors gracefully
                 MessageBox.Show(this.language == AppText.Language.Chinese ? 
-                    "获取车站名称失败，请稍后再试。" : "Failed to get station name, please try again later.", 
+                    "获取车站信息失败，请稍后再试。" : "Failed to get station information, please try again later.", 
                     "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 
                 // Re-enable UI and return
@@ -302,7 +315,6 @@ namespace FrtTicketVendingMachine
             checkout.DestinationText = stationDisplayName; // Use the proper name, not the code
             // Set the quantity and price to default values
             checkout.QuantityText = "?";
-            checkout.PriceText = "?";
             // Transition to the next state
             kioskState = State.WaitSelectTicketQuantity;
             // Set the instructions text accordingly
@@ -335,6 +347,46 @@ namespace FrtTicketVendingMachine
         {
             CancelFakeDelayTimer.Stop();
             ResetKioskStage2();
+        }
+
+        private async void SelectTicketQuantity(int quantity)
+        {
+            // Set the selected quantity in the checkout control
+            selectedQuantity = quantity;
+            checkout.QuantityText = this.language == AppText.Language.Chinese ? 
+                $"{quantity} 张" : $"{quantity} tickets";
+
+            // Get the fare for the selected station and quantity
+        }
+
+        private void OneTicketButton_Click(object sender, EventArgs e)
+        {
+            SelectTicketQuantity(1);
+        }
+
+        private void TwoTicketButton_Click(object sender, EventArgs e)
+        {
+            SelectTicketQuantity(2);
+        }
+
+        private void ThreeTicketButton_Click(object sender, EventArgs e)
+        {
+            SelectTicketQuantity(3);
+        }
+
+        private void FourTicketButton_Click(object sender, EventArgs e)
+        {
+            SelectTicketQuantity(4);
+        }
+
+        private void FiveTicketButton_Click(object sender, EventArgs e)
+        {
+            SelectTicketQuantity(5);
+        }
+
+        private void SixTicketButton_Click(object sender, EventArgs e)
+        {
+            SelectTicketQuantity(6);
         }
     }
 }

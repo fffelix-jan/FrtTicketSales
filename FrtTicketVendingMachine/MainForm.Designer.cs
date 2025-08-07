@@ -344,6 +344,7 @@
             this.OneTicketButton.Text = "1";
             this.OneTicketButton.Thickness = 3F;
             this.OneTicketButton.UseVisualStyleBackColor = false;
+            this.OneTicketButton.Click += new System.EventHandler(this.OneTicketButton_Click);
             // 
             // TwoTicketButton
             // 
@@ -362,6 +363,7 @@
             this.TwoTicketButton.Text = "2";
             this.TwoTicketButton.Thickness = 3F;
             this.TwoTicketButton.UseVisualStyleBackColor = false;
+            this.TwoTicketButton.Click += new System.EventHandler(this.TwoTicketButton_Click);
             // 
             // ThreeTicketButton
             // 
@@ -380,6 +382,7 @@
             this.ThreeTicketButton.Text = "3";
             this.ThreeTicketButton.Thickness = 3F;
             this.ThreeTicketButton.UseVisualStyleBackColor = false;
+            this.ThreeTicketButton.Click += new System.EventHandler(this.ThreeTicketButton_Click);
             // 
             // FourTicketButton
             // 
@@ -398,6 +401,7 @@
             this.FourTicketButton.Text = "4";
             this.FourTicketButton.Thickness = 3F;
             this.FourTicketButton.UseVisualStyleBackColor = false;
+            this.FourTicketButton.Click += new System.EventHandler(this.FourTicketButton_Click);
             // 
             // FiveTicketButton
             // 
@@ -416,6 +420,7 @@
             this.FiveTicketButton.Text = "5";
             this.FiveTicketButton.Thickness = 3F;
             this.FiveTicketButton.UseVisualStyleBackColor = false;
+            this.FiveTicketButton.Click += new System.EventHandler(this.FiveTicketButton_Click);
             // 
             // SixTicketButton
             // 
@@ -434,6 +439,7 @@
             this.SixTicketButton.Text = "6";
             this.SixTicketButton.Thickness = 3F;
             this.SixTicketButton.UseVisualStyleBackColor = false;
+            this.SixTicketButton.Click += new System.EventHandler(this.SixTicketButton_Click);
             // 
             // ClockRoundedPanel
             // 

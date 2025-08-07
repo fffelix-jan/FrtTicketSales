@@ -23,6 +23,9 @@ namespace FrtTicketVendingMachine
         private Image handButton1Image;
         private Image handButton2Image;
 
+        // Track which price mode we're in
+        private bool showingTotalPrice = true;
+
         // Enum for animation types
         public enum AnimationType
         {
@@ -77,11 +80,28 @@ namespace FrtTicketVendingMachine
             }
         }
 
-        // Public field to change the text of the price label
-        public string PriceText
+        // Public field to change the text of the total price label
+        public string TotalPriceText
         {
             get { return TotalPriceLabel.Text; }
-            set { TotalPriceLabel.Text = value; }
+            set 
+            { 
+                TotalPriceLabel.Text = value;
+                showingTotalPrice = true;
+                UpdatePriceTitleLabel();
+            }
+        }
+
+        // Public field to change the text of the price each label
+        public string PriceEachText
+        {
+            get { return TotalPriceLabel.Text; }
+            set 
+            { 
+                TotalPriceLabel.Text = value;
+                showingTotalPrice = false;
+                UpdatePriceTitleLabel();
+            }
         }
 
         // Public field to change the text of the quantity label
@@ -98,6 +118,21 @@ namespace FrtTicketVendingMachine
             set { InstructionsLabel.Text = value; }
         }
 
+        // Helper method to update the price title label based on current mode and language
+        private void UpdatePriceTitleLabel()
+        {
+            if (showingTotalPrice)
+            {
+                PriceTitleLabel.Text = _language == AppText.Language.Chinese ? 
+                    AppText.TotalPriceChinese : AppText.TotalPriceEnglish;
+            }
+            else
+            {
+                PriceTitleLabel.Text = _language == AppText.Language.Chinese ? 
+                    AppText.PriceEachChinese : AppText.PriceEachEnglish;
+            }
+        }
+
         // Public field to change the language
         public AppText.Language Language
         {
@@ -110,17 +145,15 @@ namespace FrtTicketVendingMachine
                 {
                     case AppText.Language.English:
                         DestinationTitleLabel.Text = AppText.DestinationEnglish;
-                        PriceTitleLabel.Text = AppText.TotalPriceEnglish;
                         QuantityTitleLabel.Text = AppText.QuantityEnglish;
-                        // TODO: get the updated station name from the server
                         break;
                     case AppText.Language.Chinese:
                         DestinationTitleLabel.Text = AppText.DestinationChinese;
-                        PriceTitleLabel.Text = AppText.TotalPriceChinese;
                         QuantityTitleLabel.Text = AppText.QuantityChinese;
-                        // TODO: get the updated station name from the server
                         break;
                 }
+                // Update the price title label based on current mode
+                UpdatePriceTitleLabel();
             }
         }
 

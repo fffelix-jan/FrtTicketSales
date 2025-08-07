@@ -32,6 +32,9 @@ namespace FrtTicketVendingMachine
         public const string TotalPriceEnglish = "Total Price:";
         public const string TotalPriceChinese = "总价:";
 
+        public const string PriceEachEnglish = "Price Each:";
+        public const string PriceEachChinese = "单价:";
+
         public const string QuantityEnglish = "Quantity:";
         public const string QuantityChinese = "购票数量:";
 
