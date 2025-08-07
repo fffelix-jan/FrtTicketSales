@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using FrtAfcApiClient;
 
 namespace FrtTicketVendingMachine
 {
@@ -17,25 +18,16 @@ namespace FrtTicketVendingMachine
         AppText.Language language = AppText.Language.Chinese;
         State kioskState = State.HomeScreen;
         CheckoutControl checkout = new CheckoutControl();
+
+        StationInfo selectedStationInfo;
+
         // Set this to false when processing payments and printing tickets to prevent the machine from swallowing the user's money
         bool canCancel = true;
 
-        // Enables double buffering to avoid lag when refreshing the screen
-        // This causes high CPU usage which is why it's not used
-        //protected override CreateParams CreateParams
-        //{
-        //    get
-        //    {
-        //        // Skip if running over RDP
-        //        if (SystemInformation.TerminalServerSession)
-        //            return base.CreateParams;
+        // API client
+        FareApiClient fareApiClient = new FareApiClient(SimpleConfig.Get("API_ENDPOINT"));
 
-        //        CreateParams cp = base.CreateParams;
-        //        cp.ExStyle |= 0x02000000; // WS_EX_COMPOSITED (double-buffer all controls)
-        //        return cp;
-        //    }
-        //}
-
+        // Enum for different states of the kiosk
         enum State
         {
             HomeScreen,
@@ -69,6 +61,8 @@ namespace FrtTicketVendingMachine
             SelectTicketQuantityPanel.Hide();
             SelectPaymentMethodPanel.Hide();
 
+            CancelButton.Hide();
+
             CenterControlHorizontally(ClockRoundedPanel);
             UpdateClockDisplay();
         }
@@ -78,15 +72,24 @@ namespace FrtTicketVendingMachine
         {
             if (canCancel)
             {
-                //
+                // Set canCancel to false to prevent multiple reset attempts
+                canCancel = false;
 
-                // Eject the coins here and wait for them to be ejected without blocking the UI
-                // TODO: Implement coin ejection logic
-                // TODO: Show a "Cancelling..." message to the user
+                // Grey out the cancel button to indicate it's not clickable
+                CancelButton.Enabled = false;
 
+                // Hide the quantity select and payment select panels
+                SelectPaymentMethodPanel.Hide();
+                SelectTicketQuantityPanel.Hide();
 
-                // Stage 2 would normally be called by the coin ejection logic
-                // But we call it directly here for simplicity
+                // TODO: Eject the coins here and wait for them to be ejected without blocking the UI
+                // Show a "Cancelling..." message to the user
+                checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
+                    AppText.CancellingChinese : AppText.CancellingEnglish;
+                // TODO: Start async coin ejection process that calls ResetKioskStage2() when complete
+
+                // For now, start the fake cancel delay timer
+                CancelFakeDelayTimer.Start();
             }
         }
 
@@ -94,18 +97,45 @@ namespace FrtTicketVendingMachine
         // DO NOT CALL THIS FUNCTION DIRECTLY
         private void ResetKioskStage2()
         {
-            // Reset the kiosk state
+            // Reset the kiosk state to home screen
             kioskState = State.HomeScreen;
-            // Hide all panels
+            
+            // Clear checkout control data
+            checkout.DestinationText = "";
+            checkout.QuantityText = "";
+            checkout.PriceText = "";
+            
+            // Hide all transaction panels
             SelectTicketQuantityPanel.Hide();
             SelectPaymentMethodPanel.Hide();
             checkout.Hide();
-            MainFrtFullLineMapControl.Hide();
-            // Show the welcome panel
+            
+            // Show and bring home screen elements to front
             WelcomePanel.Show();
             WelcomePanel.BringToFront();
+            MainFrtFullLineMapControl.Show();
+            MainFrtFullLineMapControl.BringToFront();
+            
+            // Reset map to show all lines
+            MainFrtFullLineMapControl.ShowLine(0);
+            
             // Update the clock display
             UpdateClockDisplay();
+            
+            // Re-enable cancellation for future transactions
+            canCancel = true;
+
+            // Hide the cancel button
+            CancelButton.Hide();
+
+            // Show the language toggle button
+            LanguageToggleButton.Show();
+
+            // Enable the line buttons
+            foreach (Control c in LineSelectFlowLayoutPanel.Controls)
+            {
+                c.Enabled = true;
+            }
         }
 
         // Sets the language of the kiosk
@@ -132,6 +162,8 @@ namespace FrtTicketVendingMachine
                 AllLinesButton.Text = AppText.AllLinesChinese;
                 Line1Button.Text = AppText.Line1Chinese;
                 Line2Button.Text = AppText.Line2Chinese;
+                // Set cancel button text
+                CancelButton.Text = AppText.CancelChinese;
             }
             // Else, set it to English
             else
@@ -152,6 +184,8 @@ namespace FrtTicketVendingMachine
                 AllLinesButton.Text = AppText.AllLinesEnglish;
                 Line1Button.Text = AppText.Line1English;
                 Line2Button.Text = AppText.Line2English;
+                // Set cancel button text
+                CancelButton.Text = AppText.CancelEnglish;
             }
 
             // Update the clock display
@@ -221,15 +255,59 @@ namespace FrtTicketVendingMachine
             }
         }
 
-        private void SelectStation(string stationCode)
+        private async void SelectStation(string stationCode)
         {
+            // Show loading message while API call is in progress
+            checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
+                "正在获取车站信息..." : "Loading station information...";
+            
+            // Disable UI to prevent multiple clicks
+            foreach(Control c in LineSelectFlowLayoutPanel.Controls)
+            {
+                c.Enabled = false;
+            }
+
+            try
+            {
+                // Use await instead of .Result to avoid blocking the UI thread
+                selectedStationInfo = await fareApiClient.GetStationNameAsync(stationCode);
+            }
+            catch (Exception ex)
+            {
+                // Handle API errors gracefully
+                MessageBox.Show(this.language == AppText.Language.Chinese ? 
+                    "获取车站名称失败，请稍后再试。" : "Failed to get station name, please try again later.", 
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
+                // Re-enable UI and return
+                foreach(Control c in LineSelectFlowLayoutPanel.Controls)
+                {
+                    c.Enabled = true;
+                }
+                return;
+            }
+
+            // Set the selected station info with proper name
+            string stationDisplayName = this.language == AppText.Language.Chinese ? 
+                selectedStationInfo.ChineseName : 
+                selectedStationInfo.EnglishName;
+
+            // Enable and show the cancel button
+            CancelButton.Enabled = true;
+            CancelButton.Show();
+            // Hide the language toggle button
+            LanguageToggleButton.Hide();
+            
             // Set the selected station in the checkout control
-            checkout.DestinationText = stationCode;
+            checkout.DestinationText = stationDisplayName; // Use the proper name, not the code
             // Set the quantity and price to default values
             checkout.QuantityText = "?";
             checkout.PriceText = "?";
             // Transition to the next state
             kioskState = State.WaitSelectTicketQuantity;
+            // Set the instructions text accordingly
+            checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
+                AppText.PleaseSelectQuantityChinese : AppText.PleaseSelectQuantityEnglish;
             // Show the ticket quantity selection panel
             SelectTicketQuantityPanel.Show();
             SelectTicketQuantityPanel.BringToFront();
@@ -237,6 +315,8 @@ namespace FrtTicketVendingMachine
             WelcomePanel.Hide();
             // Hide the map
             MainFrtFullLineMapControl.Hide();
+            // Set the animation
+            checkout.SetAnimationType(CheckoutControl.AnimationType.PressButton);
             // Show the checkout panel
             checkout.Show();
         }
@@ -244,6 +324,17 @@ namespace FrtTicketVendingMachine
         private void MainFrtFullLineMapControl_StationSelected(object sender, StationSelectedEventArgs e)
         {
             SelectStation(e.StationCode);
+        }
+
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            ResetKiosk();
+        }
+
+        private void CancelFakeDelayTimer_Tick(object sender, EventArgs e)
+        {
+            CancelFakeDelayTimer.Stop();
+            ResetKioskStage2();
         }
     }
 }

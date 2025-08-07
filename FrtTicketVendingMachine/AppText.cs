@@ -44,5 +44,13 @@ namespace FrtTicketVendingMachine
         public const string Line2English = "Line 2";
         public const string Line2Chinese = "2号线";
 
+        public const string CancelEnglish = "Cancel";
+        public const string CancelChinese = "取消";
+
+        public const string PleaseSelectQuantityEnglish = "Please select the number of tickets → → →";
+        public const string PleaseSelectQuantityChinese = "请选择购票张数 → → →";
+
+        public const string CancellingEnglish = "Cancelling...";
+        public const string CancellingChinese = "正在取消...";
     }
 }

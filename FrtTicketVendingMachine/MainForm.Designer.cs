@@ -34,6 +34,7 @@
             this.StationSelectionPanel = new System.Windows.Forms.Panel();
             this.MainFrtFullLineMapControl = new FrtTicketVendingMachine.FrtFullLineMapControl();
             this.RightHandSelectionsRoundedPanel = new FrtTicketVendingMachine.RoundedPanel();
+            this.CancelButton = new FrtTicketVendingMachine.RoundedButton();
             this.LanguageToggleButton = new FrtTicketVendingMachine.RoundedButton();
             this.WelcomePanel = new System.Windows.Forms.Panel();
             this.ChineseWelcomeLabel = new System.Windows.Forms.Label();
@@ -62,7 +63,7 @@
             this.Line1Button = new FrtTicketVendingMachine.RoundedButton();
             this.Line2Button = new FrtTicketVendingMachine.RoundedButton();
             this.ClockUpdateTimer = new System.Windows.Forms.Timer(this.components);
-            this.roundedButton1 = new FrtTicketVendingMachine.RoundedButton();
+            this.CancelFakeDelayTimer = new System.Windows.Forms.Timer(this.components);
             this.MainPanel.SuspendLayout();
             this.MapSelectionRoundedPanel.SuspendLayout();
             this.StationSelectionPanel.SuspendLayout();
@@ -121,7 +122,7 @@
             // 
             this.RightHandSelectionsRoundedPanel.BackColor = System.Drawing.Color.DodgerBlue;
             this.RightHandSelectionsRoundedPanel.BorderColor = System.Drawing.Color.White;
-            this.RightHandSelectionsRoundedPanel.Controls.Add(this.roundedButton1);
+            this.RightHandSelectionsRoundedPanel.Controls.Add(this.CancelButton);
             this.RightHandSelectionsRoundedPanel.Controls.Add(this.LanguageToggleButton);
             this.RightHandSelectionsRoundedPanel.Controls.Add(this.WelcomePanel);
             this.RightHandSelectionsRoundedPanel.Controls.Add(this.SelectPaymentMethodPanel);
@@ -135,13 +136,32 @@
             this.RightHandSelectionsRoundedPanel.TabIndex = 1;
             this.RightHandSelectionsRoundedPanel.Thickness = 5F;
             // 
+            // CancelButton
+            // 
+            this.CancelButton.BackColor = System.Drawing.Color.Red;
+            this.CancelButton.BorderColor = System.Drawing.Color.Transparent;
+            this.CancelButton.FlatAppearance.BorderSize = 0;
+            this.CancelButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.CancelButton.Font = new System.Drawing.Font("Microsoft YaHei", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CancelButton.ForeColor = System.Drawing.Color.White;
+            this.CancelButton.Location = new System.Drawing.Point(23, 937);
+            this.CancelButton.Name = "CancelButton";
+            this.CancelButton.Radius = 25;
+            this.CancelButton.Size = new System.Drawing.Size(144, 57);
+            this.CancelButton.TabIndex = 8;
+            this.CancelButton.TabStop = false;
+            this.CancelButton.Text = "Cancel";
+            this.CancelButton.Thickness = 3F;
+            this.CancelButton.UseVisualStyleBackColor = false;
+            this.CancelButton.Click += new System.EventHandler(this.CancelButton_Click);
+            // 
             // LanguageToggleButton
             // 
             this.LanguageToggleButton.BackColor = System.Drawing.Color.ForestGreen;
             this.LanguageToggleButton.BorderColor = System.Drawing.Color.Transparent;
             this.LanguageToggleButton.FlatAppearance.BorderSize = 0;
             this.LanguageToggleButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.LanguageToggleButton.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.LanguageToggleButton.Font = new System.Drawing.Font("Microsoft YaHei", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.LanguageToggleButton.ForeColor = System.Drawing.Color.White;
             this.LanguageToggleButton.Location = new System.Drawing.Point(257, 937);
             this.LanguageToggleButton.Name = "LanguageToggleButton";
@@ -168,44 +188,44 @@
             // ChineseWelcomeLabel
             // 
             this.ChineseWelcomeLabel.AutoSize = true;
-            this.ChineseWelcomeLabel.Font = new System.Drawing.Font("SimHei", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ChineseWelcomeLabel.Font = new System.Drawing.Font("Microsoft YaHei", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ChineseWelcomeLabel.ForeColor = System.Drawing.Color.White;
             this.ChineseWelcomeLabel.Location = new System.Drawing.Point(120, 26);
             this.ChineseWelcomeLabel.Name = "ChineseWelcomeLabel";
-            this.ChineseWelcomeLabel.Size = new System.Drawing.Size(128, 27);
+            this.ChineseWelcomeLabel.Size = new System.Drawing.Size(123, 36);
             this.ChineseWelcomeLabel.TabIndex = 7;
             this.ChineseWelcomeLabel.Text = "欢迎光临";
             // 
             // EnglishStationNameLabel
             // 
             this.EnglishStationNameLabel.AutoSize = true;
-            this.EnglishStationNameLabel.Font = new System.Drawing.Font("Segoe UI", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.EnglishStationNameLabel.Font = new System.Drawing.Font("Microsoft YaHei", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.EnglishStationNameLabel.ForeColor = System.Drawing.Color.White;
             this.EnglishStationNameLabel.Location = new System.Drawing.Point(14, 165);
             this.EnglishStationNameLabel.Name = "EnglishStationNameLabel";
-            this.EnglishStationNameLabel.Size = new System.Drawing.Size(337, 37);
+            this.EnglishStationNameLabel.Size = new System.Drawing.Size(355, 36);
             this.EnglishStationNameLabel.TabIndex = 6;
             this.EnglishStationNameLabel.Text = "Falloway Railway Station";
             // 
             // ChineseStationNameLabel
             // 
             this.ChineseStationNameLabel.AutoSize = true;
-            this.ChineseStationNameLabel.Font = new System.Drawing.Font("SimHei", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ChineseStationNameLabel.Font = new System.Drawing.Font("Microsoft YaHei", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ChineseStationNameLabel.ForeColor = System.Drawing.Color.White;
             this.ChineseStationNameLabel.Location = new System.Drawing.Point(28, 102);
             this.ChineseStationNameLabel.Name = "ChineseStationNameLabel";
-            this.ChineseStationNameLabel.Size = new System.Drawing.Size(314, 48);
+            this.ChineseStationNameLabel.Size = new System.Drawing.Size(315, 64);
             this.ChineseStationNameLabel.TabIndex = 5;
             this.ChineseStationNameLabel.Text = "法洛威火车站";
             // 
             // EnglishWelcomeLabel
             // 
             this.EnglishWelcomeLabel.AutoSize = true;
-            this.EnglishWelcomeLabel.Font = new System.Drawing.Font("Segoe UI", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.EnglishWelcomeLabel.Font = new System.Drawing.Font("Microsoft YaHei", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.EnglishWelcomeLabel.ForeColor = System.Drawing.Color.White;
             this.EnglishWelcomeLabel.Location = new System.Drawing.Point(134, 63);
             this.EnglishWelcomeLabel.Name = "EnglishWelcomeLabel";
-            this.EnglishWelcomeLabel.Size = new System.Drawing.Size(93, 25);
+            this.EnglishWelcomeLabel.Size = new System.Drawing.Size(101, 26);
             this.EnglishWelcomeLabel.TabIndex = 4;
             this.EnglishWelcomeLabel.Text = "Welcome";
             // 
@@ -221,11 +241,11 @@
             // SelectPaymentMethodLabel
             // 
             this.SelectPaymentMethodLabel.AutoSize = true;
-            this.SelectPaymentMethodLabel.Font = new System.Drawing.Font("Segoe UI", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SelectPaymentMethodLabel.Font = new System.Drawing.Font("Microsoft YaHei", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SelectPaymentMethodLabel.ForeColor = System.Drawing.Color.White;
             this.SelectPaymentMethodLabel.Location = new System.Drawing.Point(12, 0);
             this.SelectPaymentMethodLabel.Name = "SelectPaymentMethodLabel";
-            this.SelectPaymentMethodLabel.Size = new System.Drawing.Size(323, 37);
+            this.SelectPaymentMethodLabel.Size = new System.Drawing.Size(342, 36);
             this.SelectPaymentMethodLabel.TabIndex = 3;
             this.SelectPaymentMethodLabel.Text = "Select Payment Method";
             // 
@@ -244,7 +264,7 @@
             this.CashButton.BorderColor = System.Drawing.Color.Transparent;
             this.CashButton.FlatAppearance.BorderSize = 0;
             this.CashButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.CashButton.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CashButton.Font = new System.Drawing.Font("Microsoft YaHei", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CashButton.ForeColor = System.Drawing.Color.White;
             this.CashButton.Location = new System.Drawing.Point(3, 3);
             this.CashButton.Name = "CashButton";
@@ -262,7 +282,7 @@
             this.QRPayButton.BorderColor = System.Drawing.Color.Transparent;
             this.QRPayButton.FlatAppearance.BorderSize = 0;
             this.QRPayButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.QRPayButton.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.QRPayButton.Font = new System.Drawing.Font("Microsoft YaHei", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.QRPayButton.ForeColor = System.Drawing.Color.White;
             this.QRPayButton.Location = new System.Drawing.Point(3, 109);
             this.QRPayButton.Name = "QRPayButton";
@@ -286,11 +306,11 @@
             // SelectTicketQuantityLabel
             // 
             this.SelectTicketQuantityLabel.AutoSize = true;
-            this.SelectTicketQuantityLabel.Font = new System.Drawing.Font("Segoe UI", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SelectTicketQuantityLabel.Font = new System.Drawing.Font("Microsoft YaHei", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SelectTicketQuantityLabel.ForeColor = System.Drawing.Color.White;
             this.SelectTicketQuantityLabel.Location = new System.Drawing.Point(12, 0);
             this.SelectTicketQuantityLabel.Name = "SelectTicketQuantityLabel";
-            this.SelectTicketQuantityLabel.Size = new System.Drawing.Size(337, 37);
+            this.SelectTicketQuantityLabel.Size = new System.Drawing.Size(357, 36);
             this.SelectTicketQuantityLabel.TabIndex = 3;
             this.SelectTicketQuantityLabel.Text = "Select Number of Tickets";
             // 
@@ -313,7 +333,7 @@
             this.OneTicketButton.BorderColor = System.Drawing.Color.Transparent;
             this.OneTicketButton.FlatAppearance.BorderSize = 0;
             this.OneTicketButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.OneTicketButton.Font = new System.Drawing.Font("Segoe UI", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.OneTicketButton.Font = new System.Drawing.Font("Microsoft YaHei", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.OneTicketButton.ForeColor = System.Drawing.Color.White;
             this.OneTicketButton.Location = new System.Drawing.Point(3, 3);
             this.OneTicketButton.Name = "OneTicketButton";
@@ -331,7 +351,7 @@
             this.TwoTicketButton.BorderColor = System.Drawing.Color.Transparent;
             this.TwoTicketButton.FlatAppearance.BorderSize = 0;
             this.TwoTicketButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.TwoTicketButton.Font = new System.Drawing.Font("Segoe UI", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.TwoTicketButton.Font = new System.Drawing.Font("Microsoft YaHei", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.TwoTicketButton.ForeColor = System.Drawing.Color.White;
             this.TwoTicketButton.Location = new System.Drawing.Point(109, 3);
             this.TwoTicketButton.Name = "TwoTicketButton";
@@ -349,7 +369,7 @@
             this.ThreeTicketButton.BorderColor = System.Drawing.Color.Transparent;
             this.ThreeTicketButton.FlatAppearance.BorderSize = 0;
             this.ThreeTicketButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.ThreeTicketButton.Font = new System.Drawing.Font("Segoe UI", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.ThreeTicketButton.Font = new System.Drawing.Font("Microsoft YaHei", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.ThreeTicketButton.ForeColor = System.Drawing.Color.White;
             this.ThreeTicketButton.Location = new System.Drawing.Point(215, 3);
             this.ThreeTicketButton.Name = "ThreeTicketButton";
@@ -367,7 +387,7 @@
             this.FourTicketButton.BorderColor = System.Drawing.Color.Transparent;
             this.FourTicketButton.FlatAppearance.BorderSize = 0;
             this.FourTicketButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.FourTicketButton.Font = new System.Drawing.Font("Segoe UI", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FourTicketButton.Font = new System.Drawing.Font("Microsoft YaHei", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FourTicketButton.ForeColor = System.Drawing.Color.White;
             this.FourTicketButton.Location = new System.Drawing.Point(3, 109);
             this.FourTicketButton.Name = "FourTicketButton";
@@ -385,7 +405,7 @@
             this.FiveTicketButton.BorderColor = System.Drawing.Color.Transparent;
             this.FiveTicketButton.FlatAppearance.BorderSize = 0;
             this.FiveTicketButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.FiveTicketButton.Font = new System.Drawing.Font("Segoe UI", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FiveTicketButton.Font = new System.Drawing.Font("Microsoft YaHei", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FiveTicketButton.ForeColor = System.Drawing.Color.White;
             this.FiveTicketButton.Location = new System.Drawing.Point(109, 109);
             this.FiveTicketButton.Name = "FiveTicketButton";
@@ -403,7 +423,7 @@
             this.SixTicketButton.BorderColor = System.Drawing.Color.Transparent;
             this.SixTicketButton.FlatAppearance.BorderSize = 0;
             this.SixTicketButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.SixTicketButton.Font = new System.Drawing.Font("Segoe UI", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SixTicketButton.Font = new System.Drawing.Font("Microsoft YaHei", 72F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SixTicketButton.ForeColor = System.Drawing.Color.White;
             this.SixTicketButton.Location = new System.Drawing.Point(215, 109);
             this.SixTicketButton.Name = "SixTicketButton";
@@ -430,11 +450,11 @@
             // DateTimeLabel
             // 
             this.DateTimeLabel.AutoSize = true;
-            this.DateTimeLabel.Font = new System.Drawing.Font("Segoe UI", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.DateTimeLabel.Font = new System.Drawing.Font("Microsoft YaHei", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.DateTimeLabel.ForeColor = System.Drawing.Color.White;
             this.DateTimeLabel.Location = new System.Drawing.Point(6, 13);
             this.DateTimeLabel.Name = "DateTimeLabel";
-            this.DateTimeLabel.Size = new System.Drawing.Size(304, 100);
+            this.DateTimeLabel.Size = new System.Drawing.Size(317, 100);
             this.DateTimeLabel.TabIndex = 0;
             this.DateTimeLabel.Text = "1919年08月10日\r\n04:20";
             this.DateTimeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -465,7 +485,7 @@
             this.AllLinesButton.BorderColor = System.Drawing.Color.Transparent;
             this.AllLinesButton.FlatAppearance.BorderSize = 0;
             this.AllLinesButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.AllLinesButton.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.AllLinesButton.Font = new System.Drawing.Font("Microsoft YaHei", 24F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.AllLinesButton.ForeColor = System.Drawing.Color.White;
             this.AllLinesButton.Location = new System.Drawing.Point(3, 3);
             this.AllLinesButton.Name = "AllLinesButton";
@@ -484,7 +504,7 @@
             this.Line1Button.BorderColor = System.Drawing.Color.Transparent;
             this.Line1Button.FlatAppearance.BorderSize = 0;
             this.Line1Button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Line1Button.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Line1Button.Font = new System.Drawing.Font("Microsoft YaHei", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Line1Button.ForeColor = System.Drawing.Color.White;
             this.Line1Button.Location = new System.Drawing.Point(169, 3);
             this.Line1Button.Name = "Line1Button";
@@ -503,7 +523,7 @@
             this.Line2Button.BorderColor = System.Drawing.Color.Transparent;
             this.Line2Button.FlatAppearance.BorderSize = 0;
             this.Line2Button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.Line2Button.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Line2Button.Font = new System.Drawing.Font("Microsoft YaHei", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Line2Button.ForeColor = System.Drawing.Color.White;
             this.Line2Button.Location = new System.Drawing.Point(335, 3);
             this.Line2Button.Name = "Line2Button";
@@ -522,23 +542,10 @@
             this.ClockUpdateTimer.Interval = 500;
             this.ClockUpdateTimer.Tick += new System.EventHandler(this.ClockUpdateTimer_Tick);
             // 
-            // roundedButton1
+            // CancelFakeDelayTimer
             // 
-            this.roundedButton1.BackColor = System.Drawing.Color.Red;
-            this.roundedButton1.BorderColor = System.Drawing.Color.Transparent;
-            this.roundedButton1.FlatAppearance.BorderSize = 0;
-            this.roundedButton1.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.roundedButton1.Font = new System.Drawing.Font("Segoe UI", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.roundedButton1.ForeColor = System.Drawing.Color.White;
-            this.roundedButton1.Location = new System.Drawing.Point(23, 937);
-            this.roundedButton1.Name = "roundedButton1";
-            this.roundedButton1.Radius = 25;
-            this.roundedButton1.Size = new System.Drawing.Size(144, 57);
-            this.roundedButton1.TabIndex = 8;
-            this.roundedButton1.TabStop = false;
-            this.roundedButton1.Text = "Cancel";
-            this.roundedButton1.Thickness = 3F;
-            this.roundedButton1.UseVisualStyleBackColor = false;
+            this.CancelFakeDelayTimer.Interval = 2000;
+            this.CancelFakeDelayTimer.Tick += new System.EventHandler(this.CancelFakeDelayTimer_Tick);
             // 
             // MainForm
             // 
@@ -607,7 +614,8 @@
         private RoundedButton Line2Button;
         private FrtFullLineMapControl MainFrtFullLineMapControl;
         private RoundedButton LanguageToggleButton;
-        private RoundedButton roundedButton1;
+        private RoundedButton CancelButton;
+        private System.Windows.Forms.Timer CancelFakeDelayTimer;
     }
 }
 

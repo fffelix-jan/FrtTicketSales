@@ -15,6 +15,47 @@ namespace FrtTicketVendingMachine
         // Private variable for language
         private AppText.Language _language;
 
+        // Private variable for animation state and type
+        private int animationState = 1;
+        private AnimationType currentAnimationType;
+
+        // Cache animation images to prevent RAM growth
+        private Image handButton1Image;
+        private Image handButton2Image;
+
+        // Enum for animation types
+        public enum AnimationType
+        {
+            PressButton,
+            InsertMoney,
+            ScanCode,
+            TicketPrinting,
+        }
+
+        public void SetAnimationType(AnimationType type)
+        {
+            currentAnimationType = type;
+            switch (type)
+            {
+                case AnimationType.PressButton:
+                    // Load images once if not already loaded
+                    if (handButton1Image == null)
+                    {
+                        handButton1Image = Properties.Resources.HandButton1;
+                    }
+                    if (handButton2Image == null)
+                    {
+                        handButton2Image = Properties.Resources.HandButton2;
+                    }
+                    InstructionsPictureBox.Image = handButton1Image;
+                    break;
+                default:
+                    break;
+            }
+            animationState = 1;
+            AnimationTimer.Start();
+        }
+
         // Public field to change the text of the destination label
         public string DestinationText
         {
@@ -50,6 +91,13 @@ namespace FrtTicketVendingMachine
             set { QuantityLabel.Text = value; }
         }
 
+        // Public field to change the text of the instructions label
+        public string InstructionsText
+        {
+            get { return InstructionsLabel.Text; }
+            set { InstructionsLabel.Text = value; }
+        }
+
         // Public field to change the language
         public AppText.Language Language
         {
@@ -76,14 +124,37 @@ namespace FrtTicketVendingMachine
             }
         }
 
-        public void SetStationNameFromStationCode(string stationCode)
-        {
-            // TODO: Get the station name from the server in the selected language
-        }
-
         public CheckoutControl()
         {
             InitializeComponent();
+        }
+
+        private void CheckoutControl_VisibleChanged(object sender, EventArgs e)
+        {
+            // Stop the animation timer
+            if (!this.Visible)
+            {
+                AnimationTimer.Stop();
+            }
+        }
+
+        private void AnimationTimer_Tick(object sender, EventArgs e)
+        {
+            // Hand animation logic based on the value of animation
+            if (currentAnimationType == AnimationType.PressButton)
+            {
+                if (animationState == 1)
+                {
+                    InstructionsPictureBox.Image = handButton2Image;
+                    animationState = 2;
+                }
+                else
+                {
+                    InstructionsPictureBox.Image = handButton1Image;
+                    animationState = 1;
+                }
+            }
+            // TODO: implement other animation types
         }
     }
 }
