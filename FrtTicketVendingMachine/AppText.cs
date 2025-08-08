@@ -58,5 +58,55 @@ namespace FrtTicketVendingMachine
 
         public const string CancellingEnglish = "Cancelling...";
         public const string CancellingChinese = "正在取消...";
+
+        // Language toggle button text
+        public const string EnglishToggleText = "English";
+        public const string ChineseToggleText = "中文";
+
+        // Loading and status messages
+        public const string LoadingStationInfoEnglish = "Loading station information...";
+        public const string LoadingStationInfoChinese = "正在获取车站信息...";
+
+        public const string StationInfoErrorEnglish = "Failed to get station information, please try again later.";
+        public const string StationInfoErrorChinese = "获取车站信息失败，请稍后再试。";
+
+        // Quantity display text
+        public const string TicketsEnglish = "tickets";
+        public const string TicketsChinese = "张";
+
+        // Cash payment messages
+        public const string InsertCashEnglish = "Please insert cash...";
+        public const string InsertCashChinese = "请投入现金...";
+
+        public const string CashInsertedEnglish = "Inserted: ¥{0:F2}";
+        public const string CashInsertedChinese = "已投入: ¥{0:F2}";
+
+        public const string ChangeEjectedEnglish = "Change: ¥{0:F2}";
+        public const string ChangeEjectedChinese = "找零: ¥{0:F2}";
+
+        public const string CashReturnedEnglish = "Cash Returned: ¥{0:F2}";
+        public const string CashReturnedChinese = "退币: ¥{0:F2}";
+
+        // Payment processing messages
+        public const string ProcessingPaymentEnglish = "Processing payment...";
+        public const string ProcessingPaymentChinese = "正在处理付款...";
+
+        public const string PrintingTicketsEnglish = "Printing tickets...";
+        public const string PrintingTicketsChinese = "正在打印票据...";
+
+        public const string PrintingCompleteEnglish = "Printing complete! Please take your tickets";
+        public const string PrintingCompleteChinese = "打印完成！请取票";
+
+        public const string ProcessingFailedEnglish = "Processing failed: {0}";
+        public const string ProcessingFailedChinese = "处理失败: {0}";
+
+        // Ticket printing constants
+        public const string SingleJourneyTicketEnglish = "Single Journey Ticket";
+        public const string SingleJourneyTicketChinese = "单程票";
+
+        public const string CashPaymentMethodEnglish = "现金/Cash";
+
+        public const string ThankYouMessageEnglish = "Thank you for using FRT Transit";
+        public const string ThankYouMessageChinese = "感谢您使用FRT轨道交通";
     }
 }

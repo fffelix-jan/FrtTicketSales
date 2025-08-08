@@ -161,7 +161,7 @@ namespace FrtTicketVendingMachine
                 // Set the checkout control language
                 checkout.Language = AppText.Language.Chinese;
                 // Set language toggle button text
-                LanguageToggleButton.Text = "English";
+                LanguageToggleButton.Text = AppText.EnglishToggleText;
                 // Set select ticket label
                 SelectTicketQuantityLabel.Text = AppText.SelectTicketsChinese;
                 // Set select payment method label
@@ -183,7 +183,7 @@ namespace FrtTicketVendingMachine
                 // Set the checkout control language
                 checkout.Language = AppText.Language.English;
                 // Set language toggle button text
-                LanguageToggleButton.Text = "中文";
+                LanguageToggleButton.Text = AppText.ChineseToggleText;
                 // Set select ticket label
                 SelectTicketQuantityLabel.Text = AppText.SelectTicketsEnglish;
                 // Set select payment method label
@@ -202,6 +202,275 @@ namespace FrtTicketVendingMachine
 
             // Update the clock display
             UpdateClockDisplay();
+        }
+
+        private async void SelectStation(string stationCode)
+        {
+            // Show loading message while API call is in progress
+            checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
+                AppText.LoadingStationInfoChinese : AppText.LoadingStationInfoEnglish;
+            
+            // Disable UI to prevent multiple clicks
+            foreach(Control c in LineSelectFlowLayoutPanel.Controls)
+            {
+                c.Enabled = false;
+            }
+
+            try
+            {
+                // Use await instead of .Result to avoid blocking the UI thread
+                selectedStationInfo = await fareApiClient.GetStationNameAsync(stationCode);
+                
+                // Get the current station from config (where this kiosk is located)
+                string currentStationCode = SimpleConfig.Get("CURRENT_STATION", "FLZ"); // Default to FLZ if not configured
+                
+                // Get the fare from current station to selected destination
+                selectedFareInfo = await fareApiClient.GetFareAsync(currentStationCode, selectedStationInfo.StationCode);
+                
+                // Format price each (assuming cents, convert to currency)
+                string priceEach = $"¥{selectedFareInfo.FareCents / 100.0:F2}";
+
+                // Set the price each in checkout
+                checkout.PriceEachText = priceEach;
+            }
+            catch (Exception ex)
+            {
+                // Handle API errors gracefully
+                MessageBox.Show(this.language == AppText.Language.Chinese ? 
+                    AppText.StationInfoErrorChinese : AppText.StationInfoErrorEnglish, 
+                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                
+                // Re-enable UI and return
+                foreach(Control c in LineSelectFlowLayoutPanel.Controls)
+                {
+                    c.Enabled = true;
+                }
+                return;
+            }
+
+            // Set the selected station info with proper name
+            string stationDisplayName = this.language == AppText.Language.Chinese ? 
+                selectedStationInfo.ChineseName : 
+                selectedStationInfo.EnglishName;
+
+            // Enable and show the cancel button
+            CancelButton.Enabled = true;
+            CancelButton.Show();
+            // Hide the language toggle button
+            LanguageToggleButton.Hide();
+            
+            // Set the selected station in the checkout control
+            checkout.DestinationText = stationDisplayName; // Use the proper name, not the code
+            // Set the quantity and price to default values
+            checkout.QuantityText = "?";
+            // Transition to the next state
+            kioskState = State.WaitSelectTicketQuantity;
+            // Set the instructions text accordingly
+            checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
+                AppText.PleaseSelectQuantityChinese : AppText.PleaseSelectQuantityEnglish;
+            // Show the ticket quantity selection panel
+            SelectTicketQuantityPanel.Show();
+            SelectTicketQuantityPanel.BringToFront();
+            // Hide the welcome panel
+            WelcomePanel.Hide();
+            // Hide the map
+            MainFrtFullLineMapControl.Hide();
+            // Set the animation
+            checkout.SetAnimationType(CheckoutControl.AnimationType.PressButton);
+            // Show the checkout panel
+            checkout.Show();
+        }
+
+        private void MainFrtFullLineMapControl_StationSelected(object sender, StationSelectedEventArgs e)
+        {
+            SelectStation(e.StationCode);
+        }
+
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            ResetKiosk();
+        }
+
+        private void CancelFakeDelayTimer_Tick(object sender, EventArgs e)
+        {
+            CancelFakeDelayTimer.Stop();
+            ResetKioskStage2();
+        }
+
+        private async void SelectTicketQuantity(int quantity)
+        {
+            // Set the selected quantity in the checkout control
+            selectedQuantity = quantity;
+            checkout.QuantityText = this.language == AppText.Language.Chinese ? 
+                $"{quantity} {AppText.TicketsChinese}" : $"{quantity} {AppText.TicketsEnglish}";
+
+            // Calculate total price in cents directly from selectedFareInfo (integer math - faster)
+            totalPriceCents = selectedFareInfo.FareCents * quantity;
+            
+            // Convert to display format for checkout
+            string totalPriceDisplay = $"¥{totalPriceCents / 100.0:F2}";
+            checkout.TotalPriceText = totalPriceDisplay;
+            
+            // Transition to payment method selection state
+            kioskState = State.WaitSelectPaymentMethod;
+            
+            // Update instructions for payment method selection
+            checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
+                AppText.PleaseSelectPaymentMethodChinese : AppText.PleaseSelectPaymentMethodEnglish;
+            
+            // Hide the quantity selection panel
+            SelectTicketQuantityPanel.Hide();
+            
+            // Show the payment method selection panel
+            SelectPaymentMethodPanel.Show();
+            SelectPaymentMethodPanel.BringToFront();
+            
+            // Update animation type for payment selection
+            checkout.SetAnimationType(CheckoutControl.AnimationType.PressButton);
+        }
+
+        private void CashButton_Click(object sender, EventArgs e)
+        {
+            // Set state to allow cancellation during payment
+            canCancel = true;
+            kioskState = State.WaitForPayment;
+            
+            // Update checkout display for cash payment
+            checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
+                AppText.InsertCashChinese : AppText.InsertCashEnglish;
+            checkout.SetAnimationType(CheckoutControl.AnimationType.InsertMoney);
+            
+            // Create and show cash insertion form
+            currentCashForm = new InsertCashForm(totalPriceCents, this.language);
+            
+            // Handle cash insertion events
+            currentCashForm.CashInserted += (s, insertedArgs) => {
+                // Update main form display with inserted amount
+                decimal insertedAmount = insertedArgs.TotalInsertedCents / 100.0m;
+                checkout.InstructionsText = this.language == AppText.Language.Chinese 
+                    ? string.Format(AppText.CashInsertedChinese, insertedAmount)
+                    : string.Format(AppText.CashInsertedEnglish, insertedAmount);
+            };
+            
+            // Handle cash ejection events (change or cancellation)
+            currentCashForm.CashEjected += (s, ejectedArgs) => {
+                decimal ejectedAmount = ejectedArgs.AmountEjectedCents / 100.0m;
+                if (ejectedArgs.Reason == CashEjectionReason.Change)
+                {
+                    checkout.InstructionsText = this.language == AppText.Language.Chinese 
+                        ? string.Format(AppText.ChangeEjectedChinese, ejectedAmount)
+                        : string.Format(AppText.ChangeEjectedEnglish, ejectedAmount);
+                }
+                else
+                {
+                    checkout.InstructionsText = this.language == AppText.Language.Chinese 
+                        ? string.Format(AppText.CashReturnedChinese, ejectedAmount)
+                        : string.Format(AppText.CashReturnedEnglish, ejectedAmount);
+                }
+            };
+            
+            // Handle ejection completion (for cancellation)
+            currentCashForm.EjectionCompleted += (s, completedArgs) => {
+                currentCashForm.Hide();
+                currentCashForm.Dispose();
+                currentCashForm = null;
+                
+                // Continue with the normal reset process
+                ResetKioskStage2();
+            };
+            
+            // Handle payment completion
+            currentCashForm.PaymentCompleted += async (s, completedArgs) => {
+                currentCashForm.Hide();
+                await CompletePayment(AppText.CashPaymentMethodEnglish);
+                currentCashForm.Dispose();
+                currentCashForm = null;
+            };
+            
+            // Show the cash form
+            currentCashForm.Show(this);
+        }
+
+        private async Task CompletePayment(string paymentMethod)
+        {
+            try
+            {
+                // Set state to processing
+                canCancel = false;
+                kioskState = State.PaymentProcessing;
+
+                // Update UI to show processing
+                checkout.InstructionsText = this.language == AppText.Language.Chinese
+                    ? AppText.ProcessingPaymentChinese : AppText.ProcessingPaymentEnglish;
+                checkout.SetAnimationType(CheckoutControl.AnimationType.TicketPrinting);
+
+                // Get current station for ticket issuing
+                string currentStationCode = SimpleConfig.Get("CURRENT_STATION", "FLZ");
+
+                // Issue tickets through API
+                var ticketData = await fareApiClient.IssueTicketAsync(selectedFareInfo.FareCents, currentStationCode, 0);
+
+                // Update state and UI for printing
+                kioskState = State.PrintingTicket;
+                checkout.InstructionsText = this.language == AppText.Language.Chinese
+                    ? AppText.PrintingTicketsChinese : AppText.PrintingTicketsEnglish;
+
+                // Get station names for printing
+                string chineseStationName = selectedStationInfo.ChineseName;
+                string englishStationName = selectedStationInfo.EnglishName;
+                string priceEachDisplay = $"¥{selectedFareInfo.FareCents / 100.0:F2}";
+
+                // Print each ticket
+                for (int i = 0; i < selectedQuantity; i++)
+                {
+                    FrtTicketPrinter.TicketGenerator.PrintTicket(
+                        AppText.SingleJourneyTicketChinese, AppText.SingleJourneyTicketEnglish,
+                        chineseStationName, englishStationName,
+                        priceEachDisplay, paymentMethod,
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        ticketData.TicketString,
+                        $"{ticketData.TicketNumber}-{i + 1:D2}",
+                        AppText.ThankYouMessageChinese, AppText.ThankYouMessageEnglish
+                    );
+                }
+
+                // Show success message
+                checkout.InstructionsText = this.language == AppText.Language.Chinese
+                    ? AppText.PrintingCompleteChinese : AppText.PrintingCompleteEnglish;
+
+                // Auto-reset after 3 seconds
+                var resetTimer = new Timer();
+                resetTimer.Interval = 3000;
+                resetTimer.Tick += (s, e) => {
+                    resetTimer.Stop();
+                    resetTimer.Dispose();
+                    ResetKioskStage2();
+                };
+                resetTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                // Handle errors
+                checkout.InstructionsText = this.language == AppText.Language.Chinese
+                    ? string.Format(AppText.ProcessingFailedChinese, ex.Message)
+                    : string.Format(AppText.ProcessingFailedEnglish, ex.Message);
+
+                // Return to payment selection after error
+                canCancel = true;
+                kioskState = State.WaitSelectPaymentMethod;
+
+                // Show error for 3 seconds then return to payment selection
+                var errorTimer = new Timer();
+                errorTimer.Interval = 3000;
+                errorTimer.Tick += (s, e) => {
+                    errorTimer.Stop();
+                    errorTimer.Dispose();
+                    checkout.InstructionsText = this.language == AppText.Language.Chinese ?
+                        AppText.SelectPaymentMethodChinese : AppText.SelectPaymentMethodEnglish;
+                    checkout.SetAnimationType(CheckoutControl.AnimationType.PressButton);
+                };
+                errorTimer.Start();
+            }
         }
 
         // Centers controls horizontally
@@ -267,131 +536,6 @@ namespace FrtTicketVendingMachine
             }
         }
 
-        private async void SelectStation(string stationCode)
-        {
-            // Show loading message while API call is in progress
-            checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
-                "正在获取车站信息..." : "Loading station information...";
-            
-            // Disable UI to prevent multiple clicks
-            foreach(Control c in LineSelectFlowLayoutPanel.Controls)
-            {
-                c.Enabled = false;
-            }
-
-            try
-            {
-                // Use await instead of .Result to avoid blocking the UI thread
-                selectedStationInfo = await fareApiClient.GetStationNameAsync(stationCode);
-                
-                // Get the current station from config (where this kiosk is located)
-                string currentStationCode = SimpleConfig.Get("CURRENT_STATION", "FLZ"); // Default to FLZ if not configured
-                
-                // Get the fare from current station to selected destination
-                selectedFareInfo = await fareApiClient.GetFareAsync(currentStationCode, selectedStationInfo.StationCode);
-                
-                // Format price each (assuming cents, convert to currency)
-                string priceEach = $"¥{selectedFareInfo.FareCents / 100.0:F2}";
-
-                // Set the price each in checkout
-                checkout.PriceEachText = priceEach;
-            }
-            catch (Exception ex)
-            {
-                // Handle API errors gracefully
-                MessageBox.Show(this.language == AppText.Language.Chinese ? 
-                    "获取车站信息失败，请稍后再试。" : "Failed to get station information, please try again later.", 
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                
-                // Re-enable UI and return
-                foreach(Control c in LineSelectFlowLayoutPanel.Controls)
-                {
-                    c.Enabled = true;
-                }
-                return;
-            }
-
-            // Set the selected station info with proper name
-            string stationDisplayName = this.language == AppText.Language.Chinese ? 
-                selectedStationInfo.ChineseName : 
-                selectedStationInfo.EnglishName;
-
-            // Enable and show the cancel button
-            CancelButton.Enabled = true;
-            CancelButton.Show();
-            // Hide the language toggle button
-            LanguageToggleButton.Hide();
-            
-            // Set the selected station in the checkout control
-            checkout.DestinationText = stationDisplayName; // Use the proper name, not the code
-            // Set the quantity and price to default values
-            checkout.QuantityText = "?";
-            // Transition to the next state
-            kioskState = State.WaitSelectTicketQuantity;
-            // Set the instructions text accordingly
-            checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
-                AppText.PleaseSelectQuantityChinese : AppText.PleaseSelectQuantityEnglish;
-            // Show the ticket quantity selection panel
-            SelectTicketQuantityPanel.Show();
-            SelectTicketQuantityPanel.BringToFront();
-            // Hide the welcome panel
-            WelcomePanel.Hide();
-            // Hide the map
-            MainFrtFullLineMapControl.Hide();
-            // Set the animation
-            checkout.SetAnimationType(CheckoutControl.AnimationType.PressButton);
-            // Show the checkout panel
-            checkout.Show();
-        }
-
-        private void MainFrtFullLineMapControl_StationSelected(object sender, StationSelectedEventArgs e)
-        {
-            SelectStation(e.StationCode);
-        }
-
-        private void CancelButton_Click(object sender, EventArgs e)
-        {
-            ResetKiosk();
-        }
-
-        private void CancelFakeDelayTimer_Tick(object sender, EventArgs e)
-        {
-            CancelFakeDelayTimer.Stop();
-            ResetKioskStage2();
-        }
-
-        private async void SelectTicketQuantity(int quantity)
-        {
-            // Set the selected quantity in the checkout control
-            selectedQuantity = quantity;
-            checkout.QuantityText = this.language == AppText.Language.Chinese ? 
-                $"{quantity} 张" : $"{quantity} tickets";
-
-            // Calculate total price in cents directly from selectedFareInfo (integer math - faster)
-            totalPriceCents = selectedFareInfo.FareCents * quantity;
-            
-            // Convert to display format for checkout
-            string totalPriceDisplay = $"¥{totalPriceCents / 100.0:F2}";
-            checkout.TotalPriceText = totalPriceDisplay;
-            
-            // Transition to payment method selection state
-            kioskState = State.WaitSelectPaymentMethod;
-            
-            // Update instructions for payment method selection
-            checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
-                AppText.PleaseSelectPaymentMethodChinese : AppText.PleaseSelectPaymentMethodEnglish;
-            
-            // Hide the quantity selection panel
-            SelectTicketQuantityPanel.Hide();
-            
-            // Show the payment method selection panel
-            SelectPaymentMethodPanel.Show();
-            SelectPaymentMethodPanel.BringToFront();
-            
-            // Update animation type for payment selection
-            checkout.SetAnimationType(CheckoutControl.AnimationType.PressButton);
-        }
-
         private void OneTicketButton_Click(object sender, EventArgs e)
         {
             SelectTicketQuantity(1);
@@ -420,149 +564,6 @@ namespace FrtTicketVendingMachine
         private void SixTicketButton_Click(object sender, EventArgs e)
         {
             SelectTicketQuantity(6);
-        }
-
-        private void CashButton_Click(object sender, EventArgs e)
-        {
-            // Set state to allow cancellation during payment
-            canCancel = true;
-            kioskState = State.WaitForPayment;
-            
-            // Update checkout display for cash payment
-            checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
-                "请投入现金..." : "Please insert cash...";
-            checkout.SetAnimationType(CheckoutControl.AnimationType.InsertMoney);
-            
-            // Create and show cash insertion form
-            currentCashForm = new InsertCashForm(totalPriceCents, this.language);
-            
-            // Handle cash insertion events
-            currentCashForm.CashInserted += (s, insertedArgs) => {
-                // Update main form display with inserted amount
-                decimal insertedAmount = insertedArgs.TotalInsertedCents / 100.0m;
-                checkout.InstructionsText = this.language == AppText.Language.Chinese 
-                    ? $"已投入: ¥{insertedAmount:F2}" 
-                    : $"Inserted: ¥{insertedAmount:F2}";
-            };
-            
-            // Handle cash ejection events (change or cancellation)
-            currentCashForm.CashEjected += (s, ejectedArgs) => {
-                decimal ejectedAmount = ejectedArgs.AmountEjectedCents / 100.0m;
-                if (ejectedArgs.Reason == CashEjectionReason.Change)
-                {
-                    checkout.InstructionsText = this.language == AppText.Language.Chinese 
-                        ? $"找零: ¥{ejectedAmount:F2}" 
-                        : $"Change: ¥{ejectedAmount:F2}";
-                }
-                else
-                {
-                    checkout.InstructionsText = this.language == AppText.Language.Chinese 
-                        ? $"退币: ¥{ejectedAmount:F2}" 
-                        : $"Cash Returned: ¥{ejectedAmount:F2}";
-                }
-            };
-            
-            // Handle ejection completion (for cancellation)
-            currentCashForm.EjectionCompleted += (s, completedArgs) => {
-                currentCashForm.Hide();
-                currentCashForm.Dispose();
-                currentCashForm = null;
-                
-                // Continue with the normal reset process
-                ResetKioskStage2();
-            };
-            
-            // Handle payment completion
-            currentCashForm.PaymentCompleted += async (s, completedArgs) => {
-                currentCashForm.Hide();
-                await CompletePayment("现金/Cash");
-                currentCashForm.Dispose();
-                currentCashForm = null;
-            };
-            
-            // Show the cash form
-            currentCashForm.Show(this);
-        }
-
-        private async Task CompletePayment(string paymentMethod)
-        {
-            try
-            {
-                // Set state to processing
-                canCancel = false;
-                kioskState = State.PaymentProcessing;
-
-                // Update UI to show processing
-                checkout.InstructionsText = this.language == AppText.Language.Chinese
-                    ? "正在处理付款..." : "Processing payment...";
-                checkout.SetAnimationType(CheckoutControl.AnimationType.TicketPrinting);
-
-                // Get current station for ticket issuing
-                string currentStationCode = SimpleConfig.Get("CURRENT_STATION", "FLZ");
-
-                // Issue tickets through API
-                var ticketData = await fareApiClient.IssueTicketAsync(selectedFareInfo.FareCents, currentStationCode, 0);
-
-                // Update state and UI for printing
-                kioskState = State.PrintingTicket;
-                checkout.InstructionsText = this.language == AppText.Language.Chinese
-                    ? "正在打印票据..." : "Printing tickets...";
-
-                // Get station names for printing
-                string chineseStationName = selectedStationInfo.ChineseName;
-                string englishStationName = selectedStationInfo.EnglishName;
-                string priceEachDisplay = $"¥{selectedFareInfo.FareCents / 100.0:F2}";
-
-                // Print each ticket
-                for (int i = 0; i < selectedQuantity; i++)
-                {
-                    FrtTicketPrinter.TicketGenerator.PrintTicket(
-                        "单程票", "Single Journey Ticket",
-                        chineseStationName, englishStationName,
-                        priceEachDisplay, paymentMethod,
-                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
-                        ticketData.TicketString,
-                        $"{ticketData.TicketNumber}-{i + 1:D2}",
-                        "感谢您使用FRT轨道交通", "Thank you for using FRT Transit"
-                    );
-                }
-
-                // Show success message
-                checkout.InstructionsText = this.language == AppText.Language.Chinese
-                    ? "打印完成！请取票" : "Printing complete! Please take your tickets";
-
-                // Auto-reset after 3 seconds
-                var resetTimer = new Timer();
-                resetTimer.Interval = 3000;
-                resetTimer.Tick += (s, e) => {
-                    resetTimer.Stop();
-                    resetTimer.Dispose();
-                    ResetKioskStage2();
-                };
-                resetTimer.Start();
-            }
-            catch (Exception ex)
-            {
-                // Handle errors
-                checkout.InstructionsText = this.language == AppText.Language.Chinese
-                    ? $"处理失败: {ex.Message}" : $"Processing failed: {ex.Message}";
-
-                // Return to payment selection after error
-                canCancel = true;
-                kioskState = State.WaitSelectPaymentMethod;
-
-                // Show error for 3 seconds then return to payment selection
-                var errorTimer = new Timer();
-                errorTimer.Interval = 3000;
-                errorTimer.Tick += (s, e) => {
-                    errorTimer.Stop();
-                    errorTimer.Dispose();
-                    checkout.InstructionsText = this.language == AppText.Language.Chinese ?
-                        AppText.SelectPaymentMethodChinese : AppText.SelectPaymentMethodEnglish;
-                    checkout.SetAnimationType(CheckoutControl.AnimationType.PressButton);
-                };
-                errorTimer.Start();
-            }
         }
     }
 }
