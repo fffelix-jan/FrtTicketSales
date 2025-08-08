@@ -22,6 +22,10 @@ namespace FrtTicketVendingMachine
         // Cache animation images to prevent RAM growth
         private Image handButton1Image;
         private Image handButton2Image;
+        private Image insertCoin1Image;
+        private Image insertCoin2Image;
+        private Image insertCoin3Image;
+        private Image insertCoin4Image;
 
         // Track which price mode we're in
         private bool showingTotalPrice = true;
@@ -51,6 +55,26 @@ namespace FrtTicketVendingMachine
                         handButton2Image = Properties.Resources.HandButton2;
                     }
                     InstructionsPictureBox.Image = handButton1Image;
+                    break;
+                case AnimationType.InsertMoney:
+                    // Load images once if not already loaded
+                    if (insertCoin1Image == null)
+                    {
+                        insertCoin1Image = Properties.Resources.InsertCoin1;
+                    }
+                    if (insertCoin2Image == null)
+                    {
+                        insertCoin2Image = Properties.Resources.InsertCoin2;
+                    }
+                    if (insertCoin3Image == null)
+                    {
+                        insertCoin3Image = Properties.Resources.InsertCoin3;
+                    }
+                    if (insertCoin4Image == null)
+                    {
+                        insertCoin4Image = Properties.Resources.InsertCoin4;
+                    }
+                    InstructionsPictureBox.Image = insertCoin1Image;
                     break;
                 default:
                     break;
@@ -187,7 +211,44 @@ namespace FrtTicketVendingMachine
                     animationState = 1;
                 }
             }
-            // TODO: implement other animation types
+            else if (currentAnimationType == AnimationType.InsertMoney)
+            {
+                if (animationState == 1)
+                {
+                    InstructionsPictureBox.Image = insertCoin2Image;
+                    animationState = 2;
+                }
+                else if (animationState == 2)
+                {
+                    InstructionsPictureBox.Image = insertCoin3Image;
+                    animationState = 3;
+                }
+                else if (animationState == 3)
+                {
+                    InstructionsPictureBox.Image = insertCoin4Image;
+                    animationState = 4;
+                }
+                else
+                {
+                    InstructionsPictureBox.Image = insertCoin1Image;
+                    animationState = 1;
+                }
+            }
+        }
+
+        // Dispose of cached images when control is disposed
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                handButton1Image?.Dispose();
+                handButton2Image?.Dispose();
+                insertCoin1Image?.Dispose();
+                insertCoin2Image?.Dispose();
+                insertCoin3Image?.Dispose();
+                insertCoin4Image?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }

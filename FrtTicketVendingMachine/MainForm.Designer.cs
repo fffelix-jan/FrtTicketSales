@@ -275,6 +275,7 @@
             this.CashButton.Text = "Cash";
             this.CashButton.Thickness = 3F;
             this.CashButton.UseVisualStyleBackColor = false;
+            this.CashButton.Click += new System.EventHandler(this.CashButton_Click);
             // 
             // QRPayButton
             // 

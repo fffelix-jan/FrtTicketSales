@@ -41,6 +41,9 @@ namespace FrtTicketVendingMachine
             PrintingTicket,
         }
 
+        // Store reference to cash form for cancellation handling
+        private InsertCashForm currentCashForm = null;
+
         public MainForm()
         {
             InitializeComponent();
@@ -85,13 +88,19 @@ namespace FrtTicketVendingMachine
                 SelectPaymentMethodPanel.Hide();
                 SelectTicketQuantityPanel.Hide();
 
-                // TODO: Eject the coins here and wait for them to be ejected without blocking the UI
                 // Show a "Cancelling..." message to the user
                 checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
                     AppText.CancellingChinese : AppText.CancellingEnglish;
-                // TODO: Start async coin ejection process that calls ResetKioskStage2() when complete
 
-                // For now, start the fake cancel delay timer
+                // Check if we're in cash payment state and there's a cash form open
+                if (kioskState == State.WaitForPayment && currentCashForm != null)
+                {
+                    // Request cash ejection from the cash form and wait for completion
+                    currentCashForm.RequestCashEjection();
+                    return; // EjectionCompleted event will call ResetKioskStage2()
+                }
+
+                // If not in cash payment, use the fake delay timer as before
                 CancelFakeDelayTimer.Start();
             }
         }
@@ -411,6 +420,149 @@ namespace FrtTicketVendingMachine
         private void SixTicketButton_Click(object sender, EventArgs e)
         {
             SelectTicketQuantity(6);
+        }
+
+        private void CashButton_Click(object sender, EventArgs e)
+        {
+            // Set state to allow cancellation during payment
+            canCancel = true;
+            kioskState = State.WaitForPayment;
+            
+            // Update checkout display for cash payment
+            checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
+                "请投入现金..." : "Please insert cash...";
+            checkout.SetAnimationType(CheckoutControl.AnimationType.InsertMoney);
+            
+            // Create and show cash insertion form
+            currentCashForm = new InsertCashForm(totalPriceCents, this.language);
+            
+            // Handle cash insertion events
+            currentCashForm.CashInserted += (s, insertedArgs) => {
+                // Update main form display with inserted amount
+                decimal insertedAmount = insertedArgs.TotalInsertedCents / 100.0m;
+                checkout.InstructionsText = this.language == AppText.Language.Chinese 
+                    ? $"已投入: ¥{insertedAmount:F2}" 
+                    : $"Inserted: ¥{insertedAmount:F2}";
+            };
+            
+            // Handle cash ejection events (change or cancellation)
+            currentCashForm.CashEjected += (s, ejectedArgs) => {
+                decimal ejectedAmount = ejectedArgs.AmountEjectedCents / 100.0m;
+                if (ejectedArgs.Reason == CashEjectionReason.Change)
+                {
+                    checkout.InstructionsText = this.language == AppText.Language.Chinese 
+                        ? $"找零: ¥{ejectedAmount:F2}" 
+                        : $"Change: ¥{ejectedAmount:F2}";
+                }
+                else
+                {
+                    checkout.InstructionsText = this.language == AppText.Language.Chinese 
+                        ? $"退币: ¥{ejectedAmount:F2}" 
+                        : $"Cash Returned: ¥{ejectedAmount:F2}";
+                }
+            };
+            
+            // Handle ejection completion (for cancellation)
+            currentCashForm.EjectionCompleted += (s, completedArgs) => {
+                currentCashForm.Hide();
+                currentCashForm.Dispose();
+                currentCashForm = null;
+                
+                // Continue with the normal reset process
+                ResetKioskStage2();
+            };
+            
+            // Handle payment completion
+            currentCashForm.PaymentCompleted += async (s, completedArgs) => {
+                currentCashForm.Hide();
+                await CompletePayment("现金/Cash");
+                currentCashForm.Dispose();
+                currentCashForm = null;
+            };
+            
+            // Show the cash form
+            currentCashForm.Show(this);
+        }
+
+        private async Task CompletePayment(string paymentMethod)
+        {
+            try
+            {
+                // Set state to processing
+                canCancel = false;
+                kioskState = State.PaymentProcessing;
+
+                // Update UI to show processing
+                checkout.InstructionsText = this.language == AppText.Language.Chinese
+                    ? "正在处理付款..." : "Processing payment...";
+                checkout.SetAnimationType(CheckoutControl.AnimationType.TicketPrinting);
+
+                // Get current station for ticket issuing
+                string currentStationCode = SimpleConfig.Get("CURRENT_STATION", "FLZ");
+
+                // Issue tickets through API
+                var ticketData = await fareApiClient.IssueTicketAsync(selectedFareInfo.FareCents, currentStationCode, 0);
+
+                // Update state and UI for printing
+                kioskState = State.PrintingTicket;
+                checkout.InstructionsText = this.language == AppText.Language.Chinese
+                    ? "正在打印票据..." : "Printing tickets...";
+
+                // Get station names for printing
+                string chineseStationName = selectedStationInfo.ChineseName;
+                string englishStationName = selectedStationInfo.EnglishName;
+                string priceEachDisplay = $"¥{selectedFareInfo.FareCents / 100.0:F2}";
+
+                // Print each ticket
+                for (int i = 0; i < selectedQuantity; i++)
+                {
+                    FrtTicketPrinter.TicketGenerator.PrintTicket(
+                        "单程票", "Single Journey Ticket",
+                        chineseStationName, englishStationName,
+                        priceEachDisplay, paymentMethod,
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                        ticketData.TicketString,
+                        $"{ticketData.TicketNumber}-{i + 1:D2}",
+                        "感谢您使用FRT轨道交通", "Thank you for using FRT Transit"
+                    );
+                }
+
+                // Show success message
+                checkout.InstructionsText = this.language == AppText.Language.Chinese
+                    ? "打印完成！请取票" : "Printing complete! Please take your tickets";
+
+                // Auto-reset after 3 seconds
+                var resetTimer = new Timer();
+                resetTimer.Interval = 3000;
+                resetTimer.Tick += (s, e) => {
+                    resetTimer.Stop();
+                    resetTimer.Dispose();
+                    ResetKioskStage2();
+                };
+                resetTimer.Start();
+            }
+            catch (Exception ex)
+            {
+                // Handle errors
+                checkout.InstructionsText = this.language == AppText.Language.Chinese
+                    ? $"处理失败: {ex.Message}" : $"Processing failed: {ex.Message}";
+
+                // Return to payment selection after error
+                canCancel = true;
+                kioskState = State.WaitSelectPaymentMethod;
+
+                // Show error for 3 seconds then return to payment selection
+                var errorTimer = new Timer();
+                errorTimer.Interval = 3000;
+                errorTimer.Tick += (s, e) => {
+                    errorTimer.Stop();
+                    errorTimer.Dispose();
+                    checkout.InstructionsText = this.language == AppText.Language.Chinese ?
+                        AppText.SelectPaymentMethodChinese : AppText.SelectPaymentMethodEnglish;
+                    checkout.SetAnimationType(CheckoutControl.AnimationType.PressButton);
+                };
+                errorTimer.Start();
+            }
         }
     }
 }

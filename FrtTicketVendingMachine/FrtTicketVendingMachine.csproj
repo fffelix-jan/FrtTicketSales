@@ -64,6 +64,12 @@
     <Compile Include="FrtFullLineMapControl.Designer.cs">
       <DependentUpon>FrtFullLineMapControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="InsertCashForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="InsertCashForm.Designer.cs">
+      <DependentUpon>InsertCashForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -84,6 +90,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="FrtFullLineMapControl.resx">
       <DependentUpon>FrtFullLineMapControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="InsertCashForm.resx">
+      <DependentUpon>InsertCashForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
@@ -138,6 +147,18 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\HandButton1.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\InsertCoin4.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\InsertCoin3.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\InsertCoin2.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\InsertCoin1.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
