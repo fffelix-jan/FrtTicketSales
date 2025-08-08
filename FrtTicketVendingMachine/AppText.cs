@@ -53,6 +53,9 @@ namespace FrtTicketVendingMachine
         public const string PleaseSelectQuantityEnglish = "Please select the number of tickets → → →";
         public const string PleaseSelectQuantityChinese = "请选择购票张数 → → →";
 
+        public const string PleaseSelectPaymentMethodEnglish = "Please select a payment method → → →";
+        public const string PleaseSelectPaymentMethodChinese = "请选择支付方式 → → →";
+
         public const string CancellingEnglish = "Cancelling...";
         public const string CancellingChinese = "正在取消...";
     }

@@ -20,7 +20,9 @@ namespace FrtTicketVendingMachine
         CheckoutControl checkout = new CheckoutControl();
 
         StationInfo selectedStationInfo;
+        FareInfo selectedFareInfo;
         int selectedQuantity;
+        int totalPriceCents;
 
         // Set this to false when processing payments and printing tickets to prevent the machine from swallowing the user's money
         bool canCancel = true;
@@ -277,10 +279,10 @@ namespace FrtTicketVendingMachine
                 string currentStationCode = SimpleConfig.Get("CURRENT_STATION", "FLZ"); // Default to FLZ if not configured
                 
                 // Get the fare from current station to selected destination
-                var fareInfo = await fareApiClient.GetFareAsync(currentStationCode, selectedStationInfo.StationCode);
+                selectedFareInfo = await fareApiClient.GetFareAsync(currentStationCode, selectedStationInfo.StationCode);
                 
                 // Format price each (assuming cents, convert to currency)
-                string priceEach = $"¥{fareInfo.FareCents / 100.0:F2}";
+                string priceEach = $"¥{selectedFareInfo.FareCents / 100.0:F2}";
 
                 // Set the price each in checkout
                 checkout.PriceEachText = priceEach;
@@ -356,7 +358,29 @@ namespace FrtTicketVendingMachine
             checkout.QuantityText = this.language == AppText.Language.Chinese ? 
                 $"{quantity} 张" : $"{quantity} tickets";
 
-            // Get the fare for the selected station and quantity
+            // Calculate total price in cents directly from selectedFareInfo (integer math - faster)
+            totalPriceCents = selectedFareInfo.FareCents * quantity;
+            
+            // Convert to display format for checkout
+            string totalPriceDisplay = $"¥{totalPriceCents / 100.0:F2}";
+            checkout.TotalPriceText = totalPriceDisplay;
+            
+            // Transition to payment method selection state
+            kioskState = State.WaitSelectPaymentMethod;
+            
+            // Update instructions for payment method selection
+            checkout.InstructionsText = this.language == AppText.Language.Chinese ? 
+                AppText.PleaseSelectPaymentMethodChinese : AppText.PleaseSelectPaymentMethodEnglish;
+            
+            // Hide the quantity selection panel
+            SelectTicketQuantityPanel.Hide();
+            
+            // Show the payment method selection panel
+            SelectPaymentMethodPanel.Show();
+            SelectPaymentMethodPanel.BringToFront();
+            
+            // Update animation type for payment selection
+            checkout.SetAnimationType(CheckoutControl.AnimationType.PressButton);
         }
 
         private void OneTicketButton_Click(object sender, EventArgs e)

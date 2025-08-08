@@ -282,7 +282,7 @@
             this.QRPayButton.BorderColor = System.Drawing.Color.Transparent;
             this.QRPayButton.FlatAppearance.BorderSize = 0;
             this.QRPayButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.QRPayButton.Font = new System.Drawing.Font("Microsoft YaHei", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.QRPayButton.Font = new System.Drawing.Font("Microsoft YaHei", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.QRPayButton.ForeColor = System.Drawing.Color.White;
             this.QRPayButton.Location = new System.Drawing.Point(3, 109);
             this.QRPayButton.Name = "QRPayButton";
