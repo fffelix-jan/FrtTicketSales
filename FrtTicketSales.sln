@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrtAfcApiClient", "FrtAfcAp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FareClientTestProgram", "FareClientTestProgram\FareClientTestProgram.csproj", "{84965951-E996-4D68-A945-C05A8C8E5968}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrtBoothOfficeMachine", "FrtBoothOfficeMachine\FrtBoothOfficeMachine.csproj", "{8FC4C7C9-CFB1-4EEB-AA24-02EE1E7089F7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{84965951-E996-4D68-A945-C05A8C8E5968}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84965951-E996-4D68-A945-C05A8C8E5968}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{84965951-E996-4D68-A945-C05A8C8E5968}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8FC4C7C9-CFB1-4EEB-AA24-02EE1E7089F7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8FC4C7C9-CFB1-4EEB-AA24-02EE1E7089F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8FC4C7C9-CFB1-4EEB-AA24-02EE1E7089F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8FC4C7C9-CFB1-4EEB-AA24-02EE1E7089F7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
