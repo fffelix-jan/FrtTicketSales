@@ -32,13 +32,13 @@
             this.MasterMenuStrip = new System.Windows.Forms.MenuStrip();
             this.SellTicketsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.SellRegularTicketsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.售定期票DToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.辅助AToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.制票VToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.处理LToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.查询UToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.交班XToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.帮助BToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.SellPassesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ExtrasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.PrintTicketsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.QueryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ShiftChangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.HelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DateTimeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ClockUpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.MasterMenuStrip.SuspendLayout();
@@ -48,12 +48,12 @@
             // 
             this.MasterMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.SellTicketsToolStripMenuItem,
-            this.辅助AToolStripMenuItem,
-            this.制票VToolStripMenuItem,
-            this.处理LToolStripMenuItem,
-            this.查询UToolStripMenuItem,
-            this.交班XToolStripMenuItem,
-            this.帮助BToolStripMenuItem,
+            this.ExtrasToolStripMenuItem,
+            this.PrintTicketsToolStripMenuItem,
+            this.ProcessToolStripMenuItem,
+            this.QueryToolStripMenuItem,
+            this.ShiftChangeToolStripMenuItem,
+            this.HelpToolStripMenuItem,
             this.DateTimeMenuItem});
             this.MasterMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.MasterMenuStrip.Name = "MasterMenuStrip";
@@ -65,7 +65,7 @@
             // 
             this.SellTicketsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.SellRegularTicketsToolStripMenuItem,
-            this.售定期票DToolStripMenuItem});
+            this.SellPassesToolStripMenuItem});
             this.SellTicketsToolStripMenuItem.Name = "SellTicketsToolStripMenuItem";
             this.SellTicketsToolStripMenuItem.Size = new System.Drawing.Size(68, 20);
             this.SellTicketsToolStripMenuItem.Text = "售票 [ &G ]";
@@ -73,50 +73,50 @@
             // SellRegularTicketsToolStripMenuItem
             // 
             this.SellRegularTicketsToolStripMenuItem.Name = "SellRegularTicketsToolStripMenuItem";
-            this.SellRegularTicketsToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
+            this.SellRegularTicketsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
             this.SellRegularTicketsToolStripMenuItem.Text = "售普通票 [ &S ]";
             // 
-            // 售定期票DToolStripMenuItem
+            // SellPassesToolStripMenuItem
             // 
-            this.售定期票DToolStripMenuItem.Name = "售定期票DToolStripMenuItem";
-            this.售定期票DToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
-            this.售定期票DToolStripMenuItem.Text = "售定期票 [ &D ]";
+            this.SellPassesToolStripMenuItem.Name = "SellPassesToolStripMenuItem";
+            this.SellPassesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SellPassesToolStripMenuItem.Text = "售定期票 [ &D ]";
             // 
-            // 辅助AToolStripMenuItem
+            // ExtrasToolStripMenuItem
             // 
-            this.辅助AToolStripMenuItem.Name = "辅助AToolStripMenuItem";
-            this.辅助AToolStripMenuItem.Size = new System.Drawing.Size(69, 20);
-            this.辅助AToolStripMenuItem.Text = "辅助 [ &A ]";
+            this.ExtrasToolStripMenuItem.Name = "ExtrasToolStripMenuItem";
+            this.ExtrasToolStripMenuItem.Size = new System.Drawing.Size(69, 20);
+            this.ExtrasToolStripMenuItem.Text = "辅助 [ &A ]";
             // 
-            // 制票VToolStripMenuItem
+            // PrintTicketsToolStripMenuItem
             // 
-            this.制票VToolStripMenuItem.Name = "制票VToolStripMenuItem";
-            this.制票VToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
-            this.制票VToolStripMenuItem.Text = "制票 [ &V ]";
+            this.PrintTicketsToolStripMenuItem.Name = "PrintTicketsToolStripMenuItem";
+            this.PrintTicketsToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
+            this.PrintTicketsToolStripMenuItem.Text = "制票 [ &V ]";
             // 
-            // 处理LToolStripMenuItem
+            // ProcessToolStripMenuItem
             // 
-            this.处理LToolStripMenuItem.Name = "处理LToolStripMenuItem";
-            this.处理LToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
-            this.处理LToolStripMenuItem.Text = "处理 [ &L ]";
+            this.ProcessToolStripMenuItem.Name = "ProcessToolStripMenuItem";
+            this.ProcessToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
+            this.ProcessToolStripMenuItem.Text = "处理 [ &L ]";
             // 
-            // 查询UToolStripMenuItem
+            // QueryToolStripMenuItem
             // 
-            this.查询UToolStripMenuItem.Name = "查询UToolStripMenuItem";
-            this.查询UToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
-            this.查询UToolStripMenuItem.Text = "查询 [ &U ]";
+            this.QueryToolStripMenuItem.Name = "QueryToolStripMenuItem";
+            this.QueryToolStripMenuItem.Size = new System.Drawing.Size(70, 20);
+            this.QueryToolStripMenuItem.Text = "查询 [ &U ]";
             // 
-            // 交班XToolStripMenuItem
+            // ShiftChangeToolStripMenuItem
             // 
-            this.交班XToolStripMenuItem.Name = "交班XToolStripMenuItem";
-            this.交班XToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
-            this.交班XToolStripMenuItem.Text = "交班 [ &X ]";
+            this.ShiftChangeToolStripMenuItem.Name = "ShiftChangeToolStripMenuItem";
+            this.ShiftChangeToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
+            this.ShiftChangeToolStripMenuItem.Text = "交班 [ &X ]";
             // 
-            // 帮助BToolStripMenuItem
+            // HelpToolStripMenuItem
             // 
-            this.帮助BToolStripMenuItem.Name = "帮助BToolStripMenuItem";
-            this.帮助BToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
-            this.帮助BToolStripMenuItem.Text = "帮助 [ &B ]";
+            this.HelpToolStripMenuItem.Name = "HelpToolStripMenuItem";
+            this.HelpToolStripMenuItem.Size = new System.Drawing.Size(67, 20);
+            this.HelpToolStripMenuItem.Text = "帮助 [ &B ]";
             // 
             // DateTimeMenuItem
             // 
@@ -140,6 +140,7 @@
             this.MainMenuStrip = this.MasterMenuStrip;
             this.Name = "MainForm";
             this.Text = "法洛威轨道交通窗口售票机";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.MasterMenuStrip.ResumeLayout(false);
             this.MasterMenuStrip.PerformLayout();
             this.ResumeLayout(false);
@@ -152,13 +153,13 @@
         private System.Windows.Forms.MenuStrip MasterMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem SellTicketsToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem SellRegularTicketsToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 售定期票DToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 辅助AToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 制票VToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 处理LToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 查询UToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 交班XToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 帮助BToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem SellPassesToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ExtrasToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem PrintTicketsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ProcessToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem QueryToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ShiftChangeToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem HelpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem DateTimeMenuItem;
         private System.Windows.Forms.Timer ClockUpdateTimer;
     }
