@@ -41,6 +41,7 @@
             this.HelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DateTimeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ClockUpdateTimer = new System.Windows.Forms.Timer(this.components);
+            this.panel1 = new System.Windows.Forms.Panel();
             this.MasterMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -57,7 +58,7 @@
             this.DateTimeMenuItem});
             this.MasterMenuStrip.Location = new System.Drawing.Point(0, 0);
             this.MasterMenuStrip.Name = "MasterMenuStrip";
-            this.MasterMenuStrip.Size = new System.Drawing.Size(800, 24);
+            this.MasterMenuStrip.Size = new System.Drawing.Size(784, 24);
             this.MasterMenuStrip.TabIndex = 0;
             this.MasterMenuStrip.Text = "主菜单";
             // 
@@ -73,13 +74,13 @@
             // SellRegularTicketsToolStripMenuItem
             // 
             this.SellRegularTicketsToolStripMenuItem.Name = "SellRegularTicketsToolStripMenuItem";
-            this.SellRegularTicketsToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SellRegularTicketsToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.SellRegularTicketsToolStripMenuItem.Text = "售普通票 [ &S ]";
             // 
             // SellPassesToolStripMenuItem
             // 
             this.SellPassesToolStripMenuItem.Name = "SellPassesToolStripMenuItem";
-            this.SellPassesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.SellPassesToolStripMenuItem.Size = new System.Drawing.Size(147, 22);
             this.SellPassesToolStripMenuItem.Text = "售定期票 [ &D ]";
             // 
             // ExtrasToolStripMenuItem
@@ -131,11 +132,22 @@
             this.ClockUpdateTimer.Interval = 500;
             this.ClockUpdateTimer.Tick += new System.EventHandler(this.ClockUpdateTimer_Tick);
             // 
+            // panel1
+            // 
+            this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel1.Location = new System.Drawing.Point(0, 24);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(784, 537);
+            this.panel1.TabIndex = 1;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(784, 561);
+            this.Controls.Add(this.panel1);
             this.Controls.Add(this.MasterMenuStrip);
             this.MainMenuStrip = this.MasterMenuStrip;
             this.Name = "MainForm";
@@ -162,6 +174,7 @@
         private System.Windows.Forms.ToolStripMenuItem HelpToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem DateTimeMenuItem;
         private System.Windows.Forms.Timer ClockUpdateTimer;
+        private System.Windows.Forms.Panel panel1;
     }
 }
 
