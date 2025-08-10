@@ -463,7 +463,7 @@
             this.DateTimeLabel.Name = "DateTimeLabel";
             this.DateTimeLabel.Size = new System.Drawing.Size(317, 100);
             this.DateTimeLabel.TabIndex = 0;
-            this.DateTimeLabel.Text = "1919年08月10日\r\n04:20";
+            this.DateTimeLabel.Text = "1969年04月20日\r\n16:20";
             this.DateTimeLabel.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
             // LogoPictureBox

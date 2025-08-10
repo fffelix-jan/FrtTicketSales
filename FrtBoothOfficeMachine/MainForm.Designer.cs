@@ -40,7 +40,7 @@
             this.交班XToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.帮助BToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DateTimeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.DateTimeUpdateTimer = new System.Windows.Forms.Timer(this.components);
+            this.ClockUpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.MasterMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -125,9 +125,11 @@
             this.DateTimeMenuItem.Size = new System.Drawing.Size(107, 20);
             this.DateTimeMenuItem.Text = "1969-04-20 16:20";
             // 
-            // DateTimeUpdateTimer
+            // ClockUpdateTimer
             // 
-            this.DateTimeUpdateTimer.Interval = 500;
+            this.ClockUpdateTimer.Enabled = true;
+            this.ClockUpdateTimer.Interval = 500;
+            this.ClockUpdateTimer.Tick += new System.EventHandler(this.ClockUpdateTimer_Tick);
             // 
             // MainForm
             // 
@@ -158,7 +160,7 @@
         private System.Windows.Forms.ToolStripMenuItem 交班XToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 帮助BToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem DateTimeMenuItem;
-        private System.Windows.Forms.Timer DateTimeUpdateTimer;
+        private System.Windows.Forms.Timer ClockUpdateTimer;
     }
 }
 

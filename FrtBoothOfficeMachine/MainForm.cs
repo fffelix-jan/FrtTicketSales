@@ -15,6 +15,18 @@ namespace FrtBoothOfficeMachine
         public MainForm()
         {
             InitializeComponent();
+            UpdateClockDisplay();
+        }
+
+        private void UpdateClockDisplay()
+        {
+            // Update the clock display with the current date and time
+            DateTimeMenuItem.Text = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+        }
+
+        private void ClockUpdateTimer_Tick(object sender, EventArgs e)
+        {
+            UpdateClockDisplay();
         }
     }
 }
