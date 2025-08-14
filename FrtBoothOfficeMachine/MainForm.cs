@@ -12,10 +12,13 @@ namespace FrtBoothOfficeMachine
 {
     public partial class MainForm : Form
     {
+        SellRegularTicketsControl sellRegularTicketsControl = new SellRegularTicketsControl();
+
         public MainForm()
         {
             InitializeComponent();
             UpdateClockDisplay();
+            MainPanel.Controls.Add(sellRegularTicketsControl);
         }
 
         private void UpdateClockDisplay()

@@ -16,6 +16,8 @@ namespace FrtBoothOfficeMachine
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            // dummy logic, the login logic still needs to be programmed
+            // TODO: program login logic
             Application.Run(new LoginForm());
             Application.Run(new MainForm());
         }

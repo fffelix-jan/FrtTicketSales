@@ -288,6 +288,18 @@ namespace FrtAfcApiClient
         public int TicketType { get; set; }
     }
 
+    public class UserPermissionInfo
+    {
+        public string Username { get; set; } = string.Empty;
+        public int UserId { get; set; }
+        public int PermissionValue { get; set; }
+        public List<string> Permissions { get; set; } = new List<string>();
+        public bool HasBasicAccess { get; set; }
+        public bool HasFareAccess { get; set; }
+        public bool HasTicketAccess { get; set; }
+        public bool HasAdminAccess { get; set; }
+    }
+
     // Custom Exception Classes
     public class FrtAfcApiException : Exception
     {

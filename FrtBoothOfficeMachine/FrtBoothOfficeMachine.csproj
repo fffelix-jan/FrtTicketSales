@@ -67,6 +67,7 @@
     <Compile Include="SellRegularTicketsControl.Designer.cs">
       <DependentUpon>SellRegularTicketsControl.cs</DependentUpon>
     </Compile>
+    <Compile Include="SimpleConfig.cs" />
     <EmbeddedResource Include="LoginForm.resx">
       <DependentUpon>LoginForm.cs</DependentUpon>
     </EmbeddedResource>
