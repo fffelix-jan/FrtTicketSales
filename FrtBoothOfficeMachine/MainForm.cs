@@ -75,5 +75,13 @@ namespace FrtBoothOfficeMachine
         {
             ICCardPlaceholder();
         }
+
+        private void DisplayCalendarToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (CalendarForm calendarForm = new CalendarForm())
+            {
+                calendarForm.ShowDialog();
+            } // calendarForm is automatically disposed here
+        }
     }
 }

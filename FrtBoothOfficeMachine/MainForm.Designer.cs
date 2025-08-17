@@ -93,30 +93,30 @@
             this.toolStripSeparator3,
             this.TopUpICCardToolStripMenuItem});
             this.SellTicketsToolStripMenuItem.Name = "SellTicketsToolStripMenuItem";
-            this.SellTicketsToolStripMenuItem.Size = new System.Drawing.Size(99, 23);
+            this.SellTicketsToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.SellTicketsToolStripMenuItem.Text = "售票 [&G]";
             // 
             // SellRegularTicketsToolStripMenuItem
             // 
             this.SellRegularTicketsToolStripMenuItem.Name = "SellRegularTicketsToolStripMenuItem";
-            this.SellRegularTicketsToolStripMenuItem.Size = new System.Drawing.Size(252, 24);
-            this.SellRegularTicketsToolStripMenuItem.Text = "售普通票 [&S]";
+            this.SellRegularTicketsToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
+            this.SellRegularTicketsToolStripMenuItem.Text = "售单程票 [&S]";
             // 
             // SellPassesToolStripMenuItem
             // 
             this.SellPassesToolStripMenuItem.Name = "SellPassesToolStripMenuItem";
-            this.SellPassesToolStripMenuItem.Size = new System.Drawing.Size(252, 24);
+            this.SellPassesToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
             this.SellPassesToolStripMenuItem.Text = "售定期票 [&D]";
             // 
             // toolStripSeparator3
             // 
             this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(252, 6);
+            this.toolStripSeparator3.Size = new System.Drawing.Size(209, 6);
             // 
             // TopUpICCardToolStripMenuItem
             // 
             this.TopUpICCardToolStripMenuItem.Name = "TopUpICCardToolStripMenuItem";
-            this.TopUpICCardToolStripMenuItem.Size = new System.Drawing.Size(252, 24);
+            this.TopUpICCardToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
             this.TopUpICCardToolStripMenuItem.Text = "IC卡激活及充值 [&C]";
             this.TopUpICCardToolStripMenuItem.Click += new System.EventHandler(this.TopUpICCardToolStripMenuItem_Click);
             // 
@@ -129,38 +129,39 @@
             this.toolStripSeparator5,
             this.DisplayCalendarToolStripMenuItem});
             this.ExtrasToolStripMenuItem.Name = "ExtrasToolStripMenuItem";
-            this.ExtrasToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
+            this.ExtrasToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.ExtrasToolStripMenuItem.Text = "辅助 [&A]";
             // 
             // 测试服务器链接ToolStripMenuItem
             // 
             this.测试服务器链接ToolStripMenuItem.Name = "测试服务器链接ToolStripMenuItem";
-            this.测试服务器链接ToolStripMenuItem.Size = new System.Drawing.Size(251, 24);
+            this.测试服务器链接ToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.测试服务器链接ToolStripMenuItem.Text = "测试服务器链接 [&T]";
             // 
             // 测试打印机PToolStripMenuItem
             // 
             this.测试打印机PToolStripMenuItem.Name = "测试打印机PToolStripMenuItem";
-            this.测试打印机PToolStripMenuItem.Size = new System.Drawing.Size(251, 24);
+            this.测试打印机PToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.测试打印机PToolStripMenuItem.Text = "测试打印机 [&P]";
             // 
             // ICCardReaderSettingsToolStripMenuItem
             // 
             this.ICCardReaderSettingsToolStripMenuItem.Name = "ICCardReaderSettingsToolStripMenuItem";
-            this.ICCardReaderSettingsToolStripMenuItem.Size = new System.Drawing.Size(251, 24);
+            this.ICCardReaderSettingsToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.ICCardReaderSettingsToolStripMenuItem.Text = "IC读卡器设置 [&R]";
             this.ICCardReaderSettingsToolStripMenuItem.Click += new System.EventHandler(this.ICCardReaderSettingsToolStripMenuItem_Click);
             // 
             // toolStripSeparator5
             // 
             this.toolStripSeparator5.Name = "toolStripSeparator5";
-            this.toolStripSeparator5.Size = new System.Drawing.Size(255, 6);
+            this.toolStripSeparator5.Size = new System.Drawing.Size(208, 6);
             // 
             // DisplayCalendarToolStripMenuItem
             // 
             this.DisplayCalendarToolStripMenuItem.Name = "DisplayCalendarToolStripMenuItem";
-            this.DisplayCalendarToolStripMenuItem.Size = new System.Drawing.Size(258, 30);
+            this.DisplayCalendarToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.DisplayCalendarToolStripMenuItem.Text = "日历显示";
+            this.DisplayCalendarToolStripMenuItem.Click += new System.EventHandler(this.DisplayCalendarToolStripMenuItem_Click);
             // 
             // PrintTicketsToolStripMenuItem
             // 
@@ -168,19 +169,19 @@
             this.打印免费出站票EToolStripMenuItem,
             this.重打ToolStripMenuItem});
             this.PrintTicketsToolStripMenuItem.Name = "PrintTicketsToolStripMenuItem";
-            this.PrintTicketsToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
+            this.PrintTicketsToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.PrintTicketsToolStripMenuItem.Text = "制票 [&V]";
             // 
             // 打印免费出站票EToolStripMenuItem
             // 
             this.打印免费出站票EToolStripMenuItem.Name = "打印免费出站票EToolStripMenuItem";
-            this.打印免费出站票EToolStripMenuItem.Size = new System.Drawing.Size(251, 24);
+            this.打印免费出站票EToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.打印免费出站票EToolStripMenuItem.Text = "打印免费出站票 [&E]";
             // 
             // 重打ToolStripMenuItem
             // 
             this.重打ToolStripMenuItem.Name = "重打ToolStripMenuItem";
-            this.重打ToolStripMenuItem.Size = new System.Drawing.Size(251, 24);
+            this.重打ToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.重打ToolStripMenuItem.Text = "重打丢失票 [&R]";
             // 
             // ProcessToolStripMenuItem
@@ -191,30 +192,30 @@
             this.toolStripSeparator4,
             this.RefundICCardToolStripMenuItem});
             this.ProcessToolStripMenuItem.Name = "ProcessToolStripMenuItem";
-            this.ProcessToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
+            this.ProcessToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.ProcessToolStripMenuItem.Text = "处理 [&L]";
             // 
             // 开发票FToolStripMenuItem
             // 
             this.开发票FToolStripMenuItem.Name = "开发票FToolStripMenuItem";
-            this.开发票FToolStripMenuItem.Size = new System.Drawing.Size(233, 24);
+            this.开发票FToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.开发票FToolStripMenuItem.Text = "开发票 [&F]";
             // 
             // 退票处理RToolStripMenuItem
             // 
             this.退票处理RToolStripMenuItem.Name = "退票处理RToolStripMenuItem";
-            this.退票处理RToolStripMenuItem.Size = new System.Drawing.Size(233, 24);
+            this.退票处理RToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.退票处理RToolStripMenuItem.Text = "退票处理 [&R]";
             // 
             // toolStripSeparator4
             // 
             this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(232, 6);
+            this.toolStripSeparator4.Size = new System.Drawing.Size(194, 6);
             // 
             // RefundICCardToolStripMenuItem
             // 
             this.RefundICCardToolStripMenuItem.Name = "RefundICCardToolStripMenuItem";
-            this.RefundICCardToolStripMenuItem.Size = new System.Drawing.Size(233, 24);
+            this.RefundICCardToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.RefundICCardToolStripMenuItem.Text = "注销并退IC卡 [&X]";
             this.RefundICCardToolStripMenuItem.Click += new System.EventHandler(this.RefundICCardToolStripMenuItem_Click);
             // 
@@ -226,30 +227,30 @@
             this.toolStripSeparator2,
             this.QueryICCardToolStripMenuItem});
             this.QueryToolStripMenuItem.Name = "QueryToolStripMenuItem";
-            this.QueryToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
+            this.QueryToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.QueryToolStripMenuItem.Text = "查询 [&U]";
             // 
             // 查询票信息检票CToolStripMenuItem
             // 
             this.查询票信息检票CToolStripMenuItem.Name = "查询票信息检票CToolStripMenuItem";
-            this.查询票信息检票CToolStripMenuItem.Size = new System.Drawing.Size(261, 24);
+            this.查询票信息检票CToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
             this.查询票信息检票CToolStripMenuItem.Text = "查询票信息/检票 [&C]";
             // 
             // 车站信息查询NToolStripMenuItem
             // 
             this.车站信息查询NToolStripMenuItem.Name = "车站信息查询NToolStripMenuItem";
-            this.车站信息查询NToolStripMenuItem.Size = new System.Drawing.Size(261, 24);
+            this.车站信息查询NToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
             this.车站信息查询NToolStripMenuItem.Text = "车站信息查询 [&N]";
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(263, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(216, 6);
             // 
             // QueryICCardToolStripMenuItem
             // 
             this.QueryICCardToolStripMenuItem.Name = "QueryICCardToolStripMenuItem";
-            this.QueryICCardToolStripMenuItem.Size = new System.Drawing.Size(261, 24);
+            this.QueryICCardToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
             this.QueryICCardToolStripMenuItem.Text = "查询IC卡信息 [&I]";
             this.QueryICCardToolStripMenuItem.Click += new System.EventHandler(this.QueryICCardToolStripMenuItem_Click);
             // 
@@ -261,30 +262,30 @@
             this.修改密码并退出登录XToolStripMenuItem,
             this.LogoutToolStripMenuItem});
             this.ShiftChangeToolStripMenuItem.Name = "ShiftChangeToolStripMenuItem";
-            this.ShiftChangeToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
+            this.ShiftChangeToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.ShiftChangeToolStripMenuItem.Text = "交班 [&X]";
             // 
             // 暂停售票ToolStripMenuItem
             // 
             this.暂停售票ToolStripMenuItem.Name = "暂停售票ToolStripMenuItem";
-            this.暂停售票ToolStripMenuItem.Size = new System.Drawing.Size(289, 24);
+            this.暂停售票ToolStripMenuItem.Size = new System.Drawing.Size(241, 22);
             this.暂停售票ToolStripMenuItem.Text = "暂停售票 [&Z]";
             // 
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(293, 6);
+            this.toolStripSeparator1.Size = new System.Drawing.Size(238, 6);
             // 
             // 修改密码并退出登录XToolStripMenuItem
             // 
             this.修改密码并退出登录XToolStripMenuItem.Name = "修改密码并退出登录XToolStripMenuItem";
-            this.修改密码并退出登录XToolStripMenuItem.Size = new System.Drawing.Size(289, 24);
+            this.修改密码并退出登录XToolStripMenuItem.Size = new System.Drawing.Size(241, 22);
             this.修改密码并退出登录XToolStripMenuItem.Text = "修改密码并退出登录 [&C]";
             // 
             // LogoutToolStripMenuItem
             // 
             this.LogoutToolStripMenuItem.Name = "LogoutToolStripMenuItem";
-            this.LogoutToolStripMenuItem.Size = new System.Drawing.Size(289, 24);
+            this.LogoutToolStripMenuItem.Size = new System.Drawing.Size(241, 22);
             this.LogoutToolStripMenuItem.Text = "退出登录 [&X]";
             this.LogoutToolStripMenuItem.Click += new System.EventHandler(this.LogoutToolStripMenuItem_Click);
             // 
@@ -293,20 +294,20 @@
             this.HelpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.关于本软件ToolStripMenuItem});
             this.HelpToolStripMenuItem.Name = "HelpToolStripMenuItem";
-            this.HelpToolStripMenuItem.Size = new System.Drawing.Size(75, 20);
+            this.HelpToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.HelpToolStripMenuItem.Text = "帮助 [&B]";
             // 
             // 关于本软件ToolStripMenuItem
             // 
             this.关于本软件ToolStripMenuItem.Name = "关于本软件ToolStripMenuItem";
-            this.关于本软件ToolStripMenuItem.Size = new System.Drawing.Size(192, 30);
+            this.关于本软件ToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.关于本软件ToolStripMenuItem.Text = "关于本软件...";
             // 
             // DateTimeMenuItem
             // 
             this.DateTimeMenuItem.Enabled = false;
             this.DateTimeMenuItem.Name = "DateTimeMenuItem";
-            this.DateTimeMenuItem.Size = new System.Drawing.Size(169, 29);
+            this.DateTimeMenuItem.Size = new System.Drawing.Size(147, 20);
             this.DateTimeMenuItem.Text = "1969-04-20 16:20";
             // 
             // ClockUpdateTimer
