@@ -14,6 +14,8 @@ namespace FrtTicketVendingMachine
             set
             {
                 _thickness = value;
+                // Dispose old pen before creating new one
+                _pen?.Dispose();
                 _pen = new Pen(_borderColor, Thickness);
                 Invalidate();
             }
@@ -26,6 +28,8 @@ namespace FrtTicketVendingMachine
             set
             {
                 _borderColor = value;
+                // Dispose old pen before creating new one
+                _pen?.Dispose();
                 _pen = new Pen(_borderColor, Thickness);
                 Invalidate();
             }
@@ -174,6 +178,16 @@ namespace FrtTicketVendingMachine
         {
             base.OnResize(e);
             Invalidate();
+        }
+
+        // Proper resource disposal
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _pen?.Dispose();
+            }
+            base.Dispose(disposing);
         }
 
         // Touchscreen optimizations

@@ -1,10 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Drawing.Drawing2D;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 namespace FrtTicketVendingMachine
@@ -21,6 +17,8 @@ namespace FrtTicketVendingMachine
             set
             {
                 _thickness = value;
+                // Dispose old pen before creating new one
+                _pen?.Dispose();
                 _pen = new Pen(_borderColor, Thickness);
                 Invalidate();
             }
@@ -36,6 +34,8 @@ namespace FrtTicketVendingMachine
             set
             {
                 _borderColor = value;
+                // Dispose old pen before creating new one
+                _pen?.Dispose();
                 _pen = new Pen(_borderColor, Thickness);
                 Invalidate();
             }
@@ -62,6 +62,7 @@ namespace FrtTicketVendingMachine
             _pen = new Pen(BorderColor, Thickness);
             DoubleBuffered = true;
         }
+
         private Rectangle GetLeftUpper(int e)
         {
             return new Rectangle(0, 0, e, e);
@@ -82,18 +83,20 @@ namespace FrtTicketVendingMachine
         private void ExtendedDraw(PaintEventArgs e)
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            GraphicsPath path = new GraphicsPath();
-            path.StartFigure();
-            path.AddArc(GetLeftUpper(Radius), 180, 90);
-            path.AddLine(Radius, 0, Width - Radius, 0);
-            path.AddArc(GetRightUpper(Radius), 270, 90);
-            path.AddLine(Width, Radius, Width, Height - Radius);
-            path.AddArc(GetRightLower(Radius), 0, 90);
-            path.AddLine(Width - Radius, Height, Radius, Height);
-            path.AddArc(GetLeftLower(Radius), 90, 90);
-            path.AddLine(0, Height - Radius, 0, Radius);
-            path.CloseFigure();
-            Region = new Region(path);
+            using (GraphicsPath path = new GraphicsPath())
+            {
+                path.StartFigure();
+                path.AddArc(GetLeftUpper(Radius), 180, 90);
+                path.AddLine(Radius, 0, Width - Radius, 0);
+                path.AddArc(GetRightUpper(Radius), 270, 90);
+                path.AddLine(Width, Radius, Width, Height - Radius);
+                path.AddArc(GetRightLower(Radius), 0, 90);
+                path.AddLine(Width - Radius, Height, Radius, Height);
+                path.AddArc(GetLeftLower(Radius), 90, 90);
+                path.AddLine(0, Height - Radius, 0, Radius);
+                path.CloseFigure();
+                Region = new Region(path);
+            }
         }
 
         public GraphicsPath GetRoundedPath()
@@ -128,11 +131,22 @@ namespace FrtTicketVendingMachine
         {
             DrawSingleBorder(graphics);
         }
+
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
             ExtendedDraw(e);
             // DrawBorder(e.Graphics);
+        }
+
+        // Proper resource disposal
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _pen?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }
