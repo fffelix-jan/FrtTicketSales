@@ -20,6 +20,10 @@ namespace FrtTicketVendingMachine
                         line => string.Join("=", line.Split('=').Skip(1)).Trim()
                     );
             }
+            else
+            {
+                throw new FileNotFoundException($"Configuration file '{filename}' not found.");
+            }
         }
 
         public static string Get(string key, string defaultValue = "")

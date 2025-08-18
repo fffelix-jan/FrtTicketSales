@@ -142,11 +142,11 @@
             // 
             this.VersionLabel.AutoSize = true;
             this.VersionLabel.BackColor = System.Drawing.Color.Transparent;
-            this.VersionLabel.Font = new System.Drawing.Font("SimSun", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.VersionLabel.Font = new System.Drawing.Font("Microsoft YaHei", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.VersionLabel.ForeColor = System.Drawing.Color.Yellow;
             this.VersionLabel.Location = new System.Drawing.Point(12, 511);
             this.VersionLabel.Name = "VersionLabel";
-            this.VersionLabel.Size = new System.Drawing.Size(335, 32);
+            this.VersionLabel.Size = new System.Drawing.Size(343, 42);
             this.VersionLabel.TabIndex = 8;
             this.VersionLabel.Text = "v1.0.0\r\n© 1996-2025 法洛威铁道科学研究院 版权所有";
             // 

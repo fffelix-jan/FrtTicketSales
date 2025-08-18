@@ -19,8 +19,23 @@ namespace FrtTicketVendingMachine
             {
                 // Load configuration from user's home folder
                 string configPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "ticket_machine_config.txt");
-                
-                SimpleConfig.Load(configPath);
+
+                try
+                {
+                    SimpleConfig.Load(configPath);
+                }
+                catch (FileNotFoundException)
+                {
+                    MessageBox.Show($"未找到配置文件！\n\n" +
+                                  $"请在以下路径创建 'ticket_machine_config.txt' 文件：\n{Environment.GetFolderPath(Environment.SpecialFolder.UserProfile)}\n\n" +
+                                  $"示例内容：\n" +
+                                  $"API_ENDPOINT=https://api.example.com\n" +
+                                  $"API_USERNAME=your_username\n" +
+                                  $"API_PASSWORD=your_password",
+                                  "缺少配置文件",
+                                  MessageBoxButtons.OK,
+                                  MessageBoxIcon.Warning);
+                }
                 
                 // Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);

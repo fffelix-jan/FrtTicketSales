@@ -38,6 +38,43 @@ namespace FrtAfcApiClient
         }
 
         /// <summary>
+        /// Sets Basic Authentication credentials for API access.
+        /// </summary>
+        /// <param name="username">API username</param>
+        /// <param name="password">API password</param>
+        public void SetBasicAuthentication(string username, string password)
+        {
+            if (string.IsNullOrEmpty(username) || string.IsNullOrEmpty(password))
+            {
+                throw new ArgumentException("Username and password cannot be null or empty");
+            }
+
+            var credentials = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{username}:{password}"));
+            _httpClient.DefaultRequestHeaders.Authorization = 
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", credentials);
+        }
+
+        /// <summary>
+        /// Gets all stations from the system.
+        /// </summary>
+        /// <returns>List of all station information including English and Chinese names</returns>
+        public async Task<List<StationInfo>> GetAllStationsAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("stations");
+                response.EnsureSuccessStatusCode();
+
+                var stations = await response.Content.ReadFromJsonAsync<List<StationInfo>>();
+                return stations ?? new List<StationInfo>();
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException("Failed to get stations list from server", ex);
+            }
+        }
+
+        /// <summary>
         /// Gets the current server date and time.
         /// </summary>
         /// <returns>Server's current DateTime</returns>
@@ -45,14 +82,45 @@ namespace FrtAfcApiClient
         {
             try
             {
+                Console.WriteLine($"Making request to: {_httpClient.BaseAddress}currentdatetime");
+                Console.WriteLine($"Authorization header: {_httpClient.DefaultRequestHeaders.Authorization?.ToString()}");
+                
                 var response = await _httpClient.GetAsync("currentdatetime");
+                
+                Console.WriteLine($"Response status: {response.StatusCode}");
+                
                 response.EnsureSuccessStatusCode();
 
-                return await response.Content.ReadFromJsonAsync<DateTime>();
+                // The server returns a complex object, not a simple DateTime
+                var authResponse = await response.Content.ReadFromJsonAsync<AuthenticatedDateTimeResponse>();
+                if (authResponse != null)
+                {
+                    Console.WriteLine($"Received authenticated response: {authResponse.CurrentDateTime}, Auth: {authResponse.Authenticated}");
+                    Console.WriteLine($"Username: {authResponse.Username}, UserId: {authResponse.UserId}");
+                    return authResponse.CurrentDateTime;
+                }
+                
+                throw new FrtAfcApiException("Server returned null response");
             }
             catch (HttpRequestException ex)
             {
+                Console.WriteLine($"HttpRequestException in GetCurrentDateTimeAsync: {ex.Message}");
                 throw new FrtAfcApiException("Failed to get current datetime from server", ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                Console.WriteLine($"TaskCanceledException in GetCurrentDateTimeAsync: {ex.Message}");
+                throw new FrtAfcApiException("Request timeout while getting datetime from server", ex);
+            }
+            catch (System.Text.Json.JsonException ex)
+            {
+                Console.WriteLine($"JsonException in GetCurrentDateTimeAsync: {ex.Message}");
+                throw new FrtAfcApiException("Failed to parse server response", ex);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected exception in GetCurrentDateTimeAsync: {ex.GetType().Name} - {ex.Message}");
+                throw new FrtAfcApiException($"Unexpected error getting datetime: {ex.Message}", ex);
             }
         }
 
@@ -85,7 +153,12 @@ namespace FrtAfcApiClient
                 response.EnsureSuccessStatusCode();
 
                 var stationInfo = await response.Content.ReadFromJsonAsync<StationInfo>();
-                return stationInfo ?? throw new FrtAfcApiException("Received null response from server");
+
+                if (stationInfo.Equals(default(StationInfo)))
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return stationInfo;
             }
             catch (HttpRequestException ex)
             {
@@ -245,11 +318,11 @@ namespace FrtAfcApiClient
     }
 
     // Data Transfer Objects (DTOs) - matching the server-side structs
-    public class StationInfo
+    public struct StationInfo
     {
-        public string StationCode { get; set; } = string.Empty;
-        public string EnglishName { get; set; } = string.Empty;
-        public string ChineseName { get; set; } = string.Empty;
+        public string StationCode { get; set; }
+        public string EnglishName { get; set; }
+        public string ChineseName { get; set; }
         public int ZoneId { get; set; }
         public bool IsActive { get; set; }
     }
@@ -320,5 +393,15 @@ namespace FrtAfcApiClient
     public class DebugModeDisabledException : FrtAfcApiException
     {
         public DebugModeDisabledException(string message) : base(message) { }
+    }
+
+    // Update the AuthenticatedDateTimeResponse class to match the server response exactly:
+    public class AuthenticatedDateTimeResponse
+    {
+        public DateTime CurrentDateTime { get; set; }
+        public string ServerTimeZone { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public int UserId { get; set; }
+        public bool Authenticated { get; set; }
     }
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace FrtTicketVendingMachine
+namespace FrtBoothOfficeMachine
 {
     public static class SimpleConfig
     {
@@ -19,6 +19,10 @@ namespace FrtTicketVendingMachine
                         line => line.Split('=')[0].Trim(),
                         line => string.Join("=", line.Split('=').Skip(1)).Trim()
                     );
+            }
+            else
+            {
+                throw new FileNotFoundException($"Configuration file '{filename}' not found.");
             }
         }
 
