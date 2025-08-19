@@ -55,6 +55,40 @@ namespace FrtAfcApiClient
         }
 
         /// <summary>
+        /// Clears authentication credentials from the client.
+        /// Call this method when the user logs out.
+        /// </summary>
+        public void ClearCredentials()
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = null;
+        }
+
+        /// <summary>
+        /// Tests if the current credentials are valid by calling a lightweight authenticated endpoint.
+        /// Perfect for login validation on POS machines.
+        /// </summary>
+        /// <returns>True if credentials are valid, false otherwise</returns>
+        public async Task<bool> TestCredentialsAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("currentdatetime");
+                
+                if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    return false;
+                }
+                
+                response.EnsureSuccessStatusCode();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Gets all stations from the system.
         /// </summary>
         /// <returns>List of all station information including English and Chinese names</returns>
@@ -82,21 +116,13 @@ namespace FrtAfcApiClient
         {
             try
             {
-                Console.WriteLine($"Making request to: {_httpClient.BaseAddress}currentdatetime");
-                Console.WriteLine($"Authorization header: {_httpClient.DefaultRequestHeaders.Authorization?.ToString()}");
-                
                 var response = await _httpClient.GetAsync("currentdatetime");
-                
-                Console.WriteLine($"Response status: {response.StatusCode}");
-                
                 response.EnsureSuccessStatusCode();
 
                 // The server returns a complex object, not a simple DateTime
                 var authResponse = await response.Content.ReadFromJsonAsync<AuthenticatedDateTimeResponse>();
                 if (authResponse != null)
                 {
-                    Console.WriteLine($"Received authenticated response: {authResponse.CurrentDateTime}, Auth: {authResponse.Authenticated}");
-                    Console.WriteLine($"Username: {authResponse.Username}, UserId: {authResponse.UserId}");
                     return authResponse.CurrentDateTime;
                 }
                 
@@ -104,23 +130,7 @@ namespace FrtAfcApiClient
             }
             catch (HttpRequestException ex)
             {
-                Console.WriteLine($"HttpRequestException in GetCurrentDateTimeAsync: {ex.Message}");
                 throw new FrtAfcApiException("Failed to get current datetime from server", ex);
-            }
-            catch (TaskCanceledException ex)
-            {
-                Console.WriteLine($"TaskCanceledException in GetCurrentDateTimeAsync: {ex.Message}");
-                throw new FrtAfcApiException("Request timeout while getting datetime from server", ex);
-            }
-            catch (System.Text.Json.JsonException ex)
-            {
-                Console.WriteLine($"JsonException in GetCurrentDateTimeAsync: {ex.Message}");
-                throw new FrtAfcApiException("Failed to parse server response", ex);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Unexpected exception in GetCurrentDateTimeAsync: {ex.GetType().Name} - {ex.Message}");
-                throw new FrtAfcApiException($"Unexpected error getting datetime: {ex.Message}", ex);
             }
         }
 
@@ -190,7 +200,11 @@ namespace FrtAfcApiClient
                 response.EnsureSuccessStatusCode();
 
                 var fareInfo = await response.Content.ReadFromJsonAsync<FareInfo>();
-                return fareInfo ?? throw new FrtAfcApiException("Received null response from server");
+                if (fareInfo.Equals(default(FareInfo)))
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return fareInfo;
             }
             catch (HttpRequestException ex)
             {
@@ -199,7 +213,7 @@ namespace FrtAfcApiClient
         }
 
         /// <summary>
-        /// Issues a new ticket.
+        /// Issues a ticket based on ticket type. Routes to appropriate specific endpoint.
         /// </summary>
         /// <param name="request">Ticket request details</param>
         /// <returns>Issued ticket data including ticket string for QR code</returns>
@@ -212,17 +226,260 @@ namespace FrtAfcApiClient
 
             ValidateTicketRequest(request);
 
+            // Route to specific endpoint based on ticket type using traditional switch
+            switch (request.TicketType)
+            {
+                case 0:
+                    return await IssueTicketInternalAsync("issueticket/full", request);
+                case 1:
+                    return await IssueTicketInternalAsync("issueticket/student", request);
+                case 2:
+                    return await IssueTicketInternalAsync("issueticket/senior", request);
+                case 3:
+                    return await IssueTicketInternalAsync("issueticket/free", request);
+                case 4:
+                    return await IssueTicketInternalAsync("issueticket/daypass", request);
+                default:
+                    throw new ArgumentException($"Invalid ticket type: {request.TicketType}");
+            }
+        }
+
+        /// <summary>
+        /// Issues a ticket with simplified parameters.
+        /// </summary>
+        /// <param name="valueCents">Ticket value in cents</param>
+        /// <param name="issuingStation">3-letter station code where ticket is issued</param>
+        /// <param name="ticketType">Ticket type (0=Full Fare, 1=Student, 2=Senior, 3=Free, 4=Day Pass)</param>
+        /// <returns>Issued ticket data</returns>
+        public async Task<TicketData> IssueTicketAsync(int valueCents, string issuingStation, int ticketType)
+        {
+            var request = new TicketRequest
+            {
+                ValueCents = valueCents,
+                IssuingStation = issuingStation,
+                TicketType = ticketType
+            };
+
+            return await IssueTicketAsync(request);
+        }
+
+        /// <summary>
+        /// Issues a full fare ticket.
+        /// </summary>
+        /// <param name="request">Ticket request details</param>
+        /// <returns>Issued ticket data including ticket string for QR code</returns>
+        public async Task<TicketData> IssueFullFareTicketAsync(TicketRequest request)
+        {
+            return await IssueTicketInternalAsync("issueticket/full", request);
+        }
+
+        /// <summary>
+        /// Issues a student ticket.
+        /// </summary>
+        /// <param name="request">Ticket request details</param>
+        /// <returns>Issued ticket data including ticket string for QR code</returns>
+        public async Task<TicketData> IssueStudentTicketAsync(TicketRequest request)
+        {
+            return await IssueTicketInternalAsync("issueticket/student", request);
+        }
+
+        /// <summary>
+        /// Issues a senior ticket.
+        /// </summary>
+        /// <param name="request">Ticket request details</param>
+        /// <returns>Issued ticket data including ticket string for QR code</returns>
+        public async Task<TicketData> IssueSeniorTicketAsync(TicketRequest request)
+        {
+            return await IssueTicketInternalAsync("issueticket/senior", request);
+        }
+
+        /// <summary>
+        /// Issues a free entry ticket.
+        /// </summary>
+        /// <param name="request">Ticket request details (ValueCents will be ignored, set to 0 by server)</param>
+        /// <returns>Issued ticket data including ticket string for QR code</returns>
+        public async Task<TicketData> IssueFreeEntryTicketAsync(TicketRequest request)
+        {
+            return await IssueTicketInternalAsync("issueticket/free", request);
+        }
+
+        /// <summary>
+        /// Issues a day pass ticket.
+        /// </summary>
+        /// <param name="request">Ticket request details</param>
+        /// <returns>Issued ticket data including ticket string for QR code</returns>
+        public async Task<TicketData> IssueDayPassTicketAsync(TicketRequest request)
+        {
+            return await IssueTicketInternalAsync("issueticket/daypass", request);
+        }
+
+        /// <summary>
+        /// Reissues a damaged ticket.
+        /// </summary>
+        /// <param name="request">Reissue ticket request details</param>
+        /// <returns>Reissue response with original and replacement ticket information</returns>
+        public async Task<ReissueTicketResponse> ReissueTicketAsync(ReissueTicketRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            ValidateReissueTicketRequest(request);
+
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("issueticket", request);
+                var response = await _httpClient.PostAsJsonAsync("reissueticket", request);
                 response.EnsureSuccessStatusCode();
 
-                var ticketData = await response.Content.ReadFromJsonAsync<TicketData>();
-                return ticketData ?? throw new FrtAfcApiException("Received null response from server");
+                var reissueResponse = await response.Content.ReadFromJsonAsync<ReissueTicketResponse>();
+                if (reissueResponse == null)
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return reissueResponse;
             }
             catch (HttpRequestException ex)
             {
-                throw new FrtAfcApiException("Failed to issue ticket", ex);
+                throw new FrtAfcApiException("Failed to reissue ticket", ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets information about a specific ticket.
+        /// </summary>
+        /// <param name="ticketNumber">Ticket number to look up</param>
+        /// <returns>Ticket information</returns>
+        public async Task<TicketInfo> GetTicketInfoAsync(string ticketNumber)
+        {
+            if (string.IsNullOrWhiteSpace(ticketNumber))
+            {
+                throw new ArgumentException("Ticket number cannot be null or empty", nameof(ticketNumber));
+            }
+
+            try
+            {
+                var response = await _httpClient.GetAsync($"ticket/{ticketNumber}");
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    throw new TicketNotFoundException($"Ticket '{ticketNumber}' not found");
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                var ticketInfo = await response.Content.ReadFromJsonAsync<TicketInfo>();
+                if (ticketInfo == null)
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return ticketInfo;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException($"Failed to get ticket information for '{ticketNumber}'", ex);
+            }
+        }
+
+        /// <summary>
+        /// Validates a ticket at a faregate.
+        /// </summary>
+        /// <param name="request">Validation request details</param>
+        /// <returns>Validation response</returns>
+        public async Task<ValidateTicketResponse> ValidateTicketAsync(ValidateTicketRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            ValidateTicketValidationRequest(request);
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("validateticket", request);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new TicketValidationException($"Ticket validation failed: {error}");
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                var validationResponse = await response.Content.ReadFromJsonAsync<ValidateTicketResponse>();
+                if (validationResponse == null)
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return validationResponse;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException("Failed to validate ticket", ex);
+            }
+        }
+
+        /// <summary>
+        /// Changes the current user's password.
+        /// </summary>
+        /// <param name="request">Password change request</param>
+        /// <returns>Success response</returns>
+        public async Task<PasswordChangeResponse> ChangePasswordAsync(ChangePasswordRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            ValidatePasswordChangeRequest(request);
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("changepassword", request);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new PasswordChangeException($"Password change failed: {error}");
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                var changeResponse = await response.Content.ReadFromJsonAsync<PasswordChangeResponse>();
+                if (changeResponse == null)
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return changeResponse;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException("Failed to change password", ex);
+            }
+        }
+
+        /// <summary>
+        /// Gets current user's permission information.
+        /// </summary>
+        /// <returns>User permission details</returns>
+        public async Task<UserPermissionInfo> GetCurrentUserPermissionsAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("permissions");
+                response.EnsureSuccessStatusCode();
+
+                var permissionInfo = await response.Content.ReadFromJsonAsync<UserPermissionInfo>();
+                if (permissionInfo == null)
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return permissionInfo;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException("Failed to get user permissions", ex);
             }
         }
 
@@ -244,7 +501,11 @@ namespace FrtAfcApiClient
                 response.EnsureSuccessStatusCode();
 
                 var ticketData = await response.Content.ReadFromJsonAsync<TicketData>();
-                return ticketData ?? throw new FrtAfcApiException("Received null response from server");
+                if (ticketData.Equals(default(TicketData)))
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return ticketData;
             }
             catch (HttpRequestException ex)
             {
@@ -252,23 +513,31 @@ namespace FrtAfcApiClient
             }
         }
 
-        /// <summary>
-        /// Issues a ticket with simplified parameters.
-        /// </summary>
-        /// <param name="valueCents">Ticket value in cents</param>
-        /// <param name="issuingStation">3-letter station code where ticket is issued</param>
-        /// <param name="ticketType">Ticket type (0=Full Fare, 1=Student, 2=Senior, etc.)</param>
-        /// <returns>Issued ticket data</returns>
-        public async Task<TicketData> IssueTicketAsync(int valueCents, string issuingStation, int ticketType)
+        private async Task<TicketData> IssueTicketInternalAsync(string endpoint, TicketRequest request)
         {
-            var request = new TicketRequest
+            if (request == null)
             {
-                ValueCents = valueCents,
-                IssuingStation = issuingStation,
-                TicketType = ticketType
-            };
+                throw new ArgumentNullException(nameof(request));
+            }
 
-            return await IssueTicketAsync(request);
+            ValidateTicketRequest(request);
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync(endpoint, request);
+                response.EnsureSuccessStatusCode();
+
+                var ticketData = await response.Content.ReadFromJsonAsync<TicketData>();
+                if (ticketData.Equals(default(TicketData)))
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return ticketData;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException($"Failed to issue ticket via {endpoint}", ex);
+            }
         }
 
         private void ValidateStationCode(string stationCode, string paramName)
@@ -301,6 +570,42 @@ namespace FrtAfcApiClient
             }
         }
 
+        private void ValidateReissueTicketRequest(ReissueTicketRequest request)
+        {
+            var validationResults = new List<ValidationResult>();
+            var context = new ValidationContext(request);
+
+            if (!Validator.TryValidateObject(request, context, validationResults, true))
+            {
+                var errors = string.Join("; ", validationResults.Select(v => v.ErrorMessage));
+                throw new ArgumentException($"Invalid reissue ticket request: {errors}");
+            }
+        }
+
+        private void ValidateTicketValidationRequest(ValidateTicketRequest request)
+        {
+            var validationResults = new List<ValidationResult>();
+            var context = new ValidationContext(request);
+
+            if (!Validator.TryValidateObject(request, context, validationResults, true))
+            {
+                var errors = string.Join("; ", validationResults.Select(v => v.ErrorMessage));
+                throw new ArgumentException($"Invalid ticket validation request: {errors}");
+            }
+        }
+
+        private void ValidatePasswordChangeRequest(ChangePasswordRequest request)
+        {
+            var validationResults = new List<ValidationResult>();
+            var context = new ValidationContext(request);
+
+            if (!Validator.TryValidateObject(request, context, validationResults, true))
+            {
+                var errors = string.Join("; ", validationResults.Select(v => v.ErrorMessage));
+                throw new ArgumentException($"Invalid password change request: {errors}");
+            }
+        }
+
         public void Dispose()
         {
             Dispose(true);
@@ -311,6 +616,7 @@ namespace FrtAfcApiClient
         {
             if (!_disposed && disposing)
             {
+                ClearCredentials();
                 _httpClient?.Dispose();
                 _disposed = true;
             }
@@ -327,21 +633,21 @@ namespace FrtAfcApiClient
         public bool IsActive { get; set; }
     }
 
-    public class FareInfo
+    public struct FareInfo
     {
-        public string FromStation { get; set; } = string.Empty;
-        public string ToStation { get; set; } = string.Empty;
+        public string FromStation { get; set; }
+        public string ToStation { get; set; }
         public int FromZone { get; set; }
         public int ToZone { get; set; }
         public int FareCents { get; set; }
-        public string FromStationName { get; set; } = string.Empty;
-        public string ToStationName { get; set; } = string.Empty;
+        public string FromStationName { get; set; }
+        public string ToStationName { get; set; }
     }
 
-    public class TicketData
+    public struct TicketData
     {
-        public string TicketString { get; set; } = string.Empty;
-        public string TicketNumber { get; set; } = string.Empty;
+        public string TicketString { get; set; }
+        public string TicketNumber { get; set; }
         public DateTime IssueTime { get; set; }
     }
 
@@ -353,12 +659,71 @@ namespace FrtAfcApiClient
         public string IssuingStation { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Ticket value is required")]
-        [Range(1, 100000, ErrorMessage = "Value must be between 1 and 100000 cents")]
+        [Range(0, 100000, ErrorMessage = "Value must be between 0 and 100000 cents")]
         public int ValueCents { get; set; }
 
         [Required(ErrorMessage = "Ticket type is required")]
         [Range(0, 255, ErrorMessage = "Ticket type must be between 0 and 255")]
         public int TicketType { get; set; }
+    }
+
+    public class ReissueTicketRequest : TicketRequest
+    {
+        [Required(ErrorMessage = "Original ticket number is required")]
+        public string OriginalTicketNumber { get; set; }
+
+        [Required(ErrorMessage = "Ticket type is required")]
+        [Range(0, 255, ErrorMessage = "Ticket type must be between 0 and 255")]
+        public new byte TicketType { get; set; }
+    }
+
+    public class ValidateTicketRequest
+    {
+        [Required(ErrorMessage = "Ticket number is required")]
+        public string TicketNumber { get; set; }
+
+        [StringLength(3, MinimumLength = 3, ErrorMessage = "Station code must be 3 characters")]
+        [RegularExpression(@"^[A-Z]+$", ErrorMessage = "Station code must be uppercase letters")]
+        public string ValidatingStation { get; set; }
+    }
+
+    public class ChangePasswordRequest
+    {
+        [Required(ErrorMessage = "Current password is required")]
+        public string CurrentPassword { get; set; }
+
+        [Required(ErrorMessage = "New password is required")]
+        [MinLength(8, ErrorMessage = "New password must be at least 8 characters")]
+        public string NewPassword { get; set; }
+    }
+
+    // Response DTOs
+    public class ReissueTicketResponse
+    {
+        public string OriginalTicket { get; set; } = string.Empty;
+        public TicketData ReplacementTicket { get; set; }
+    }
+
+    public class TicketInfo
+    {
+        public long TicketNumber { get; set; }
+        public int ValueCents { get; set; }
+        public string IssuingStation { get; set; } = string.Empty;
+        public DateTime IssueDateTime { get; set; }
+        public byte TicketType { get; set; }
+        public byte TicketState { get; set; }
+    }
+
+    public class ValidateTicketResponse
+    {
+        public string TicketNumber { get; set; } = string.Empty;
+        public string Status { get; set; } = string.Empty;
+        public DateTime ValidationTime { get; set; }
+    }
+
+    public class PasswordChangeResponse
+    {
+        public string Message { get; set; } = string.Empty;
     }
 
     public class UserPermissionInfo
@@ -367,10 +732,27 @@ namespace FrtAfcApiClient
         public int UserId { get; set; }
         public int PermissionValue { get; set; }
         public List<string> Permissions { get; set; } = new List<string>();
-        public bool HasBasicAccess { get; set; }
-        public bool HasFareAccess { get; set; }
-        public bool HasTicketAccess { get; set; }
-        public bool HasAdminAccess { get; set; }
+        public bool CanViewStations { get; set; }
+        public bool CanViewFares { get; set; }
+        public bool CanIssueFullFare { get; set; }
+        public bool CanIssueStudent { get; set; }
+        public bool CanIssueSenior { get; set; }
+        public bool CanIssueFree { get; set; }
+        public bool CanIssueDayPass { get; set; }
+        public bool CanReissue { get; set; }
+        public bool CanViewTickets { get; set; }
+        public bool CanValidateTickets { get; set; }
+        public bool CanChangePassword { get; set; }
+        public bool IsSystemAdmin { get; set; }
+    }
+
+    public class AuthenticatedDateTimeResponse
+    {
+        public DateTime CurrentDateTime { get; set; }
+        public string ServerTimeZone { get; set; } = string.Empty;
+        public string Username { get; set; } = string.Empty;
+        public int UserId { get; set; }
+        public bool Authenticated { get; set; }
     }
 
     // Custom Exception Classes
@@ -390,18 +772,23 @@ namespace FrtAfcApiClient
         public FareNotFoundException(string message) : base(message) { }
     }
 
+    public class TicketNotFoundException : FrtAfcApiException
+    {
+        public TicketNotFoundException(string message) : base(message) { }
+    }
+
+    public class TicketValidationException : FrtAfcApiException
+    {
+        public TicketValidationException(string message) : base(message) { }
+    }
+
+    public class PasswordChangeException : FrtAfcApiException
+    {
+        public PasswordChangeException(string message) : base(message) { }
+    }
+
     public class DebugModeDisabledException : FrtAfcApiException
     {
         public DebugModeDisabledException(string message) : base(message) { }
-    }
-
-    // Update the AuthenticatedDateTimeResponse class to match the server response exactly:
-    public class AuthenticatedDateTimeResponse
-    {
-        public DateTime CurrentDateTime { get; set; }
-        public string ServerTimeZone { get; set; } = string.Empty;
-        public string Username { get; set; } = string.Empty;
-        public int UserId { get; set; }
-        public bool Authenticated { get; set; }
     }
 }

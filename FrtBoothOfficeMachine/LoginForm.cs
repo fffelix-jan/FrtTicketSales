@@ -70,7 +70,8 @@ namespace FrtBoothOfficeMachine
             // Allow login with Enter key
             if (e.KeyCode == Keys.Enter)
             {
-                LoginButton_Click(sender, e);
+                LoginButton.PerformClick();
+                e.SuppressKeyPress = true; // Prevent ding sound
             }
         }
 
@@ -376,6 +377,21 @@ namespace FrtBoothOfficeMachine
         {
             this.DialogResult = DialogResult.Cancel;
             this.Close();
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            // Handle Ctrl+A for text boxes
+            if (keyData == (Keys.Control | Keys.A))
+            {
+                if (this.ActiveControl is TextBox textBox)
+                {
+                    textBox.SelectAll();
+                    return true; // Indicates we handled the key
+                }
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
         }
     }
 }

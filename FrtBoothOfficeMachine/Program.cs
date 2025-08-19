@@ -75,14 +75,14 @@ namespace FrtBoothOfficeMachine
                             GlobalCredentials.Clear();
                         }
                         
-                        // After main form closes, ask if user wants to login again
-                        DialogResult continueResult = MessageBox.Show(
-                            "是否重新登录？\nLogin again?", 
-                            "退出登录 / Logout", 
-                            MessageBoxButtons.YesNo, 
-                            MessageBoxIcon.Question);
+                        // Optional: After main form closes, ask if user wants to login again
+                        //DialogResult continueResult = MessageBox.Show(
+                        //    "是否重新登录？\nLogin again?", 
+                        //    "退出登录 / Logout", 
+                        //    MessageBoxButtons.YesNo, 
+                        //    MessageBoxIcon.Question);
                             
-                        continueRunning = (continueResult == DialogResult.Yes);
+                        //continueRunning = (continueResult == DialogResult.Yes);
                     }
                     else
                     {
