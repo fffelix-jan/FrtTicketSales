@@ -48,7 +48,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.CancelButton = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.ChangeLabel = new System.Windows.Forms.Label();
             this.CashPaymentTenderedTextBox = new System.Windows.Forms.TextBox();
@@ -199,11 +199,11 @@
             this.TotalQuantityAndPriceLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
             this.TotalQuantityAndPriceLabel.AutoSize = true;
             this.TotalQuantityAndPriceLabel.Font = new System.Drawing.Font("Arial", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.TotalQuantityAndPriceLabel.Location = new System.Drawing.Point(254, 132);
+            this.TotalQuantityAndPriceLabel.Location = new System.Drawing.Point(243, 132);
             this.TotalQuantityAndPriceLabel.Name = "TotalQuantityAndPriceLabel";
-            this.TotalQuantityAndPriceLabel.Size = new System.Drawing.Size(113, 32);
+            this.TotalQuantityAndPriceLabel.Size = new System.Drawing.Size(124, 32);
             this.TotalQuantityAndPriceLabel.TabIndex = 11;
-            this.TotalQuantityAndPriceLabel.Text = "0 x 0.00";
+            this.TotalQuantityAndPriceLabel.Text = "0 @ 0.00";
             // 
             // StudentTicketQuantityAndPriceLabel
             // 
@@ -294,18 +294,18 @@
             this.button1.Text = "刷卡 [Ctrl+4]";
             this.button1.UseVisualStyleBackColor = false;
             // 
-            // button2
+            // CancelButton
             // 
-            this.button2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button2.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.button2.Font = new System.Drawing.Font("SimSun", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button2.ForeColor = System.Drawing.Color.Red;
-            this.button2.Location = new System.Drawing.Point(22, 412);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(144, 96);
-            this.button2.TabIndex = 4;
-            this.button2.Text = "取消 [Alt+E]";
-            this.button2.UseVisualStyleBackColor = false;
+            this.CancelButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.CancelButton.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.CancelButton.Font = new System.Drawing.Font("SimSun", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CancelButton.ForeColor = System.Drawing.Color.Red;
+            this.CancelButton.Location = new System.Drawing.Point(22, 412);
+            this.CancelButton.Name = "CancelButton";
+            this.CancelButton.Size = new System.Drawing.Size(144, 96);
+            this.CancelButton.TabIndex = 4;
+            this.CancelButton.Text = "取消 [Alt+E]";
+            this.CancelButton.UseVisualStyleBackColor = false;
             // 
             // groupBox1
             // 
@@ -345,7 +345,7 @@
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(199)))), ((int)(((byte)(199)))), ((int)(((byte)(199)))));
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.button2);
+            this.Controls.Add(this.CancelButton);
             this.Controls.Add(this.button1);
             this.Controls.Add(this.tableLayoutPanel1);
             this.Controls.Add(this.TopSelectionTableLayoutPanel);
@@ -385,7 +385,7 @@
         private System.Windows.Forms.Label SeniorTicketQuantityAndPriceLabel;
         private System.Windows.Forms.Label FullFareTicketQuantityAndPriceLabel;
         private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button CancelButton;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Label ChangeLabel;
         private System.Windows.Forms.TextBox CashPaymentTenderedTextBox;

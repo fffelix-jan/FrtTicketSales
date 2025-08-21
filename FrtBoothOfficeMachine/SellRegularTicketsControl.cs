@@ -56,6 +56,54 @@ namespace FrtBoothOfficeMachine
             CashPaymentTenderedTextBox.KeyPress += CashPaymentTenderedTextBox_KeyPress;
             CashPaymentTenderedTextBox.KeyDown += CashPaymentTenderedTextBox_KeyDown;
             CashPaymentTenderedTextBox.Leave += CashPaymentTenderedTextBox_Leave;
+
+            // Add event handler for Cancel button
+            CancelButton.Click += CancelButton_Click;
+        }
+
+        /// <summary>
+        /// Cancels the current transaction, clears all fields and resets to default state
+        /// </summary>
+        private void CancelTransaction()
+        {
+            // Clear destination selection
+            DestinationComboBox.Text = string.Empty;
+            DestinationComboBox.SelectedIndex = -1;
+
+            // Clear all quantity text boxes
+            FullFareTicketQuantityTextBox.Text = string.Empty;
+            SeniorTicketQuantityTextBox.Text = string.Empty;
+            StudentTicketQuantityTextBox.Text = string.Empty;
+
+            // Clear cash payment textbox
+            CashPaymentTenderedTextBox.Text = string.Empty;
+
+            // Reset all internal variables to default state
+            selectedStationPriceCents = 0;
+            fullFareTicketCount = 0;
+            seniorTicketCount = 0;
+            studentTicketCount = 0;
+            fullFareTicketPriceCents = 0;
+            seniorTicketPriceCents = 0;
+            studentTicketPriceCents = 0;
+            totalPriceCents = 0;
+
+            // Update all price calculations and display labels
+            CalculateFullFarePrice();
+            CalculateSeniorPrice();
+            CalculateStudentPrice();
+            UpdateDisplayLabels();
+
+            // Return focus to the destination selector
+            DestinationComboBox.Focus();
+        }
+
+        /// <summary>
+        /// Handles the Cancel button click event
+        /// </summary>
+        private void CancelButton_Click(object sender, EventArgs e)
+        {
+            CancelTransaction();
         }
 
         private async void SellRegularTicketsControl_Load(object sender, EventArgs e)
@@ -106,13 +154,13 @@ namespace FrtBoothOfficeMachine
             }
         }
 
-        private void DestinationComboBox_KeyPress(object sender, KeyPressEventArgs e)
+        private async void DestinationComboBox_KeyPress(object sender, KeyPressEventArgs e)
         {
             // Handle ENTER key press
             if (e.KeyChar == (char)Keys.Enter)
             {
                 e.Handled = true; // Prevent the beep sound
-                if (ProcessDestinationInput())
+                if (await ProcessDestinationInputAsync())
                 {
                     // If input was valid, advance focus to FullFareTicketQuantityTextBox
                     FullFareTicketQuantityTextBox.Focus();
@@ -123,6 +171,12 @@ namespace FrtBoothOfficeMachine
             {
                 e.KeyChar = char.ToUpper(e.KeyChar);
             }
+        }
+
+        private async void DestinationComboBox_Leave(object sender, EventArgs e)
+        {
+            // Process input when the user leaves the combo box
+            await ProcessDestinationInputAsync();
         }
 
         private void DestinationComboBox_TextChanged(object sender, EventArgs e)
@@ -141,12 +195,6 @@ namespace FrtBoothOfficeMachine
                 comboBox.SelectionStart = selectionStart;
                 comboBox.SelectionLength = selectionLength;
             }
-        }
-
-        private void DestinationComboBox_Leave(object sender, EventArgs e)
-        {
-            // Process input when the user leaves the combo box
-            ProcessDestinationInput();
         }
 
         private void QuantityTextBox_KeyPress(object sender, KeyPressEventArgs e)
@@ -407,11 +455,11 @@ namespace FrtBoothOfficeMachine
             // Update total label
             int totalTickets = fullFareTicketCount + seniorTicketCount + studentTicketCount;
             decimal totalYuan = totalPriceCents / 100.0m;
-            TotalQuantityAndPriceLabel.Text = $"{totalTickets} x {totalYuan:F2}";
+            TotalQuantityAndPriceLabel.Text = $"{totalTickets} @ {totalYuan:F2}";
         }
 
         // Our specical StationFind technology finds the station you want FAST!!! :D
-        private bool ProcessDestinationInput()
+        private async Task<bool> ProcessDestinationInputAsync()
         {
             string input = DestinationComboBox.Text.Trim();
 
@@ -420,7 +468,10 @@ namespace FrtBoothOfficeMachine
             {
                 selectedStationPriceCents = 0;
                 DestinationComboBox.SelectedIndex = -1;
-                UpdateAllPrices();
+                CalculateFullFarePrice();
+                CalculateSeniorPrice();
+                CalculateStudentPrice();
+                UpdateDisplayLabels();
                 return true; // Empty input is valid
             }
 
@@ -430,8 +481,11 @@ namespace FrtBoothOfficeMachine
                 if (DestinationComboBox.Items[i].ToString().Equals(input, StringComparison.OrdinalIgnoreCase))
                 {
                     DestinationComboBox.SelectedIndex = i;
-                    selectedStationPriceCents = 0; // Reset price since we selected a station
-                    UpdateAllPrices();
+                    await FetchFareFromServerAsync(i); // Fetch actual fare from server
+                    CalculateFullFarePrice();
+                    CalculateSeniorPrice();
+                    CalculateStudentPrice();
+                    UpdateDisplayLabels();
                     return true;
                 }
             }
@@ -454,7 +508,10 @@ namespace FrtBoothOfficeMachine
                 DestinationComboBox.SelectedIndex = -1;
                 // Set the text back to the entered price for clarity
                 DestinationComboBox.Text = priceYuan.ToString("F2");
-                UpdateAllPrices();
+                CalculateFullFarePrice();
+                CalculateSeniorPrice();
+                CalculateStudentPrice();
+                UpdateDisplayLabels();
                 return true;
             }
 
@@ -464,8 +521,11 @@ namespace FrtBoothOfficeMachine
                 if (_allStations[i].ChineseName.Equals(input, StringComparison.OrdinalIgnoreCase))
                 {
                     DestinationComboBox.SelectedIndex = i;
-                    selectedStationPriceCents = 0; // Reset price since we selected a station
-                    UpdateAllPrices();
+                    await FetchFareFromServerAsync(i); // Fetch actual fare from server
+                    CalculateFullFarePrice();
+                    CalculateSeniorPrice();
+                    CalculateStudentPrice();
+                    UpdateDisplayLabels();
                     return true;
                 }
             }
@@ -476,8 +536,11 @@ namespace FrtBoothOfficeMachine
                 if (_allStations[i].EnglishName.Equals(input, StringComparison.OrdinalIgnoreCase))
                 {
                     DestinationComboBox.SelectedIndex = i;
-                    selectedStationPriceCents = 0; // Reset price since we selected a station
-                    UpdateAllPrices();
+                    await FetchFareFromServerAsync(i); // Fetch actual fare from server
+                    CalculateFullFarePrice();
+                    CalculateSeniorPrice();
+                    CalculateStudentPrice();
+                    UpdateDisplayLabels();
                     return true;
                 }
             }
@@ -491,8 +554,11 @@ namespace FrtBoothOfficeMachine
                     if (_allStations[i].StationCode.Equals(input, StringComparison.OrdinalIgnoreCase))
                     {
                         DestinationComboBox.SelectedIndex = i;
-                        selectedStationPriceCents = 0; // Reset price since we selected a station
-                        UpdateAllPrices();
+                        await FetchFareFromServerAsync(i); // Fetch actual fare from server
+                        CalculateFullFarePrice();
+                        CalculateSeniorPrice();
+                        CalculateStudentPrice();
+                        UpdateDisplayLabels();
                         return true;
                     }
                 }
@@ -513,12 +579,68 @@ namespace FrtBoothOfficeMachine
             return false;
         }
 
-        private void UpdateAllPrices()
+        /// <summary>
+        /// Fetches the actual fare from the server for the selected destination station
+        /// </summary>
+        /// <param name="stationIndex">Index of the selected station in _allStations list</param>
+        private async Task FetchFareFromServerAsync(int stationIndex)
         {
-            CalculateFullFarePrice();
-            CalculateSeniorPrice();
-            CalculateStudentPrice();
-            UpdateDisplayLabels();
+            try
+            {
+                // Check if we have an authenticated API client
+                if (GlobalCredentials.ApiClient == null)
+                {
+                    MessageBox.Show("API客户端未初始化。请重新登录。",
+                                  "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    selectedStationPriceCents = 0;
+                    return;
+                }
+
+                // Get the current station from config (where this booth is located)
+                string currentStationCode = SimpleConfig.Get("CURRENT_STATION", "FLZ"); // Default to FLZ if not configured
+
+                // Get the destination station code
+                string destinationStationCode = _allStations[stationIndex].StationCode;
+
+                // Don't fetch fare if destination is the same as origin
+                if (currentStationCode.Equals(destinationStationCode, StringComparison.OrdinalIgnoreCase))
+                {
+                    selectedStationPriceCents = 0;
+                    return;
+                }
+
+                // Fetch fare information from the server
+                var fareInfo = await GlobalCredentials.ApiClient.GetFareAsync(currentStationCode, destinationStationCode);
+                
+                // Update the selected station price with the fetched fare
+                selectedStationPriceCents = fareInfo.FareCents;
+            }
+            catch (Exception ex)
+            {
+                // Handle API errors gracefully
+                MessageBox.Show($"获取票价信息失败：\n\n{ex.Message}",
+                              "错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                
+                // Reset price to 0 on error
+                selectedStationPriceCents = 0;
+            }
+        }
+
+        // Update the synchronous wrapper to call the async version
+        private bool ProcessDestinationInput()
+        {
+            // For compatibility with existing event handlers, we need to run the async method synchronously
+            // This is not ideal but necessary for the current event handler structure
+            try
+            {
+                return ProcessDestinationInputAsync().GetAwaiter().GetResult();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"处理目的地输入时发生错误：\n\n{ex.Message}",
+                              "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
         }
 
         /// <summary>
@@ -551,11 +673,14 @@ namespace FrtBoothOfficeMachine
                 return base.ProcessCmdKey(ref msg, keyData);
             }
 
-            // Handle Ctrl+A for DestinationComboBox
-            if (keyData == (Keys.Control | Keys.A) && DestinationComboBox.Focused)
+            // Handle Ctrl+A for text boxes
+            if (keyData == (Keys.Control | Keys.A))
             {
-                DestinationComboBox.SelectAll();
-                return true; // Indicates we handled the key
+                if (this.ActiveControl is TextBox textBox)
+                {
+                    textBox.SelectAll();
+                    return true; // Indicates we handled the key
+                }
             }
 
             // F1 hotkey to focus on the destination combo box
@@ -563,6 +688,13 @@ namespace FrtBoothOfficeMachine
             {
                 // Your F1 functionality here
                 DestinationComboBox.Focus();
+                return true; // Indicates we handled the key
+            }
+
+            // Alt+E hotkey to cancel the transaction
+            if (keyData == (Keys.Alt | Keys.E))
+            {
+                CancelTransaction();
                 return true; // Indicates we handled the key
             }
 
