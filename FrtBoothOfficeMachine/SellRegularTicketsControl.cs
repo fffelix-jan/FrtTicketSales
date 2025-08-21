@@ -41,14 +41,20 @@ namespace FrtBoothOfficeMachine
 
             // Add event handlers for quantity text boxes
             FullFareTicketQuantityTextBox.KeyPress += QuantityTextBox_KeyPress;
+            FullFareTicketQuantityTextBox.Enter += QuantityTextBox_Enter;
+            FullFareTicketQuantityTextBox.Click += QuantityTextBox_Click;
             FullFareTicketQuantityTextBox.Leave += FullFareTicketQuantityTextBox_Leave;
             FullFareTicketQuantityTextBox.KeyDown += FullFareTicketQuantityTextBox_KeyDown;
             
             SeniorTicketQuantityTextBox.KeyPress += QuantityTextBox_KeyPress;
+            SeniorTicketQuantityTextBox.Enter += QuantityTextBox_Enter;
+            SeniorTicketQuantityTextBox.Click += QuantityTextBox_Click;
             SeniorTicketQuantityTextBox.Leave += SeniorTicketQuantityTextBox_Leave;
             SeniorTicketQuantityTextBox.KeyDown += SeniorTicketQuantityTextBox_KeyDown;
             
             StudentTicketQuantityTextBox.KeyPress += QuantityTextBox_KeyPress;
+            StudentTicketQuantityTextBox.Enter += QuantityTextBox_Enter;
+            StudentTicketQuantityTextBox.Click += QuantityTextBox_Click;
             StudentTicketQuantityTextBox.Leave += StudentTicketQuantityTextBox_Leave;
             StudentTicketQuantityTextBox.KeyDown += StudentTicketQuantityTextBox_KeyDown;
             
@@ -110,6 +116,12 @@ namespace FrtBoothOfficeMachine
         {
             await LoadStationsAsync();
             UpdateDisplayLabels(); // Initialize the display labels
+
+            // Set focus to the destination combo box after loading is complete
+            // Use BeginInvoke to ensure the control is fully visible and ready to receive focus
+            this.BeginInvoke((Action)(() => {
+                DestinationComboBox.Focus();
+            }));
         }
 
         private async Task LoadStationsAsync()
@@ -197,8 +209,29 @@ namespace FrtBoothOfficeMachine
             }
         }
 
+        private void QuantityTextBox_Enter(object sender, EventArgs e)
+        {
+            // Select all text when entering the quantity text box
+            TextBox textBox = sender as TextBox;
+            textBox.SelectAll();
+        }
+
+        private void QuantityTextBox_Click(object sender, EventArgs e)
+        {
+            // Select all text when clicking the quantity text box
+            TextBox textBox = sender as TextBox;
+            textBox.SelectAll();
+        }
+
         private void QuantityTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
+            // Handle ENTER key press to prevent ding sound
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                e.Handled = true; // Prevent the beep sound
+                return; // Let the KeyDown event handle the actual logic
+            }
+
             // Only allow digits (0-9) and control characters (backspace, delete, etc.)
             if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
             {
@@ -253,12 +286,19 @@ namespace FrtBoothOfficeMachine
 
         private void CashPaymentTenderedTextBox_KeyPress(object sender, KeyPressEventArgs e)
         {
+            // Handle ENTER key press to prevent ding sound
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                e.Handled = true; // Prevent the beep sound
+                return; // Let the KeyDown event handle the actual logic
+            }
+
             // Allow digits, decimal point, and control characters
             if (!char.IsDigit(e.KeyChar) && e.KeyChar != '.' && !char.IsControl(e.KeyChar))
             {
                 e.Handled = true; // Block the character
             }
-            
+
             // Only allow one decimal point
             TextBox textBox = sender as TextBox;
             if (e.KeyChar == '.' && textBox.Text.Contains('.'))
@@ -686,8 +726,28 @@ namespace FrtBoothOfficeMachine
             // F1 hotkey to focus on the destination combo box
             if (keyData == Keys.F1)
             {
-                // Your F1 functionality here
                 DestinationComboBox.Focus();
+                return true; // Indicates we handled the key
+            }
+
+            // F2 hotkey to focus on the full fare ticket quantity text box
+            if (keyData == Keys.F2)
+            {
+                FullFareTicketQuantityTextBox.Focus();
+                return true; // Indicates we handled the key
+            }
+
+            // F3 hotkey to focus on the senior ticket quantity text box
+            if (keyData == Keys.F3)
+            {
+                SeniorTicketQuantityTextBox.Focus();
+                return true; // Indicates we handled the key
+            }
+
+            // F4 hotkey to focus on the student ticket quantity text box
+            if (keyData == Keys.F4)
+            {
+                StudentTicketQuantityTextBox.Focus();
                 return true; // Indicates we handled the key
             }
 

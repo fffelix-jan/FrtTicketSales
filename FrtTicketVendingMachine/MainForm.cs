@@ -416,6 +416,7 @@ namespace FrtTicketVendingMachine
                     ? AppText.PrintingTicketsChinese : AppText.PrintingTicketsEnglish;
 
                 // Get station names for printing
+                // TODO: replace with current station info, NOT the destination station info
                 string chineseStationName = selectedStationInfo.ChineseName;
                 string englishStationName = selectedStationInfo.EnglishName;
                 string priceEachDisplay = $"¥{selectedFareInfo.FareCents / 100.0:F2}";

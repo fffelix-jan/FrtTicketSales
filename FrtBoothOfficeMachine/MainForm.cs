@@ -83,5 +83,21 @@ namespace FrtBoothOfficeMachine
                 calendarForm.ShowDialog();
             } // calendarForm is automatically disposed here
         }
+
+        private void ChangePasswordAndLogOutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (var changePasswordDialog = new ChangePasswordAndLogOutDialogForm())
+            {
+                changePasswordDialog.ShowDialog(this);
+
+                if (changePasswordDialog.PasswordChangedSuccessfully)
+                {
+                    // Password was changed successfully, close the application
+                    this.Close();
+                }
+                // If result is DialogResult.Cancel or password change failed, do nothing
+                // The user remains logged in and can continue using the application
+            }
+        }
     }
 }

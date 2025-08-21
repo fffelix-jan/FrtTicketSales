@@ -53,6 +53,12 @@
     <Compile Include="CalendarForm.Designer.cs">
       <DependentUpon>CalendarForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="ChangePasswordAndLogOutDialogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ChangePasswordAndLogOutDialogForm.Designer.cs">
+      <DependentUpon>ChangePasswordAndLogOutDialogForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ClassicMonthCalendar.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -78,8 +84,17 @@
       <DependentUpon>SellRegularTicketsControl.cs</DependentUpon>
     </Compile>
     <Compile Include="SimpleConfig.cs" />
+    <Compile Include="TicketPrintDialogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TicketPrintDialogForm.Designer.cs">
+      <DependentUpon>TicketPrintDialogForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="CalendarForm.resx">
       <DependentUpon>CalendarForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ChangePasswordAndLogOutDialogForm.resx">
+      <DependentUpon>ChangePasswordAndLogOutDialogForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LoginForm.resx">
       <DependentUpon>LoginForm.cs</DependentUpon>
@@ -99,6 +114,9 @@
     </Compile>
     <EmbeddedResource Include="SellRegularTicketsControl.resx">
       <DependentUpon>SellRegularTicketsControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TicketPrintDialogForm.resx">
+      <DependentUpon>TicketPrintDialogForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

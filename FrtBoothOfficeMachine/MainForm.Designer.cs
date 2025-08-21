@@ -57,7 +57,7 @@
             this.ShiftChangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.暂停售票ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.修改密码并退出登录XToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ChangePasswordAndLogOutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.LogoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.HelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.关于本软件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -259,7 +259,7 @@
             this.ShiftChangeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.暂停售票ToolStripMenuItem,
             this.toolStripSeparator1,
-            this.修改密码并退出登录XToolStripMenuItem,
+            this.ChangePasswordAndLogOutToolStripMenuItem,
             this.LogoutToolStripMenuItem});
             this.ShiftChangeToolStripMenuItem.Name = "ShiftChangeToolStripMenuItem";
             this.ShiftChangeToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
@@ -276,11 +276,12 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(238, 6);
             // 
-            // 修改密码并退出登录XToolStripMenuItem
+            // ChangePasswordAndLogOutToolStripMenuItem
             // 
-            this.修改密码并退出登录XToolStripMenuItem.Name = "修改密码并退出登录XToolStripMenuItem";
-            this.修改密码并退出登录XToolStripMenuItem.Size = new System.Drawing.Size(241, 22);
-            this.修改密码并退出登录XToolStripMenuItem.Text = "修改密码并退出登录 [&C]";
+            this.ChangePasswordAndLogOutToolStripMenuItem.Name = "ChangePasswordAndLogOutToolStripMenuItem";
+            this.ChangePasswordAndLogOutToolStripMenuItem.Size = new System.Drawing.Size(241, 22);
+            this.ChangePasswordAndLogOutToolStripMenuItem.Text = "修改密码并退出登录 [&C]";
+            this.ChangePasswordAndLogOutToolStripMenuItem.Click += new System.EventHandler(this.ChangePasswordAndLogOutToolStripMenuItem_Click);
             // 
             // LogoutToolStripMenuItem
             // 
@@ -364,7 +365,7 @@
         private System.Windows.Forms.ToolStripMenuItem 暂停售票ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 打印免费出站票EToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripMenuItem 修改密码并退出登录XToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ChangePasswordAndLogOutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem LogoutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 关于本软件ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 开发票FToolStripMenuItem;
