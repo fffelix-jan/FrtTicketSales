@@ -65,6 +65,9 @@ namespace FrtBoothOfficeMachine
 
             // Add event handler for Cancel button
             CancelButton.Click += CancelButton_Click;
+
+            // Add event handler for Swipe Card button
+            CardPaymentButton.Click += CardPaymentButton_Click;
         }
 
         /// <summary>
@@ -191,7 +194,7 @@ namespace FrtBoothOfficeMachine
             await ProcessDestinationInputAsync();
         }
 
-        private void DestinationComboBox_TextChanged(object sender, EventArgs e)
+        private async void DestinationComboBox_TextChanged(object sender, EventArgs e)
         {
             // Auto-capitalize any lowercase letters in the current text
             ComboBox comboBox = sender as ComboBox;
@@ -207,6 +210,20 @@ namespace FrtBoothOfficeMachine
                 comboBox.SelectionStart = selectionStart;
                 comboBox.SelectionLength = selectionLength;
             }
+
+            // Set the full fare ticket quantity to 1 if quantites haven't been selected yet
+            if (FullFareTicketQuantityTextBox.Text.Length == 0 &&
+                SeniorTicketQuantityTextBox.Text.Length == 0 &&
+                StudentTicketQuantityTextBox.Text.Length == 0)
+            {
+                FullFareTicketQuantityTextBox.Text = "1";
+            }
+
+            // Calculate the fare from the server
+            await ProcessDestinationInputAsync();
+            ProcessFullFareTicketQuantity();
+            ProcessStudentTicketQuantity();
+            ProcessSeniorTicketQuantity();
         }
 
         private void QuantityTextBox_Enter(object sender, EventArgs e)
@@ -414,8 +431,8 @@ namespace FrtBoothOfficeMachine
             string tenderText = CashPaymentTenderedTextBox.Text.Trim();
             if (string.IsNullOrEmpty(tenderText))
             {
-                MessageBox.Show("请输入支付金额。",
-                              "支付金额无效", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                //MessageBox.Show("请输入支付金额。",
+                //              "支付金额无效", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 CashPaymentTenderedTextBox.Focus();
                 return;
             }
@@ -498,6 +515,98 @@ namespace FrtBoothOfficeMachine
 
                 // Reset change label since payment didn't complete
                 CalculateChange();
+            }
+        }
+
+        private void CardPaymentButton_Click(object sender, EventArgs e)
+        {
+            ProcessCardPayment();
+        }
+
+        private void ProcessCardPayment()
+        {
+            // Check if total price is zero
+            if (totalPriceCents <= 0)
+            {
+                MessageBox.Show("请先选择目的地和票数。",
+                              "无法完成支付", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DestinationComboBox.Focus();
+                return;
+            }
+
+            try
+            {
+                // Convert total price to decimal for display
+                decimal totalAmount = totalPriceCents / 100.0m;
+
+                // Show card payment dialog
+                using (var cardPaymentDialog = new CardPaymentDialogForm(totalAmount))
+                {
+                    var result = cardPaymentDialog.ShowDialog(this);
+
+                    if (result == DialogResult.OK && cardPaymentDialog.PaymentSuccessful)
+                    {
+                        // Payment successful, proceed with ticket printing
+                        string paymentMethod = cardPaymentDialog.SelectedPaymentMethod;
+
+                        // Get selected station for printing (if any)
+                        var selectedStation = GetSelectedStation();
+                        StationInfo destinationStation;
+
+                        if (selectedStation.HasValue)
+                        {
+                            destinationStation = selectedStation.Value;
+                        }
+                        else
+                        {
+                            // If no station selected but price was manually entered, create a dummy station
+                            destinationStation = new StationInfo
+                            {
+                                StationCode = "UNK",
+                                ChineseName = "自定义票价",
+                                EnglishName = "Custom Fare",
+                                ZoneId = 0,
+                                IsActive = true
+                            };
+                        }
+
+                        // Create and show ticket printing dialog
+                        using (var printDialog = TicketPrintDialogForm.CreateForRegularTickets(
+                            selectedStationPriceCents,
+                            fullFareTicketCount,
+                            seniorTicketCount,
+                            studentTicketCount,
+                            paymentMethod))
+                        {
+                            var printResult = printDialog.ShowDialog(this);
+
+                            if (printResult == DialogResult.OK)
+                            {
+                                // Show success message
+                                string successMessage = $"支付成功！票据已打印。\n\n支付方式：{paymentMethod}";
+
+                                MessageBox.Show(successMessage,
+                                              "支付成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                                // Clear the transaction after successful payment
+                                CancelTransaction();
+                            }
+                            else
+                            {
+                                // Printing failed
+                                MessageBox.Show("票据打印失败。请联系技术支持。",
+                                              "打印失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            }
+                        }
+                    }
+                    // If result is DialogResult.Cancel or payment failed, do nothing
+                    // User can try again or choose different payment method
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"处理电子支付时发生错误：\n\n{ex.Message}",
+                              "支付错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -611,6 +720,8 @@ namespace FrtBoothOfficeMachine
                 return true; // Empty input is valid
             }
 
+            bool stationSelected = false;
+
             // 1. Check if input exactly matches one of the dropdown items (case-insensitive)
             for (int i = 0; i < DestinationComboBox.Items.Count; i++)
             {
@@ -618,16 +729,13 @@ namespace FrtBoothOfficeMachine
                 {
                     DestinationComboBox.SelectedIndex = i;
                     await FetchFareFromServerAsync(i); // Fetch actual fare from server
-                    CalculateFullFarePrice();
-                    CalculateSeniorPrice();
-                    CalculateStudentPrice();
-                    UpdateDisplayLabels();
-                    return true;
+                    stationSelected = true;
+                    break;
                 }
             }
 
             // 2. Try to parse as a decimal price (yuan)
-            if (decimal.TryParse(input, out decimal priceYuan))
+            if (!stationSelected && decimal.TryParse(input, out decimal priceYuan))
             {
                 // Check if price is positive (greater than 0)
                 if (priceYuan <= 0)
@@ -644,45 +752,41 @@ namespace FrtBoothOfficeMachine
                 DestinationComboBox.SelectedIndex = -1;
                 // Set the text back to the entered price for clarity
                 DestinationComboBox.Text = priceYuan.ToString("F2");
-                CalculateFullFarePrice();
-                CalculateSeniorPrice();
-                CalculateStudentPrice();
-                UpdateDisplayLabels();
-                return true;
+                stationSelected = true;
             }
 
             // 3. Check if input matches a Chinese station name exactly (case-insensitive)
-            for (int i = 0; i < _allStations.Count; i++)
+            if (!stationSelected)
             {
-                if (_allStations[i].ChineseName.Equals(input, StringComparison.OrdinalIgnoreCase))
+                for (int i = 0; i < _allStations.Count; i++)
                 {
-                    DestinationComboBox.SelectedIndex = i;
-                    await FetchFareFromServerAsync(i); // Fetch actual fare from server
-                    CalculateFullFarePrice();
-                    CalculateSeniorPrice();
-                    CalculateStudentPrice();
-                    UpdateDisplayLabels();
-                    return true;
+                    if (_allStations[i].ChineseName.Equals(input, StringComparison.OrdinalIgnoreCase))
+                    {
+                        DestinationComboBox.SelectedIndex = i;
+                        await FetchFareFromServerAsync(i); // Fetch actual fare from server
+                        stationSelected = true;
+                        break;
+                    }
                 }
             }
 
             // 4. Check if input matches an English station name exactly (case-insensitive)
-            for (int i = 0; i < _allStations.Count; i++)
+            if (!stationSelected)
             {
-                if (_allStations[i].EnglishName.Equals(input, StringComparison.OrdinalIgnoreCase))
+                for (int i = 0; i < _allStations.Count; i++)
                 {
-                    DestinationComboBox.SelectedIndex = i;
-                    await FetchFareFromServerAsync(i); // Fetch actual fare from server
-                    CalculateFullFarePrice();
-                    CalculateSeniorPrice();
-                    CalculateStudentPrice();
-                    UpdateDisplayLabels();
-                    return true;
+                    if (_allStations[i].EnglishName.Equals(input, StringComparison.OrdinalIgnoreCase))
+                    {
+                        DestinationComboBox.SelectedIndex = i;
+                        await FetchFareFromServerAsync(i); // Fetch actual fare from server
+                        stationSelected = true;
+                        break;
+                    }
                 }
             }
 
             // 5. Check if input is a 3-letter station code (case-insensitive)
-            if (input.Length == 3 && input.All(c => char.IsLetter(c)))
+            if (!stationSelected && input.Length == 3 && input.All(c => char.IsLetter(c)))
             {
                 // Find matching station by code (case-insensitive)
                 for (int i = 0; i < _allStations.Count; i++)
@@ -691,20 +795,42 @@ namespace FrtBoothOfficeMachine
                     {
                         DestinationComboBox.SelectedIndex = i;
                         await FetchFareFromServerAsync(i); // Fetch actual fare from server
-                        CalculateFullFarePrice();
-                        CalculateSeniorPrice();
-                        CalculateStudentPrice();
-                        UpdateDisplayLabels();
-                        return true;
+                        stationSelected = true;
+                        break;
                     }
                 }
 
-                // Invalid station code - show error message and return focus
-                MessageBox.Show("无效的车站代码。请输入有效的三字母车站代码。",
-                              "错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                DestinationComboBox.Focus();
-                DestinationComboBox.SelectAll();
-                return false;
+                if (!stationSelected)
+                {
+                    // Invalid station code - show error message and return focus
+                    MessageBox.Show("无效的车站代码。请输入有效的三字母车站代码。",
+                                  "错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    DestinationComboBox.Focus();
+                    DestinationComboBox.SelectAll();
+                    return false;
+                }
+            }
+
+            if (stationSelected)
+            {
+                // Check if all ticket quantities are empty (no tickets specified yet)
+                bool allQuantitiesEmpty = string.IsNullOrWhiteSpace(FullFareTicketQuantityTextBox.Text) &&
+                                         string.IsNullOrWhiteSpace(SeniorTicketQuantityTextBox.Text) &&
+                                         string.IsNullOrWhiteSpace(StudentTicketQuantityTextBox.Text);
+
+                // If all quantities are empty, prefill full-fare ticket quantity as 1
+                if (allQuantitiesEmpty)
+                {
+                    FullFareTicketQuantityTextBox.Text = "1";
+                    ProcessFullFareTicketQuantity(); // Process the prefilled quantity
+                }
+
+                // Recalculate prices and update display
+                CalculateFullFarePrice();
+                CalculateSeniorPrice();
+                CalculateStudentPrice();
+                UpdateDisplayLabels();
+                return true;
             }
 
             // If we get here, the input doesn't match any expected format
@@ -817,6 +943,18 @@ namespace FrtBoothOfficeMachine
                     textBox.SelectAll();
                     return true; // Indicates we handled the key
                 }
+            }
+
+            if (keyData == (Keys.Control | Keys.D1))
+            {
+                CashPaymentTenderedTextBox.Focus();
+                return true;
+            }
+
+            if (keyData == (Keys.Control | Keys.D4))
+            {
+                CardPaymentButton.PerformClick();
+                return true;
             }
 
             // F1 hotkey to focus on the destination combo box

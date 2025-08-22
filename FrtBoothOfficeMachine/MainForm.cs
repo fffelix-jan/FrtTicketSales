@@ -151,5 +151,11 @@ namespace FrtBoothOfficeMachine
                               "暂停售票错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void AboutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show($"{GlobalConstants.ApplicationName}\n{GlobalConstants.VersionName}\n{GlobalConstants.CopyrightText}",
+                          "关于", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
     }
 }

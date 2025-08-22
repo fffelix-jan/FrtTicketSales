@@ -38,23 +38,23 @@
             this.DestinationComboBox = new System.Windows.Forms.ComboBox();
             this.F4Label = new System.Windows.Forms.Label();
             this.FullFareTicketQuantityTextBox = new System.Windows.Forms.TextBox();
-            this.tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+            this.PriceTableLayoutPanel = new System.Windows.Forms.TableLayoutPanel();
             this.TotalQuantityAndPriceLabel = new System.Windows.Forms.Label();
             this.StudentTicketQuantityAndPriceLabel = new System.Windows.Forms.Label();
             this.SeniorTicketQuantityAndPriceLabel = new System.Windows.Forms.Label();
             this.FullFareTicketQuantityAndPriceLabel = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label4 = new System.Windows.Forms.Label();
-            this.button1 = new System.Windows.Forms.Button();
+            this.FullFareTicketPriceTitleLabel = new System.Windows.Forms.Label();
+            this.SeniorTicketPriceTitleLabel = new System.Windows.Forms.Label();
+            this.StudentTicketPriceTitleLabel = new System.Windows.Forms.Label();
+            this.TotalPriceTitleLabel = new System.Windows.Forms.Label();
+            this.CardPaymentButton = new System.Windows.Forms.Button();
             this.CancelButton = new System.Windows.Forms.Button();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.CashPaymentGroupBox = new System.Windows.Forms.GroupBox();
             this.ChangeLabel = new System.Windows.Forms.Label();
             this.CashPaymentTenderedTextBox = new System.Windows.Forms.TextBox();
             this.TopSelectionTableLayoutPanel.SuspendLayout();
-            this.tableLayoutPanel1.SuspendLayout();
-            this.groupBox1.SuspendLayout();
+            this.PriceTableLayoutPanel.SuspendLayout();
+            this.CashPaymentGroupBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // TitleLabel
@@ -173,29 +173,29 @@
             this.FullFareTicketQuantityTextBox.Size = new System.Drawing.Size(113, 44);
             this.FullFareTicketQuantityTextBox.TabIndex = 1;
             // 
-            // tableLayoutPanel1
+            // PriceTableLayoutPanel
             // 
-            this.tableLayoutPanel1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.tableLayoutPanel1.ColumnCount = 2;
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 36.75676F));
-            this.tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 63.24324F));
-            this.tableLayoutPanel1.Controls.Add(this.TotalQuantityAndPriceLabel, 1, 3);
-            this.tableLayoutPanel1.Controls.Add(this.StudentTicketQuantityAndPriceLabel, 1, 2);
-            this.tableLayoutPanel1.Controls.Add(this.SeniorTicketQuantityAndPriceLabel, 1, 1);
-            this.tableLayoutPanel1.Controls.Add(this.FullFareTicketQuantityAndPriceLabel, 1, 0);
-            this.tableLayoutPanel1.Controls.Add(this.label1, 0, 0);
-            this.tableLayoutPanel1.Controls.Add(this.label2, 0, 1);
-            this.tableLayoutPanel1.Controls.Add(this.label3, 0, 2);
-            this.tableLayoutPanel1.Controls.Add(this.label4, 0, 3);
-            this.tableLayoutPanel1.Location = new System.Drawing.Point(334, 158);
-            this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 4;
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
-            this.tableLayoutPanel1.Size = new System.Drawing.Size(370, 171);
-            this.tableLayoutPanel1.TabIndex = 1;
+            this.PriceTableLayoutPanel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.PriceTableLayoutPanel.ColumnCount = 2;
+            this.PriceTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 36.75676F));
+            this.PriceTableLayoutPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 63.24324F));
+            this.PriceTableLayoutPanel.Controls.Add(this.TotalQuantityAndPriceLabel, 1, 3);
+            this.PriceTableLayoutPanel.Controls.Add(this.StudentTicketQuantityAndPriceLabel, 1, 2);
+            this.PriceTableLayoutPanel.Controls.Add(this.SeniorTicketQuantityAndPriceLabel, 1, 1);
+            this.PriceTableLayoutPanel.Controls.Add(this.FullFareTicketQuantityAndPriceLabel, 1, 0);
+            this.PriceTableLayoutPanel.Controls.Add(this.FullFareTicketPriceTitleLabel, 0, 0);
+            this.PriceTableLayoutPanel.Controls.Add(this.SeniorTicketPriceTitleLabel, 0, 1);
+            this.PriceTableLayoutPanel.Controls.Add(this.StudentTicketPriceTitleLabel, 0, 2);
+            this.PriceTableLayoutPanel.Controls.Add(this.TotalPriceTitleLabel, 0, 3);
+            this.PriceTableLayoutPanel.Location = new System.Drawing.Point(334, 158);
+            this.PriceTableLayoutPanel.Name = "PriceTableLayoutPanel";
+            this.PriceTableLayoutPanel.RowCount = 4;
+            this.PriceTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.PriceTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.PriceTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.PriceTableLayoutPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 25F));
+            this.PriceTableLayoutPanel.Size = new System.Drawing.Size(370, 171);
+            this.PriceTableLayoutPanel.TabIndex = 1;
             // 
             // TotalQuantityAndPriceLabel
             // 
@@ -241,61 +241,61 @@
             this.FullFareTicketQuantityAndPriceLabel.TabIndex = 1;
             this.FullFareTicketQuantityAndPriceLabel.Text = "0 x 0.00";
             // 
-            // label1
+            // FullFareTicketPriceTitleLabel
             // 
-            this.label1.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("SimSun", 20.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(67, 7);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(66, 27);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "全票";
+            this.FullFareTicketPriceTitleLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.FullFareTicketPriceTitleLabel.AutoSize = true;
+            this.FullFareTicketPriceTitleLabel.Font = new System.Drawing.Font("SimSun", 20.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.FullFareTicketPriceTitleLabel.Location = new System.Drawing.Point(67, 7);
+            this.FullFareTicketPriceTitleLabel.Name = "FullFareTicketPriceTitleLabel";
+            this.FullFareTicketPriceTitleLabel.Size = new System.Drawing.Size(66, 27);
+            this.FullFareTicketPriceTitleLabel.TabIndex = 0;
+            this.FullFareTicketPriceTitleLabel.Text = "全票";
             // 
-            // label2
+            // SeniorTicketPriceTitleLabel
             // 
-            this.label2.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("SimSun", 20.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(40, 49);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(93, 27);
-            this.label2.TabIndex = 2;
-            this.label2.Text = "老年票";
+            this.SeniorTicketPriceTitleLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.SeniorTicketPriceTitleLabel.AutoSize = true;
+            this.SeniorTicketPriceTitleLabel.Font = new System.Drawing.Font("SimSun", 20.25F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.SeniorTicketPriceTitleLabel.Location = new System.Drawing.Point(40, 49);
+            this.SeniorTicketPriceTitleLabel.Name = "SeniorTicketPriceTitleLabel";
+            this.SeniorTicketPriceTitleLabel.Size = new System.Drawing.Size(93, 27);
+            this.SeniorTicketPriceTitleLabel.TabIndex = 2;
+            this.SeniorTicketPriceTitleLabel.Text = "老年票";
             // 
-            // label3
+            // StudentTicketPriceTitleLabel
             // 
-            this.label3.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("SimSun", 20.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Italic | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(40, 91);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(93, 27);
-            this.label3.TabIndex = 4;
-            this.label3.Text = "学生票";
+            this.StudentTicketPriceTitleLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.StudentTicketPriceTitleLabel.AutoSize = true;
+            this.StudentTicketPriceTitleLabel.Font = new System.Drawing.Font("SimSun", 20.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Italic | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.StudentTicketPriceTitleLabel.Location = new System.Drawing.Point(40, 91);
+            this.StudentTicketPriceTitleLabel.Name = "StudentTicketPriceTitleLabel";
+            this.StudentTicketPriceTitleLabel.Size = new System.Drawing.Size(93, 27);
+            this.StudentTicketPriceTitleLabel.TabIndex = 4;
+            this.StudentTicketPriceTitleLabel.Text = "学生票";
             // 
-            // label4
+            // TotalPriceTitleLabel
             // 
-            this.label4.Anchor = System.Windows.Forms.AnchorStyles.Right;
-            this.label4.AutoSize = true;
-            this.label4.Font = new System.Drawing.Font("SimSun", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label4.Location = new System.Drawing.Point(65, 135);
-            this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(68, 27);
-            this.label4.TabIndex = 6;
-            this.label4.Text = "总计";
+            this.TotalPriceTitleLabel.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.TotalPriceTitleLabel.AutoSize = true;
+            this.TotalPriceTitleLabel.Font = new System.Drawing.Font("SimSun", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.TotalPriceTitleLabel.Location = new System.Drawing.Point(65, 135);
+            this.TotalPriceTitleLabel.Name = "TotalPriceTitleLabel";
+            this.TotalPriceTitleLabel.Size = new System.Drawing.Size(68, 27);
+            this.TotalPriceTitleLabel.TabIndex = 6;
+            this.TotalPriceTitleLabel.Text = "总计";
             // 
-            // button1
+            // CardPaymentButton
             // 
-            this.button1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.button1.BackColor = System.Drawing.SystemColors.ButtonFace;
-            this.button1.Font = new System.Drawing.Font("SimSun", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(172, 412);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(165, 96);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "刷卡 [Ctrl+4]";
-            this.button1.UseVisualStyleBackColor = false;
+            this.CardPaymentButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.CardPaymentButton.BackColor = System.Drawing.SystemColors.ButtonFace;
+            this.CardPaymentButton.Font = new System.Drawing.Font("SimSun", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CardPaymentButton.Location = new System.Drawing.Point(172, 412);
+            this.CardPaymentButton.Name = "CardPaymentButton";
+            this.CardPaymentButton.Size = new System.Drawing.Size(165, 96);
+            this.CardPaymentButton.TabIndex = 0;
+            this.CardPaymentButton.Text = "刷卡 [Ctrl+4]";
+            this.CardPaymentButton.UseVisualStyleBackColor = false;
             // 
             // CancelButton
             // 
@@ -310,18 +310,18 @@
             this.CancelButton.Text = "取消 [Alt+E]";
             this.CancelButton.UseVisualStyleBackColor = false;
             // 
-            // groupBox1
+            // CashPaymentGroupBox
             // 
-            this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox1.Controls.Add(this.ChangeLabel);
-            this.groupBox1.Controls.Add(this.CashPaymentTenderedTextBox);
-            this.groupBox1.Font = new System.Drawing.Font("SimSun", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.groupBox1.Location = new System.Drawing.Point(343, 412);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(404, 95);
-            this.groupBox1.TabIndex = 5;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "现金支付";
+            this.CashPaymentGroupBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.CashPaymentGroupBox.Controls.Add(this.ChangeLabel);
+            this.CashPaymentGroupBox.Controls.Add(this.CashPaymentTenderedTextBox);
+            this.CashPaymentGroupBox.Font = new System.Drawing.Font("SimSun", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CashPaymentGroupBox.Location = new System.Drawing.Point(343, 412);
+            this.CashPaymentGroupBox.Name = "CashPaymentGroupBox";
+            this.CashPaymentGroupBox.Size = new System.Drawing.Size(404, 95);
+            this.CashPaymentGroupBox.TabIndex = 5;
+            this.CashPaymentGroupBox.TabStop = false;
+            this.CashPaymentGroupBox.Text = "现金支付 [Ctrl+1]";
             // 
             // ChangeLabel
             // 
@@ -347,20 +347,20 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(199)))), ((int)(((byte)(199)))), ((int)(((byte)(199)))));
-            this.Controls.Add(this.groupBox1);
+            this.Controls.Add(this.CashPaymentGroupBox);
             this.Controls.Add(this.CancelButton);
-            this.Controls.Add(this.button1);
-            this.Controls.Add(this.tableLayoutPanel1);
+            this.Controls.Add(this.CardPaymentButton);
+            this.Controls.Add(this.PriceTableLayoutPanel);
             this.Controls.Add(this.TopSelectionTableLayoutPanel);
             this.Controls.Add(this.TitleLabel);
             this.Name = "SellRegularTicketsControl";
             this.Size = new System.Drawing.Size(784, 537);
             this.TopSelectionTableLayoutPanel.ResumeLayout(false);
             this.TopSelectionTableLayoutPanel.PerformLayout();
-            this.tableLayoutPanel1.ResumeLayout(false);
-            this.tableLayoutPanel1.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            this.PriceTableLayoutPanel.ResumeLayout(false);
+            this.PriceTableLayoutPanel.PerformLayout();
+            this.CashPaymentGroupBox.ResumeLayout(false);
+            this.CashPaymentGroupBox.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -378,18 +378,18 @@
         private System.Windows.Forms.TextBox StudentTicketQuantityTextBox;
         private System.Windows.Forms.TextBox SeniorTicketQuantityTextBox;
         private System.Windows.Forms.TextBox FullFareTicketQuantityTextBox;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.TableLayoutPanel PriceTableLayoutPanel;
+        private System.Windows.Forms.Label FullFareTicketPriceTitleLabel;
+        private System.Windows.Forms.Label SeniorTicketPriceTitleLabel;
+        private System.Windows.Forms.Label StudentTicketPriceTitleLabel;
+        private System.Windows.Forms.Label TotalPriceTitleLabel;
         private System.Windows.Forms.Label TotalQuantityAndPriceLabel;
         private System.Windows.Forms.Label StudentTicketQuantityAndPriceLabel;
         private System.Windows.Forms.Label SeniorTicketQuantityAndPriceLabel;
         private System.Windows.Forms.Label FullFareTicketQuantityAndPriceLabel;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button CardPaymentButton;
         private System.Windows.Forms.Button CancelButton;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox CashPaymentGroupBox;
         private System.Windows.Forms.Label ChangeLabel;
         private System.Windows.Forms.TextBox CashPaymentTenderedTextBox;
     }

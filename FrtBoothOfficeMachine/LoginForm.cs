@@ -54,7 +54,11 @@ namespace FrtBoothOfficeMachine
             PasswordTextBox.Parent = BackgroundPictureBox;
             LoginButton.Parent = BackgroundPictureBox;
             ExitButton.Parent = BackgroundPictureBox;
-            
+
+            // Put in the version number and copyright year
+            VersionLabel.Text = $"{GlobalConstants.VersionName}\n{GlobalConstants.CopyrightText}";
+            SmallTitleLabel.Text = GlobalConstants.ApplicationName;
+
             // Store the original font of the login button
             _originalLoginButtonFont = new Font(LoginButton.Font.FontFamily, LoginButton.Font.Size, LoginButton.Font.Style);
             

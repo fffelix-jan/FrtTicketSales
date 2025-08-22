@@ -513,6 +513,130 @@ namespace FrtAfcApiClient
             }
         }
 
+        /// <summary>
+        /// Gets the current day pass price from the server.
+        /// </summary>
+        /// <returns>Day pass price information</returns>
+        public async Task<DayPassPriceInfo> GetDayPassPriceAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("daypassprice");
+                response.EnsureSuccessStatusCode();
+
+                var priceInfo = await response.Content.ReadFromJsonAsync<DayPassPriceInfo>();
+                if (priceInfo == null)
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return priceInfo;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException("Failed to get day pass price from server", ex);
+            }
+        }
+
+        /// <summary>
+        /// Updates the day pass price (requires system admin permissions).
+        /// </summary>
+        /// <param name="priceCents">New day pass price in cents</param>
+        /// <returns>Update confirmation</returns>
+        public async Task<UpdateDayPassPriceResponse> UpdateDayPassPriceAsync(int priceCents)
+        {
+            var request = new UpdateDayPassPriceRequest { PriceCents = priceCents };
+            return await UpdateDayPassPriceAsync(request);
+        }
+
+        /// <summary>
+        /// Updates the day pass price (requires system admin permissions).
+        /// </summary>
+        /// <param name="request">Update request with new price</param>
+        /// <returns>Update confirmation</returns>
+        public async Task<UpdateDayPassPriceResponse> UpdateDayPassPriceAsync(UpdateDayPassPriceRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            ValidateUpdateDayPassPriceRequest(request);
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("daypassprice", request);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    throw new FrtAfcApiException("Day pass price setting not found on server");
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                {
+                    throw new FrtAfcApiException("Insufficient permissions to update day pass price");
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                var updateResponse = await response.Content.ReadFromJsonAsync<UpdateDayPassPriceResponse>();
+                if (updateResponse == null)
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return updateResponse;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException("Failed to update day pass price", ex);
+            }
+        }
+
+        /// <summary>
+        /// Issues a day pass ticket using the current day pass price from the server.
+        /// </summary>
+        /// <param name="issuingStation">3-letter station code where ticket is issued</param>
+        /// <returns>Issued ticket data</returns>
+        public async Task<TicketData> IssueDayPassTicketAsync(string issuingStation)
+        {
+            if (string.IsNullOrWhiteSpace(issuingStation))
+            {
+                throw new ArgumentException("Issuing station cannot be null or empty", nameof(issuingStation));
+            }
+
+            ValidateStationCode(issuingStation, nameof(issuingStation));
+
+            var request = new DayPassTicketRequest { IssuingStation = issuingStation.ToUpper() };
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("issueticket/daypass", request);
+                response.EnsureSuccessStatusCode();
+
+                var ticketData = await response.Content.ReadFromJsonAsync<TicketData>();
+                if (ticketData.Equals(default(TicketData)))
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return ticketData;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException("Failed to issue day pass ticket", ex);
+            }
+        }
+
+        private void ValidateUpdateDayPassPriceRequest(UpdateDayPassPriceRequest request)
+        {
+            var validationResults = new List<ValidationResult>();
+            var context = new ValidationContext(request);
+
+            if (!Validator.TryValidateObject(request, context, validationResults, true))
+            {
+                var errors = string.Join("; ", validationResults.Select(v => v.ErrorMessage));
+                throw new ArgumentException($"Invalid day pass price update request: {errors}");
+            }
+        }
+
         private async Task<TicketData> IssueTicketInternalAsync(string endpoint, TicketRequest request)
         {
             if (request == null)
@@ -753,6 +877,38 @@ namespace FrtAfcApiClient
         public string Username { get; set; } = string.Empty;
         public int UserId { get; set; }
         public bool Authenticated { get; set; }
+    }
+
+    // Day Pass Price DTOs
+    public class DayPassPriceInfo
+    {
+        public int DayPassPriceCents { get; set; }
+        public decimal DayPassPriceYuan { get; set; }
+        public DateTime LastUpdated { get; set; }
+    }
+
+    public class UpdateDayPassPriceRequest
+    {
+        [Required(ErrorMessage = "Price in cents is required")]
+        [Range(0, 100000, ErrorMessage = "Price must be between 0 and 100000 cents")]
+        public int PriceCents { get; set; }
+    }
+
+    public class UpdateDayPassPriceResponse
+    {
+        public string Message { get; set; } = string.Empty;
+        public int NewPriceCents { get; set; }
+        public decimal NewPriceYuan { get; set; }
+        public string UpdatedBy { get; set; } = string.Empty;
+        public DateTime UpdatedAt { get; set; }
+    }
+
+    public class DayPassTicketRequest
+    {
+        [Required(ErrorMessage = "Issuing station is required")]
+        [StringLength(3, MinimumLength = 3, ErrorMessage = "Station code must be 3 characters")]
+        [RegularExpression(@"^[A-Z]+$", ErrorMessage = "Station code must be uppercase letters")]
+        public string IssuingStation { get; set; } = string.Empty;
     }
 
     // Custom Exception Classes

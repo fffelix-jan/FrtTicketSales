@@ -53,6 +53,12 @@
     <Compile Include="CalendarForm.Designer.cs">
       <DependentUpon>CalendarForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="CardPaymentDialogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CardPaymentDialogForm.Designer.cs">
+      <DependentUpon>CardPaymentDialogForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="ChangePasswordAndLogOutDialogForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -62,6 +68,7 @@
     <Compile Include="ClassicMonthCalendar.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="GlobalConstants.cs" />
     <Compile Include="GlobalCredentials.cs" />
     <Compile Include="LoginForm.cs">
       <SubType>Form</SubType>
@@ -92,6 +99,9 @@
     </Compile>
     <EmbeddedResource Include="CalendarForm.resx">
       <DependentUpon>CalendarForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CardPaymentDialogForm.resx">
+      <DependentUpon>CardPaymentDialogForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ChangePasswordAndLogOutDialogForm.resx">
       <DependentUpon>ChangePasswordAndLogOutDialogForm.cs</DependentUpon>

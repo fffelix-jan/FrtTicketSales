@@ -60,7 +60,7 @@
             this.ChangePasswordAndLogOutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.LogoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.HelpToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.关于本软件ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.AboutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.DateTimeMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ClockUpdateTimer = new System.Windows.Forms.Timer(this.components);
             this.MainPanel = new System.Windows.Forms.Panel();
@@ -294,16 +294,17 @@
             // HelpToolStripMenuItem
             // 
             this.HelpToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.关于本软件ToolStripMenuItem});
+            this.AboutToolStripMenuItem});
             this.HelpToolStripMenuItem.Name = "HelpToolStripMenuItem";
             this.HelpToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.HelpToolStripMenuItem.Text = "帮助 [&B]";
             // 
-            // 关于本软件ToolStripMenuItem
+            // AboutToolStripMenuItem
             // 
-            this.关于本软件ToolStripMenuItem.Name = "关于本软件ToolStripMenuItem";
-            this.关于本软件ToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
-            this.关于本软件ToolStripMenuItem.Text = "关于本软件...";
+            this.AboutToolStripMenuItem.Name = "AboutToolStripMenuItem";
+            this.AboutToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.AboutToolStripMenuItem.Text = "关于本软件...";
+            this.AboutToolStripMenuItem.Click += new System.EventHandler(this.AboutToolStripMenuItem_Click);
             // 
             // DateTimeMenuItem
             // 
@@ -368,7 +369,7 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem ChangePasswordAndLogOutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem LogoutToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 关于本软件ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem AboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 开发票FToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 重打ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 查询票信息检票CToolStripMenuItem;
