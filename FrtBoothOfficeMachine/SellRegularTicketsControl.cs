@@ -73,7 +73,7 @@ namespace FrtBoothOfficeMachine
         /// <summary>
         /// Cancels the current transaction, clears all fields and resets to default state
         /// </summary>
-        private void CancelTransaction()
+        public void CancelTransaction()
         {
             // Clear destination selection
             DestinationComboBox.Text = string.Empty;
@@ -993,6 +993,25 @@ namespace FrtBoothOfficeMachine
             }
 
             return base.ProcessCmdKey(ref msg, keyData);
+        }
+        private void SellRegularTicketsControl_VisibleChanged(object sender, EventArgs e)
+        {
+            // Focus on the destination combo box when the control becomes visible
+            if (this.Visible && this.IsHandleCreated)
+            {
+                try
+                {
+                    // Use BeginInvoke to ensure the control is fully visible and ready to receive focus
+                    this.BeginInvoke((Action)(() => {
+                        DestinationComboBox.Focus();
+                    }));
+                }
+                catch (Exception ex)
+                {
+                    // Log error but don't crash
+                    Console.WriteLine($"Error focusing DestinationComboBox on visible: {ex.Message}");
+                }
+            }
         }
     }
 }

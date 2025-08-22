@@ -61,15 +61,19 @@ namespace FrtBoothOfficeMachine
 
             // Store the original font of the login button
             _originalLoginButtonFont = new Font(LoginButton.Font.FontFamily, LoginButton.Font.Size, LoginButton.Font.Style);
-            
+
             // Create the smaller font for login progress text (create once, reuse multiple times)
             _loginProgressFont = new Font(_originalLoginButtonFont.FontFamily, 10F, _originalLoginButtonFont.Style);
-            
+
             // Set up event handlers
             LoginButton.Click += LoginButton_Click;
+
+            // Add both KeyDown and KeyPress handlers to suppress ding sound
             UsernameTextBox.KeyDown += TextBox_KeyDown;
+            UsernameTextBox.KeyPress += TextBox_KeyPress;
             PasswordTextBox.KeyDown += TextBox_KeyDown;
-            
+            PasswordTextBox.KeyPress += TextBox_KeyPress;
+
             // Focus on username textbox when form loads
             this.Load += (s, e) => {
                 if (_isPauseMode)
@@ -81,7 +85,7 @@ namespace FrtBoothOfficeMachine
                     UsernameTextBox.Focus();
                 }
             };
-            
+
             // Hook into the FormClosed event to dispose fonts and clear credentials
             this.FormClosed += (s, e) => {
                 DisposeFonts();
@@ -190,6 +194,15 @@ namespace FrtBoothOfficeMachine
             {
                 LoginButton.PerformClick();
                 e.SuppressKeyPress = true; // Prevent ding sound
+            }
+        }
+
+        private void TextBox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // Suppress the ding sound when Enter is pressed
+            if (e.KeyChar == (char)Keys.Enter)
+            {
+                e.Handled = true; // This prevents the ding sound
             }
         }
 

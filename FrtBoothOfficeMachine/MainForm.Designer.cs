@@ -101,12 +101,14 @@
             this.SellRegularTicketsToolStripMenuItem.Name = "SellRegularTicketsToolStripMenuItem";
             this.SellRegularTicketsToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
             this.SellRegularTicketsToolStripMenuItem.Text = "售单程票 [&S]";
+            this.SellRegularTicketsToolStripMenuItem.Click += new System.EventHandler(this.SellRegularTicketsToolStripMenuItem_Click);
             // 
             // SellPassesToolStripMenuItem
             // 
             this.SellPassesToolStripMenuItem.Name = "SellPassesToolStripMenuItem";
             this.SellPassesToolStripMenuItem.Size = new System.Drawing.Size(212, 22);
             this.SellPassesToolStripMenuItem.Text = "售定期票 [&D]";
+            this.SellPassesToolStripMenuItem.Click += new System.EventHandler(this.SellPassesToolStripMenuItem_Click);
             // 
             // toolStripSeparator3
             // 

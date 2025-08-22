@@ -355,6 +355,7 @@
             this.Controls.Add(this.TitleLabel);
             this.Name = "SellRegularTicketsControl";
             this.Size = new System.Drawing.Size(784, 537);
+            this.VisibleChanged += new System.EventHandler(this.SellRegularTicketsControl_VisibleChanged);
             this.TopSelectionTableLayoutPanel.ResumeLayout(false);
             this.TopSelectionTableLayoutPanel.PerformLayout();
             this.PriceTableLayoutPanel.ResumeLayout(false);

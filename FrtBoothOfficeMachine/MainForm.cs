@@ -12,7 +12,9 @@ namespace FrtBoothOfficeMachine
 {
     public partial class MainForm : Form
     {
-        SellRegularTicketsControl sellRegularTicketsControl = new SellRegularTicketsControl();
+        private SellRegularTicketsControl sellRegularTicketsControl = new SellRegularTicketsControl();
+        private SellPassesControl sellPassesControl = new SellPassesControl();
+        private UserControl currentControl = null;
 
         private void LogoutToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -35,8 +37,83 @@ namespace FrtBoothOfficeMachine
         {
             InitializeComponent();
             UpdateClockDisplay();
-            MainPanel.Controls.Add(sellRegularTicketsControl);
+            this.Text = $"{GlobalConstants.ApplicationName} - 当前用户：{GlobalCredentials.Username}";
+
+            // Initialize both controls but don't add them yet
+            InitializeControls();
+
+            // Show the regular tickets control by default
+            ShowSellRegularTicketsControl();
+            sellPassesControl.Hide();
+        }
+
+        /// <summary>
+        /// Initializes both control instances
+        /// </summary>
+        private void InitializeControls()
+        {
+            // Set dock style for both controls
             sellRegularTicketsControl.Dock = DockStyle.Fill;
+            sellPassesControl.Dock = DockStyle.Fill;
+        }
+
+        /// <summary>
+        /// Switches to the sell regular tickets view
+        /// </summary>
+        private void ShowSellRegularTicketsControl()
+        {
+            sellPassesControl.CancelTransaction();
+            SwitchToControl(sellRegularTicketsControl);
+        }
+
+        /// <summary>
+        /// Switches to the sell passes view
+        /// </summary>
+        private void ShowSellPassesControl()
+        {
+            sellRegularTicketsControl.CancelTransaction();
+            SwitchToControl(sellPassesControl);
+        }
+
+        /// <summary>
+        /// Helper method to switch between controls in the MainPanel
+        /// </summary>
+        /// <param name="newControl">The control to switch to</param>
+        private void SwitchToControl(UserControl newControl)
+        {
+            if (currentControl == newControl)
+            {
+                return; // Already showing this control
+            }
+
+            try
+            {
+                // Suspend layout to prevent flickering
+                MainPanel.SuspendLayout();
+
+                // Remove current control if exists
+                if (currentControl != null)
+                {
+                    currentControl.Hide();
+                    MainPanel.Controls.Remove(currentControl);
+                }
+
+                // Add and show new control
+                MainPanel.Controls.Add(newControl);
+                newControl.Dock = DockStyle.Fill;
+                newControl.BringToFront();
+
+                // Update current control reference
+                currentControl = newControl;
+
+                // Show the control
+                newControl.Show();
+            }
+            finally
+            {
+                // Resume layout
+                MainPanel.ResumeLayout(true);
+            }
         }
 
         private void UpdateClockDisplay()
@@ -156,6 +233,22 @@ namespace FrtBoothOfficeMachine
         {
             MessageBox.Show($"{GlobalConstants.ApplicationName}\n{GlobalConstants.VersionName}\n{GlobalConstants.CopyrightText}",
                           "关于", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        /// <summary>
+        /// Event handler for the Sell Regular Tickets menu item
+        /// </summary>
+        private void SellRegularTicketsToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowSellRegularTicketsControl();
+        }
+
+        /// <summary>
+        /// Event handler for the Sell Passes menu item
+        /// </summary>
+        private void SellPassesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowSellPassesControl();
         }
     }
 }
