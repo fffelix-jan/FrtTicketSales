@@ -401,8 +401,104 @@ namespace FrtBoothOfficeMachine
 
         private void ProcessCashPayment()
         {
-            // TODO: Implement payment processing and ticket printing
-            MessageBox.Show("支付处理和票据打印功能将在稍后实现。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            // Check if total price is zero
+            if (totalPriceCents <= 0)
+            {
+                MessageBox.Show("请先选择目的地和票数。",
+                              "无法完成支付", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                DestinationComboBox.Focus();
+                return;
+            }
+
+            // Get the tendered amount
+            string tenderText = CashPaymentTenderedTextBox.Text.Trim();
+            if (string.IsNullOrEmpty(tenderText))
+            {
+                MessageBox.Show("请输入支付金额。",
+                              "支付金额无效", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                CashPaymentTenderedTextBox.Focus();
+                return;
+            }
+
+            if (!decimal.TryParse(tenderText, out decimal tenderAmount) || tenderAmount < 0)
+            {
+                MessageBox.Show("请输入有效的支付金额。",
+                              "支付金额无效", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                CashPaymentTenderedTextBox.Focus();
+                CashPaymentTenderedTextBox.SelectAll();
+                return;
+            }
+
+            // Convert to cents for precise calculation
+            int tenderCents = (int)(tenderAmount * 100);
+            int changeCents = tenderCents - totalPriceCents;
+
+            // Check if amount is sufficient
+            if (changeCents < 0)
+            {
+                decimal shortfallAmount = Math.Abs(changeCents) / 100.0m;
+                decimal totalAmount = totalPriceCents / 100.0m;
+                MessageBox.Show($"支付金额不足。\n\n应付金额：¥{totalAmount:F2}\n已付金额：¥{tenderAmount:F2}\n还需支付：¥{shortfallAmount:F2}",
+                              "支付金额不足", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                CashPaymentTenderedTextBox.Focus();
+                CashPaymentTenderedTextBox.SelectAll();
+                return;
+            }
+
+            // Payment is sufficient, update change label
+            decimal changeAmount = changeCents / 100.0m;
+            ChangeLabel.Text = $"找零: ¥{changeAmount:F2}";
+
+            try
+            {
+                // Create and show ticket printing dialog
+                using (var printDialog = TicketPrintDialogForm.CreateForRegularTickets(
+                    selectedStationPriceCents,     // Remove: destinationStation,
+                    fullFareTicketCount,
+                    seniorTicketCount,
+                    studentTicketCount,
+                    "现金"))
+                {
+                    var result = printDialog.ShowDialog(this);
+
+                    if (result == DialogResult.OK)
+                    {
+                        // Show success message with change amount
+                        string successMessage;
+                        if (changeAmount > 0)
+                        {
+                            successMessage = $"支付成功！票据已打印。\n\n找零：¥{changeAmount:F2}";
+                        }
+                        else
+                        {
+                            successMessage = "支付成功！票据已打印。\n\n无需找零。";
+                        }
+
+                        MessageBox.Show(successMessage,
+                                      "支付成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        // Clear the transaction after successful payment
+                        CancelTransaction();
+                    }
+                    else
+                    {
+                        // Printing failed or was cancelled
+                        MessageBox.Show("票据打印失败或被取消。请重试。",
+                                      "打印失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                        // Reset change label since payment didn't complete
+                        CalculateChange();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"处理支付时发生错误：\n\n{ex.Message}",
+                              "支付错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+
+                // Reset change label since payment didn't complete
+                CalculateChange();
+            }
         }
 
         private void CalculateFullFarePrice()

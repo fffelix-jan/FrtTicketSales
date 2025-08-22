@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.TitleLabel = new System.Windows.Forms.Label();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.TicketProgressBar = new System.Windows.Forms.ProgressBar();
             this.SuspendLayout();
             // 
             // TitleLabel
@@ -41,14 +41,14 @@
             this.TitleLabel.Size = new System.Drawing.Size(368, 21);
             this.TitleLabel.TabIndex = 0;
             this.TitleLabel.Text = "正在打印车票... （第0张，共0张）";
-            this.TitleLabel.TextChanged += new System.EventHandler(this.TitleLabel_TextChanged);
             // 
-            // progressBar1
+            // TicketProgressBar
             // 
-            this.progressBar1.Location = new System.Drawing.Point(12, 50);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(473, 31);
-            this.progressBar1.TabIndex = 1;
+            this.TicketProgressBar.Location = new System.Drawing.Point(12, 50);
+            this.TicketProgressBar.Name = "TicketProgressBar";
+            this.TicketProgressBar.Size = new System.Drawing.Size(473, 31);
+            this.TicketProgressBar.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
+            this.TicketProgressBar.TabIndex = 1;
             // 
             // TicketPrintDialogForm
             // 
@@ -56,7 +56,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(199)))), ((int)(((byte)(199)))), ((int)(((byte)(199)))));
             this.ClientSize = new System.Drawing.Size(497, 93);
-            this.Controls.Add(this.progressBar1);
+            this.Controls.Add(this.TicketProgressBar);
             this.Controls.Add(this.TitleLabel);
             this.Font = new System.Drawing.Font("SimSun", 21.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -64,6 +64,7 @@
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "TicketPrintDialogForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "打印车票";
             this.TopMost = true;
             this.ResumeLayout(false);
@@ -74,6 +75,6 @@
         #endregion
 
         private System.Windows.Forms.Label TitleLabel;
-        private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.ProgressBar TicketProgressBar;
     }
 }

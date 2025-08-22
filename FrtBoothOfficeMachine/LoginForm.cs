@@ -18,6 +18,28 @@ namespace FrtBoothOfficeMachine
         private bool _isLoggingIn = false;
         private Font _originalLoginButtonFont; // Store original font
         private Font _loginProgressFont; // Store smaller font for "登陆中…"
+        private bool _isPauseMode = false; // Flag to indicate if this is pause mode
+
+        // Disable the close button on the form
+        private const int CP_NOCLOSE_BUTTON = 0x200;
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams myCp = base.CreateParams;
+                myCp.ClassStyle = myCp.ClassStyle | CP_NOCLOSE_BUTTON;
+                return myCp;
+            }
+        }
+
+        // Pause mode constructor
+        public static LoginForm CreateForPauseMode()
+        {
+            var form = new LoginForm();
+            form._isPauseMode = true;
+            form.SetupPauseMode();
+            return form;
+        }
 
         public LoginForm()
         {
@@ -45,10 +67,48 @@ namespace FrtBoothOfficeMachine
             PasswordTextBox.KeyDown += TextBox_KeyDown;
             
             // Focus on username textbox when form loads
-            this.Load += (s, e) => UsernameTextBox.Focus();
+            this.Load += (s, e) => {
+                if (_isPauseMode)
+                {
+                    PasswordTextBox.Focus(); // In pause mode, focus on password since username is pre-filled
+                }
+                else
+                {
+                    UsernameTextBox.Focus();
+                }
+            };
             
-            // Hook into the FormClosed event to dispose fonts
-            this.FormClosed += (s, e) => DisposeFonts();
+            // Hook into the FormClosed event to dispose fonts and clear credentials
+            this.FormClosed += (s, e) => {
+                DisposeFonts();
+                ClearCredentialTextBoxes();
+            };
+        }
+
+        /// <summary>
+        /// Configures the form for pause mode
+        /// </summary>
+        private void SetupPauseMode()
+        {
+            // Change the gigantic label to show "暂停售票"
+            BigTitleLabel.Text = "暂停售票";
+            
+            // Pre-fill username with current logged-in user and grey it out
+            if (!string.IsNullOrEmpty(GlobalCredentials.Username))
+            {
+                UsernameTextBox.Text = GlobalCredentials.Username;
+            }
+            UsernameTextBox.Enabled = false;
+            UsernameTextBox.BackColor = SystemColors.Control; // Grey out the username box
+            
+            // Hide the exit button in pause mode
+            ExitButton.Visible = false;
+            
+            // Change login button text to "解锁"
+            LoginButton.Text = "解锁";
+            
+            // Clear password field
+            PasswordTextBox.Text = string.Empty;
         }
 
         private void DisposeFonts()
@@ -62,6 +122,60 @@ namespace FrtBoothOfficeMachine
             catch (Exception ex)
             {
                 Console.WriteLine($"Error disposing fonts: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Clears and scrubs the contents of username and password text boxes using the same logic as GlobalCredentials.Clear
+        /// </summary>
+        private void ClearCredentialTextBoxes()
+        {
+            try
+            {
+                // Store original lengths
+                int usernameLength = UsernameTextBox.Text?.Length ?? 0;
+                int passwordLength = PasswordTextBox.Text?.Length ?? 0;
+
+                // Clear the text boxes initially
+                UsernameTextBox.Text = null;
+                PasswordTextBox.Text = null;
+
+                GC.Collect();
+                GC.Collect();
+
+                // Overwrite the text boxes 10 times with random text (same as GlobalCredentials.Clear)
+                Random rand = new Random();
+                for (int i = 0; i < 10; i++)
+                {
+                    UsernameTextBox.Text = new string(Enumerable.Range(0, usernameLength)
+                        .Select(_ => (char)rand.Next(32, 127)).ToArray());
+                    PasswordTextBox.Text = new string(Enumerable.Range(0, passwordLength)
+                        .Select(_ => (char)rand.Next(32, 127)).ToArray());
+                    
+                    // Force UI update to ensure the random text is actually written to the controls
+                    Application.DoEvents();
+                    GC.Collect();
+                }
+
+                // Then set the text boxes to empty again
+                UsernameTextBox.Text = string.Empty;
+                PasswordTextBox.Text = string.Empty;
+                GC.Collect();
+                GC.Collect();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error clearing credential text boxes: {ex.Message}");
+                // Fallback: at least clear the text boxes normally
+                try
+                {
+                    UsernameTextBox.Text = string.Empty;
+                    PasswordTextBox.Text = string.Empty;
+                }
+                catch
+                {
+                    // If even this fails, we can't do much more
+                }
             }
         }
 
@@ -79,7 +193,96 @@ namespace FrtBoothOfficeMachine
         {
             if (_isLoggingIn) return; // Prevent multiple login attempts
             
-            await PerformLogin();
+            if (_isPauseMode)
+            {
+                await PerformOfflineLogin();
+            }
+            else
+            {
+                await PerformLogin();
+            }
+        }
+
+        /// <summary>
+        /// Performs offline password verification for pause mode
+        /// </summary>
+        private async Task PerformOfflineLogin()
+        {
+            _isLoggingIn = true;
+            
+            try
+            {
+                // Disable UI during login and change button appearance
+                LoginButton.Enabled = false;
+                LoginButton.Text = "验证中…";
+                LoginButton.Font = _loginProgressFont;
+                PasswordTextBox.Enabled = false;
+
+                // Refresh the UI
+                Application.DoEvents();
+
+                string enteredPassword = PasswordTextBox.Text;
+                
+                // Validate input
+                if (string.IsNullOrEmpty(enteredPassword))
+                {
+                    ShowError("请输入密码。");
+                    PasswordTextBox.Focus();
+                    return;
+                }
+
+                // Verify password against stored password
+                if (VerifyOfflinePassword(enteredPassword))
+                {
+                    // Password is correct, close form with success result
+                    this.DialogResult = DialogResult.OK;
+                    this.Close();
+                }
+                else
+                {
+                    // Small delay to simulate processing (for better UX)
+                    await Task.Delay(500);
+
+                    ShowError("密码错误。");
+                    PasswordTextBox.Text = string.Empty;
+                    PasswordTextBox.Focus();
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowVerboseError("验证错误", ex);
+                PasswordTextBox.Text = string.Empty;
+                PasswordTextBox.Focus();
+            }
+            finally
+            {
+                // Re-enable UI and restore original font
+                _isLoggingIn = false;
+                LoginButton.Enabled = true;
+                LoginButton.Text = "解锁";
+                LoginButton.Font = _originalLoginButtonFont;
+                PasswordTextBox.Enabled = true;
+            }
+        }
+
+        /// <summary>
+        /// Verifies password against the stored password in memory (offline verification)
+        /// </summary>
+        /// <param name="enteredPassword">Password entered by user</param>
+        /// <returns>True if password matches, false otherwise</returns>
+        private bool VerifyOfflinePassword(string enteredPassword)
+        {
+            try
+            {
+                // Compare with the stored password in GlobalCredentials
+                return !string.IsNullOrEmpty(GlobalCredentials.Password) && 
+                       GlobalCredentials.Password == enteredPassword;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error verifying offline password: {ex.Message}");
+                return false;
+            }
         }
 
         private async Task PerformLogin()
@@ -356,19 +559,27 @@ namespace FrtBoothOfficeMachine
 
         private void ShowError(string message)
         {
-            MessageBox.Show(message, "登录错误", 
+            string title = _isPauseMode ? "解锁错误" : "登录错误";
+            MessageBox.Show(message, title, 
                           MessageBoxButtons.OK, MessageBoxIcon.Warning);
             
             // Ensure focus returns to the appropriate textbox after MessageBox is dismissed
             this.BeginInvoke(new Action(() =>
             {
-                if (string.IsNullOrEmpty(UsernameTextBox.Text.Trim()))
+                if (_isPauseMode)
                 {
-                    UsernameTextBox.Focus();
+                    PasswordTextBox.Focus();
                 }
                 else
                 {
-                    PasswordTextBox.Focus();
+                    if (string.IsNullOrEmpty(UsernameTextBox.Text.Trim()))
+                    {
+                        UsernameTextBox.Focus();
+                    }
+                    else
+                    {
+                        PasswordTextBox.Focus();
+                    }
                 }
             }));
         }

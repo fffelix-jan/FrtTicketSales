@@ -21,12 +21,32 @@ namespace FrtBoothOfficeMachine
         /// </summary>
         public static void Clear()
         {
-            Username = string.Empty;
-            Password = string.Empty;
+            Username = null;
+            Password = null;
             ApiClient?.Dispose();
             ApiClient = null;
+
+            GC.Collect();
+            GC.Collect();
+
+            // Overwrite the Username and Password 10 times with random text
+            Random rand = new Random();
+            for (int i = 0; i < 10; i++)
+            {
+                Username = new string(Enumerable.Range(0, Username?.Length ?? 0)
+                    .Select(_ => (char)rand.Next(32, 127)).ToArray());
+                Password = new string(Enumerable.Range(0, Password?.Length ?? 0)
+                    .Select(_ => (char)rand.Next(32, 127)).ToArray());
+                GC.Collect();
+            }
+
+            // Then set the Username and Password to null again
+            Username = null;
+            Password = null;
+            GC.Collect();
+            GC.Collect();
         }
-        
+
         /// <summary>
         /// Checks if valid credentials are currently stored
         /// </summary>

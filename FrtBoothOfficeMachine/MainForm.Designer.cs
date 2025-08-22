@@ -55,7 +55,7 @@
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.QueryICCardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ShiftChangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.暂停售票ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.PauseSellingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.ChangePasswordAndLogOutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.LogoutToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -257,7 +257,7 @@
             // ShiftChangeToolStripMenuItem
             // 
             this.ShiftChangeToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.暂停售票ToolStripMenuItem,
+            this.PauseSellingToolStripMenuItem,
             this.toolStripSeparator1,
             this.ChangePasswordAndLogOutToolStripMenuItem,
             this.LogoutToolStripMenuItem});
@@ -265,11 +265,12 @@
             this.ShiftChangeToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.ShiftChangeToolStripMenuItem.Text = "交班 [&X]";
             // 
-            // 暂停售票ToolStripMenuItem
+            // PauseSellingToolStripMenuItem
             // 
-            this.暂停售票ToolStripMenuItem.Name = "暂停售票ToolStripMenuItem";
-            this.暂停售票ToolStripMenuItem.Size = new System.Drawing.Size(241, 22);
-            this.暂停售票ToolStripMenuItem.Text = "暂停售票 [&Z]";
+            this.PauseSellingToolStripMenuItem.Name = "PauseSellingToolStripMenuItem";
+            this.PauseSellingToolStripMenuItem.Size = new System.Drawing.Size(241, 22);
+            this.PauseSellingToolStripMenuItem.Text = "暂停售票 [&Z]";
+            this.PauseSellingToolStripMenuItem.Click += new System.EventHandler(this.PauseSellingToolStripMenuItem_Click);
             // 
             // toolStripSeparator1
             // 
@@ -362,7 +363,7 @@
         private System.Windows.Forms.ToolStripMenuItem DateTimeMenuItem;
         private System.Windows.Forms.Timer ClockUpdateTimer;
         private System.Windows.Forms.Panel MainPanel;
-        private System.Windows.Forms.ToolStripMenuItem 暂停售票ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem PauseSellingToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 打印免费出站票EToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem ChangePasswordAndLogOutToolStripMenuItem;
