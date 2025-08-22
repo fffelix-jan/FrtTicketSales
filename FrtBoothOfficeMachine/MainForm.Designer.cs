@@ -42,7 +42,7 @@
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.DisplayCalendarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PrintTicketsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.打印免费出站票EToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.PrintFreeExitTicketToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.重打ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.开发票FToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -170,17 +170,18 @@
             // PrintTicketsToolStripMenuItem
             // 
             this.PrintTicketsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.打印免费出站票EToolStripMenuItem,
+            this.PrintFreeExitTicketToolStripMenuItem,
             this.重打ToolStripMenuItem});
             this.PrintTicketsToolStripMenuItem.Name = "PrintTicketsToolStripMenuItem";
             this.PrintTicketsToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.PrintTicketsToolStripMenuItem.Text = "制票 [&V]";
             // 
-            // 打印免费出站票EToolStripMenuItem
+            // PrintFreeExitTicketToolStripMenuItem
             // 
-            this.打印免费出站票EToolStripMenuItem.Name = "打印免费出站票EToolStripMenuItem";
-            this.打印免费出站票EToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
-            this.打印免费出站票EToolStripMenuItem.Text = "打印免费出站票 [&E]";
+            this.PrintFreeExitTicketToolStripMenuItem.Name = "PrintFreeExitTicketToolStripMenuItem";
+            this.PrintFreeExitTicketToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.PrintFreeExitTicketToolStripMenuItem.Text = "打印免费出站票 [&E]";
+            this.PrintFreeExitTicketToolStripMenuItem.Click += new System.EventHandler(this.PrintFreeExitTicketToolStripMenuItem_Click);
             // 
             // 重打ToolStripMenuItem
             // 
@@ -369,7 +370,7 @@
         private System.Windows.Forms.Timer ClockUpdateTimer;
         private System.Windows.Forms.Panel MainPanel;
         private System.Windows.Forms.ToolStripMenuItem PauseSellingToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 打印免费出站票EToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem PrintFreeExitTicketToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripMenuItem ChangePasswordAndLogOutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem LogoutToolStripMenuItem;

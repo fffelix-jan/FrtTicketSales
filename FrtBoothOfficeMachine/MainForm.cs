@@ -412,5 +412,61 @@ namespace FrtBoothOfficeMachine
                               "打印机测试错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void PrintFreeExitTicketToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Check if we have an authenticated API client
+                if (GlobalCredentials.ApiClient == null)
+                {
+                    MessageBox.Show("API客户端未初始化。请先登录系统。",
+                                  "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Ask user for confirmation since this is a special ticket type
+                var confirmResult = MessageBox.Show(
+                    "确定要打印免费出站票吗？\n\n免费出站票通常用于：\n• 设备故障时的应急出站\n• 特殊情况下的客户服务\n• 系统维护期间的临时出站",
+                    "确认打印免费出站票",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (confirmResult != DialogResult.Yes)
+                {
+                    return; // User cancelled
+                }
+
+                // Create and show ticket printing dialog for free exit tickets
+                using (var printDialog = TicketPrintDialogForm.CreateForFreeExitTickets(1))
+                {
+                    var result = printDialog.ShowDialog(this);
+
+                    if (result == DialogResult.OK)
+                    {
+                        // Printing completed successfully
+                        MessageBox.Show("免费出站票打印完成！\n\n请将票据交给需要出站的乘客，\n并记录发放原因以备查询。",
+                                      "免费出站票打印完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        // Printing failed or was cancelled
+                        MessageBox.Show("免费出站票打印失败！\n\n请检查：\n• 打印机是否正常连接\n• 纸张是否充足\n• 服务器连接是否正常",
+                                      "打印失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (FrtAfcApiException ex)
+            {
+                MessageBox.Show($"服务器错误：\n\n{ex.Message}\n\n请检查网络连接和服务器状态。",
+                              "服务器错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            catch (Exception ex)
+            {
+                // Handle any unexpected errors during the process
+                MessageBox.Show($"打印免费出站票时发生错误：\n\n{ex.Message}\n\n请联系技术支持。",
+                              "打印错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

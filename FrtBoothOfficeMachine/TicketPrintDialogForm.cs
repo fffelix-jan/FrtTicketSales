@@ -165,6 +165,37 @@ namespace FrtBoothOfficeMachine
         }
 
         /// <summary>
+        /// Constructor for printing free exit tickets
+        /// </summary>
+        /// <param name="quantity">Number of free exit tickets to print</param>
+        public static TicketPrintDialogForm CreateForFreeExitTickets(int quantity = 1)
+        {
+            var tickets = new List<TicketInfo>();
+
+            for (int i = 0; i < quantity; i++)
+            {
+                tickets.Add(new TicketInfo
+                {
+                    TicketType = 3, // Free entry/exit ticket type
+                    ValueCents = 0, // Free tickets have no value
+                    ChineseTicketType = "免费出站票",
+                    EnglishTicketType = "Free Exit Ticket",
+                    TicketTypeCode = "出" // Free ticket type code
+                });
+            }
+
+            var config = new TicketPrintConfig
+            {
+                PrintType = PrintType.FreeExit,
+                Tickets = tickets,
+                PaymentMethod = "免费",
+                TotalTickets = quantity
+            };
+
+            return new TicketPrintDialogForm(config);
+        }
+
+        /// <summary>
         /// Constructor for printing test tickets (no server contact)
         /// </summary>
         /// <param name="quantity">Number of test tickets to print</param>
@@ -402,7 +433,8 @@ namespace FrtBoothOfficeMachine
         {
             RegularTickets,
             DayPass,
-            TestTicket
+            TestTicket,
+            FreeExit
         }
     }
 }
