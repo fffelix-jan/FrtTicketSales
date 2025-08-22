@@ -36,8 +36,8 @@
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             this.TopUpICCardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ExtrasToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.测试服务器链接ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.测试打印机PToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.TestServerConnectionToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.TestPrinterToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ICCardReaderSettingsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator5 = new System.Windows.Forms.ToolStripSeparator();
             this.DisplayCalendarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -125,8 +125,8 @@
             // ExtrasToolStripMenuItem
             // 
             this.ExtrasToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.测试服务器链接ToolStripMenuItem,
-            this.测试打印机PToolStripMenuItem,
+            this.TestServerConnectionToolStripMenuItem,
+            this.TestPrinterToolStripMenuItem,
             this.ICCardReaderSettingsToolStripMenuItem,
             this.toolStripSeparator5,
             this.DisplayCalendarToolStripMenuItem});
@@ -134,17 +134,19 @@
             this.ExtrasToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.ExtrasToolStripMenuItem.Text = "辅助 [&A]";
             // 
-            // 测试服务器链接ToolStripMenuItem
+            // TestServerConnectionToolStripMenuItem
             // 
-            this.测试服务器链接ToolStripMenuItem.Name = "测试服务器链接ToolStripMenuItem";
-            this.测试服务器链接ToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
-            this.测试服务器链接ToolStripMenuItem.Text = "测试服务器链接 [&T]";
+            this.TestServerConnectionToolStripMenuItem.Name = "TestServerConnectionToolStripMenuItem";
+            this.TestServerConnectionToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.TestServerConnectionToolStripMenuItem.Text = "测试服务器链接 [&T]";
+            this.TestServerConnectionToolStripMenuItem.Click += new System.EventHandler(this.TestServerConnectionToolStripMenuItem_Click);
             // 
-            // 测试打印机PToolStripMenuItem
+            // TestPrinterToolStripMenuItem
             // 
-            this.测试打印机PToolStripMenuItem.Name = "测试打印机PToolStripMenuItem";
-            this.测试打印机PToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
-            this.测试打印机PToolStripMenuItem.Text = "测试打印机 [&P]";
+            this.TestPrinterToolStripMenuItem.Name = "TestPrinterToolStripMenuItem";
+            this.TestPrinterToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.TestPrinterToolStripMenuItem.Text = "测试打印机 [&P]";
+            this.TestPrinterToolStripMenuItem.Click += new System.EventHandler(this.TestPrinterToolStripMenuItem_Click);
             // 
             // ICCardReaderSettingsToolStripMenuItem
             // 
@@ -304,7 +306,7 @@
             // AboutToolStripMenuItem
             // 
             this.AboutToolStripMenuItem.Name = "AboutToolStripMenuItem";
-            this.AboutToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.AboutToolStripMenuItem.Size = new System.Drawing.Size(173, 22);
             this.AboutToolStripMenuItem.Text = "关于本软件...";
             this.AboutToolStripMenuItem.Click += new System.EventHandler(this.AboutToolStripMenuItem_Click);
             // 
@@ -375,7 +377,7 @@
         private System.Windows.Forms.ToolStripMenuItem 开发票FToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 重打ToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 查询票信息检票CToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 测试服务器链接ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem TestServerConnectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 退票处理RToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem DisplayCalendarToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 车站信息查询NToolStripMenuItem;
@@ -383,7 +385,7 @@
         private System.Windows.Forms.ToolStripMenuItem TopUpICCardToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripMenuItem QueryICCardToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 测试打印机PToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem TestPrinterToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
         private System.Windows.Forms.ToolStripMenuItem RefundICCardToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ICCardReaderSettingsToolStripMenuItem;

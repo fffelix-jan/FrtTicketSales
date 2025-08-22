@@ -23,6 +23,9 @@ namespace FrtBoothOfficeMachine
         int seniorTicketPriceCents = 0;
         int studentTicketPriceCents = 0;
         int totalPriceCents = 0;
+        
+        // Add this field to track recent mouse interaction
+        private bool _recentMouseInteraction = false;
 
         public SellRegularTicketsControl()
         {
@@ -38,6 +41,10 @@ namespace FrtBoothOfficeMachine
             DestinationComboBox.Leave += DestinationComboBox_Leave;
             DestinationComboBox.KeyPress += DestinationComboBox_KeyPress;
             DestinationComboBox.TextChanged += DestinationComboBox_TextChanged;
+            
+            // Add mouse event handlers to track mouse interaction
+            DestinationComboBox.MouseDown += DestinationComboBox_MouseDown;
+            DestinationComboBox.SelectedIndexChanged += DestinationComboBox_SelectedIndexChanged;
 
             // Add event handlers for quantity text boxes
             FullFareTicketQuantityTextBox.KeyPress += QuantityTextBox_KeyPress;
@@ -62,12 +69,32 @@ namespace FrtBoothOfficeMachine
             CashPaymentTenderedTextBox.KeyPress += CashPaymentTenderedTextBox_KeyPress;
             CashPaymentTenderedTextBox.KeyDown += CashPaymentTenderedTextBox_KeyDown;
             CashPaymentTenderedTextBox.Leave += CashPaymentTenderedTextBox_Leave;
+            CashPaymentTenderedTextBox.TextChanged += CashPaymentTenderedTextBox_TextChanged;
 
             // Add event handler for Cancel button
             CancelButton.Click += CancelButton_Click;
 
             // Add event handler for Swipe Card button
             CardPaymentButton.Click += CardPaymentButton_Click;
+        }
+
+        private void DestinationComboBox_MouseDown(object sender, MouseEventArgs e)
+        {
+            // Set flag when mouse is used on the combo box
+            _recentMouseInteraction = true;
+        }
+
+        private async void DestinationComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // When an item is selected from dropdown, trigger server call
+            if (DestinationComboBox.SelectedIndex >= 0)
+            {
+                _recentMouseInteraction = true;
+                await ProcessDestinationInputAsync();
+                ProcessFullFareTicketQuantity();
+                ProcessStudentTicketQuantity();
+                ProcessSeniorTicketQuantity();
+            }
         }
 
         /// <summary>
@@ -186,6 +213,10 @@ namespace FrtBoothOfficeMachine
             {
                 e.KeyChar = char.ToUpper(e.KeyChar);
             }
+            
+            // Clear the recent mouse interaction flag on any keypress
+            // This ensures subsequent typing doesn't trigger server calls
+            _recentMouseInteraction = false;
         }
 
         private async void DestinationComboBox_Leave(object sender, EventArgs e)
@@ -211,7 +242,7 @@ namespace FrtBoothOfficeMachine
                 comboBox.SelectionLength = selectionLength;
             }
 
-            // Set the full fare ticket quantity to 1 if quantites haven't been selected yet
+            // Set the full fare ticket quantity to 1 if quantities haven't been selected yet
             if (FullFareTicketQuantityTextBox.Text.Length == 0 &&
                 SeniorTicketQuantityTextBox.Text.Length == 0 &&
                 StudentTicketQuantityTextBox.Text.Length == 0)
@@ -219,11 +250,25 @@ namespace FrtBoothOfficeMachine
                 FullFareTicketQuantityTextBox.Text = "1";
             }
 
-            // Calculate the fare from the server
-            await ProcessDestinationInputAsync();
-            ProcessFullFareTicketQuantity();
-            ProcessStudentTicketQuantity();
-            ProcessSeniorTicketQuantity();
+            // Only calculate the fare from the server if there was recent mouse interaction
+            // This prevents unnecessary server calls while the user is typing
+            if (_recentMouseInteraction)
+            {
+                await ProcessDestinationInputAsync();
+                ProcessFullFareTicketQuantity();
+                ProcessStudentTicketQuantity();
+                ProcessSeniorTicketQuantity();
+                
+                // Reset the flag after processing
+                _recentMouseInteraction = false;
+            }
+            else
+            {
+                // User is typing - only update quantities without server call
+                ProcessFullFareTicketQuantity();
+                ProcessStudentTicketQuantity();
+                ProcessSeniorTicketQuantity();
+            }
         }
 
         private void QuantityTextBox_Enter(object sender, EventArgs e)
@@ -659,6 +704,12 @@ namespace FrtBoothOfficeMachine
             CalculateChange();
         }
 
+        private void CashPaymentTenderedTextBox_TextChanged(object sender, EventArgs e)
+        {
+            // Calculate change in real-time as user types
+            CalculateChange();
+        }
+
         private void CalculateChange()
         {
             string tenderText = CashPaymentTenderedTextBox.Text.Trim();
@@ -666,12 +717,22 @@ namespace FrtBoothOfficeMachine
             {
                 int tenderCents = (int)(tenderAmount * 100);
                 int changeCents = tenderCents - totalPriceCents;
-                decimal changeAmount = changeCents / 100.0m;
-                ChangeLabel.Text = $"找零: {changeAmount:F2}";
+                decimal changeAmount = Math.Abs(changeCents) / 100.0m; // Always show positive amount
+
+                if (changeCents < 0)
+                {
+                    // Customer hasn't paid enough - show how much more is needed
+                    ChangeLabel.Text = $"还差: ¥{changeAmount:F2}";
+                }
+                else
+                {
+                    // Customer paid enough - show change due
+                    ChangeLabel.Text = $"找零: ¥{changeAmount:F2}";
+                }
             }
             else
             {
-                ChangeLabel.Text = "找零: 0.00";
+                ChangeLabel.Text = "找零: ¥0.00";
             }
         }
 

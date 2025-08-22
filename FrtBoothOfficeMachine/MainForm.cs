@@ -1,4 +1,5 @@
-﻿using System;
+﻿using FrtAfcApiClient;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -249,6 +250,167 @@ namespace FrtBoothOfficeMachine
         private void SellPassesToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ShowSellPassesControl();
+        }
+
+        private async void TestServerConnectionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Disable the menu item during testing to prevent multiple concurrent tests
+            var menuItem = sender as ToolStripMenuItem;
+            if (menuItem != null)
+            {
+                menuItem.Enabled = false;
+                menuItem.Text = "测试中...";
+            }
+
+            try
+            {
+                string testResult;
+                MessageBoxIcon resultIcon;
+                string resultTitle;
+
+                // Check if we have an API client
+                if (GlobalCredentials.ApiClient == null)
+                {
+                    testResult = "测试失败：API客户端未初始化。\n\n请先登录系统。";
+                    resultIcon = MessageBoxIcon.Error;
+                    resultTitle = "连接测试失败";
+                }
+                else
+                {
+                    try
+                    {
+                        // Test connection using GetCurrentDateTimeAsync
+                        var startTime = DateTime.Now;
+                        var serverDateTime = await GlobalCredentials.ApiClient.GetCurrentDateTimeAsync();
+                        var endTime = DateTime.Now;
+                        var responseTime = (endTime - startTime).TotalMilliseconds;
+
+                        // Get API endpoint from config for display
+                        string apiEndpoint = SimpleConfig.Get("API_ENDPOINT", "未配置");
+
+                        // Connection successful
+                        testResult = $"服务器连接测试成功！\n\n" +
+                                   $"服务器地址：{apiEndpoint}\n" +
+                                   $"服务器时间：{serverDateTime:yyyy-MM-dd HH:mm:ss}\n" +
+                                   $"本地时间：{DateTime.Now:yyyy-MM-dd HH:mm:ss}\n" +
+                                   $"响应时间：{responseTime:F0} 毫秒\n" +
+                                   $"当前用户：{GlobalCredentials.Username}";
+
+                        resultIcon = MessageBoxIcon.Information;
+                        resultTitle = "连接测试成功";
+                    }
+                    catch (FrtAfcApiException ex)
+                    {
+                        // API-specific error
+                        string apiEndpoint = SimpleConfig.Get("API_ENDPOINT", "未配置");
+                        testResult = $"服务器连接测试失败！\n\n" +
+                                   $"服务器地址：{apiEndpoint}\n" +
+                                   $"错误类型：API错误\n" +
+                                   $"错误信息：{ex.Message}\n\n";
+
+                        if (ex.InnerException != null)
+                        {
+                            testResult += $"详细信息：{ex.InnerException.Message}";
+                        }
+
+                        resultIcon = MessageBoxIcon.Error;
+                        resultTitle = "连接测试失败";
+                    }
+                    catch (System.Net.Http.HttpRequestException ex)
+                    {
+                        // HTTP-specific error
+                        string apiEndpoint = SimpleConfig.Get("API_ENDPOINT", "未配置");
+                        testResult = $"服务器连接测试失败！\n\n" +
+                                   $"服务器地址：{apiEndpoint}\n" +
+                                   $"错误类型：HTTP请求错误\n" +
+                                   $"错误信息：{ex.Message}\n\n" +
+                                   $"可能原因：\n" +
+                                   $"• 服务器未运行\n" +
+                                   $"• 网络连接问题\n" +
+                                   $"• 服务器地址配置错误\n" +
+                                   $"• 防火墙阻止连接";
+
+                        resultIcon = MessageBoxIcon.Error;
+                        resultTitle = "连接测试失败";
+                    }
+                    catch (TaskCanceledException ex)
+                    {
+                        // Timeout error
+                        string apiEndpoint = SimpleConfig.Get("API_ENDPOINT", "未配置");
+                        testResult = $"服务器连接测试超时！\n\n" +
+                                   $"服务器地址：{apiEndpoint}\n" +
+                                   $"错误信息：{ex.Message}\n\n" +
+                                   $"可能原因：\n" +
+                                   $"• 服务器响应过慢\n" +
+                                   $"• 网络延迟过高\n" +
+                                   $"• 服务器过载";
+
+                        resultIcon = MessageBoxIcon.Warning;
+                        resultTitle = "连接测试超时";
+                    }
+                    catch (Exception ex)
+                    {
+                        // General error
+                        string apiEndpoint = SimpleConfig.Get("API_ENDPOINT", "未配置");
+                        testResult = $"服务器连接测试失败！\n\n" +
+                                   $"服务器地址：{apiEndpoint}\n" +
+                                   $"错误类型：{ex.GetType().Name}\n" +
+                                   $"错误信息：{ex.Message}";
+
+                        resultIcon = MessageBoxIcon.Error;
+                        resultTitle = "连接测试失败";
+                    }
+                }
+
+                // Show result to user
+                MessageBox.Show(testResult, resultTitle, MessageBoxButtons.OK, resultIcon);
+            }
+            catch (Exception ex)
+            {
+                // Handle any unexpected errors in the test process itself
+                MessageBox.Show($"执行连接测试时发生错误：\n\n{ex.Message}",
+                              "测试错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                // Re-enable the menu item
+                if (menuItem != null)
+                {
+                    menuItem.Enabled = true;
+                    menuItem.Text = "测试服务器链接 [&T]";
+                }
+            }
+        }
+
+        private void TestPrinterToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Create and show ticket printing dialog for test tickets
+                using (var printDialog = TicketPrintDialogForm.CreateForTestTickets(1))
+                {
+                    var result = printDialog.ShowDialog(this);
+
+                    if (result == DialogResult.OK)
+                    {
+                        // Printing completed successfully
+                        MessageBox.Show("打印机测试完成！\n\n请检查打印机是否正常出纸，\n测试页内容是否清晰可读。",
+                                      "打印机测试", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        // Printing failed or was cancelled
+                        MessageBox.Show("打印机测试失败！\n\n请检查：\n• 打印机是否正常连接\n• 纸张是否充足\n• 打印机驱动是否正确安装",
+                                      "打印机测试失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any unexpected errors during the test process
+                MessageBox.Show($"执行打印机测试时发生错误：\n\n{ex.Message}\n\n请检查打印机连接和配置。",
+                              "打印机测试错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }

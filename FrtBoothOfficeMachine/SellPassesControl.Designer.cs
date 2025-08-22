@@ -193,7 +193,7 @@
             this.PaymentButtonsPanel.Controls.Add(this.CardPaymentButton);
             this.PaymentButtonsPanel.Location = new System.Drawing.Point(25, 455);
             this.PaymentButtonsPanel.Name = "PaymentButtonsPanel";
-            this.PaymentButtonsPanel.Size = new System.Drawing.Size(340, 75);
+            this.PaymentButtonsPanel.Size = new System.Drawing.Size(276, 75);
             this.PaymentButtonsPanel.TabIndex = 3;
             // 
             // CancelButton
@@ -225,9 +225,9 @@
             this.CashPaymentGroupBox.Controls.Add(this.ChangeLabel);
             this.CashPaymentGroupBox.Controls.Add(this.CashPaymentTenderedTextBox);
             this.CashPaymentGroupBox.Font = new System.Drawing.Font("SimSun", 14.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.CashPaymentGroupBox.Location = new System.Drawing.Point(380, 455);
+            this.CashPaymentGroupBox.Location = new System.Drawing.Point(321, 455);
             this.CashPaymentGroupBox.Name = "CashPaymentGroupBox";
-            this.CashPaymentGroupBox.Size = new System.Drawing.Size(379, 75);
+            this.CashPaymentGroupBox.Size = new System.Drawing.Size(438, 75);
             this.CashPaymentGroupBox.TabIndex = 4;
             this.CashPaymentGroupBox.TabStop = false;
             this.CashPaymentGroupBox.Text = "现金支付 [Ctrl+1]";
@@ -236,7 +236,7 @@
             // 
             this.ChangeLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ChangeLabel.AutoSize = true;
-            this.ChangeLabel.Location = new System.Drawing.Point(250, 35);
+            this.ChangeLabel.Location = new System.Drawing.Point(246, 43);
             this.ChangeLabel.Name = "ChangeLabel";
             this.ChangeLabel.Size = new System.Drawing.Size(126, 19);
             this.ChangeLabel.TabIndex = 1;
@@ -246,6 +246,7 @@
             // 
             this.CashPaymentTenderedTextBox.Font = new System.Drawing.Font("Arial", 20F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CashPaymentTenderedTextBox.Location = new System.Drawing.Point(10, 30);
+            this.CashPaymentTenderedTextBox.MaxLength = 6;
             this.CashPaymentTenderedTextBox.Name = "CashPaymentTenderedTextBox";
             this.CashPaymentTenderedTextBox.Size = new System.Drawing.Size(230, 38);
             this.CashPaymentTenderedTextBox.TabIndex = 0;

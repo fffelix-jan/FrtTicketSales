@@ -382,11 +382,11 @@ namespace FrtAfcApiClient
         }
 
         /// <summary>
-        /// Validates a ticket at a faregate.
+        /// Validates a ticket at an entry faregate.
         /// </summary>
         /// <param name="request">Validation request details</param>
         /// <returns>Validation response</returns>
-        public async Task<ValidateTicketResponse> ValidateTicketAsync(ValidateTicketRequest request)
+        public async Task<ValidateTicketResponse> ValidateTicketAtEntryAsync(ValidateTicketRequest request)
         {
             if (request == null)
             {
@@ -397,12 +397,12 @@ namespace FrtAfcApiClient
 
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("validateticket", request);
+                var response = await _httpClient.PostAsJsonAsync("validateticketatentry", request);
 
                 if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    throw new TicketValidationException($"Ticket validation failed: {error}");
+                    throw new TicketValidationException($"Entry ticket validation failed: {error}");
                 }
 
                 response.EnsureSuccessStatusCode();
@@ -416,7 +416,46 @@ namespace FrtAfcApiClient
             }
             catch (HttpRequestException ex)
             {
-                throw new FrtAfcApiException("Failed to validate ticket", ex);
+                throw new FrtAfcApiException("Failed to validate ticket at entry", ex);
+            }
+        }
+
+        /// <summary>
+        /// Validates a ticket at an exit faregate.
+        /// </summary>
+        /// <param name="request">Validation request details</param>
+        /// <returns>Validation response</returns>
+        public async Task<ValidateTicketResponse> ValidateTicketAtExitAsync(ValidateTicketRequest request)
+        {
+            if (request == null)
+            {
+                throw new ArgumentNullException(nameof(request));
+            }
+
+            ValidateTicketValidationRequest(request);
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("validateticketatexit", request);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new TicketValidationException($"Exit ticket validation failed: {error}");
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                var validationResponse = await response.Content.ReadFromJsonAsync<ValidateTicketResponse>();
+                if (validationResponse == null)
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return validationResponse;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException("Failed to validate ticket at exit", ex);
             }
         }
 

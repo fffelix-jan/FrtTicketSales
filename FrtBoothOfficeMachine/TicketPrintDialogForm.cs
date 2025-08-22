@@ -325,7 +325,7 @@ namespace FrtBoothOfficeMachine
                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     "TEST-TICKET-QR-CODE",
                     $"TEST-{DateTime.Now:yyyyMMdd}-{ticketNumber:D3}",
-                    "仅供测试，请勿损坏", "For testing only, do not damage"
+                    "仅供测试，不可以用于乘车", "For testing only, cannot be used for travel"
                 );
             });
         }

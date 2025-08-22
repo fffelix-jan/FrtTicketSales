@@ -234,6 +234,16 @@ namespace FrtBoothOfficeMachine
                 return true;
             }
 
+            // Handle Ctrl+A for text boxes
+            if (keyData == (Keys.Control | Keys.A))
+            {
+                if (this.ActiveControl is TextBox textBox)
+                {
+                    textBox.SelectAll();
+                    return true; // Indicates we handled the key
+                }
+            }
+
             return base.ProcessCmdKey(ref msg, keyData);
         }
 

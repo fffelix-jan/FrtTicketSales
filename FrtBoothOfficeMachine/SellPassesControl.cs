@@ -35,6 +35,7 @@ namespace FrtBoothOfficeMachine
             CashPaymentTenderedTextBox.KeyPress += CashPaymentTenderedTextBox_KeyPress;
             CashPaymentTenderedTextBox.KeyDown += CashPaymentTenderedTextBox_KeyDown;
             CashPaymentTenderedTextBox.Leave += CashPaymentTenderedTextBox_Leave;
+            CashPaymentTenderedTextBox.TextChanged += CashPaymentTenderedTextBox_TextChanged;
 
             // Button events
             CancelButton.Click += CancelButton_Click;
@@ -190,6 +191,12 @@ namespace FrtBoothOfficeMachine
             CalculateChange();
         }
 
+        private void CashPaymentTenderedTextBox_TextChanged(object sender, EventArgs e)
+        {
+            // Calculate change in real-time as user types
+            CalculateChange();
+        }
+
         private void CalculateChange()
         {
             string tenderText = CashPaymentTenderedTextBox.Text.Trim();
@@ -197,8 +204,18 @@ namespace FrtBoothOfficeMachine
             {
                 int tenderCents = (int)(tenderAmount * 100);
                 int changeCents = tenderCents - totalPriceCents;
-                decimal changeAmount = changeCents / 100.0m;
-                ChangeLabel.Text = $"找零: ¥{changeAmount:F2}";
+                decimal changeAmount = Math.Abs(changeCents) / 100.0m; // Always show positive amount
+
+                if (changeCents < 0)
+                {
+                    // Customer hasn't paid enough - show how much more is needed
+                    ChangeLabel.Text = $"还差: ¥{changeAmount:F2}";
+                }
+                else
+                {
+                    // Customer paid enough - show change due
+                    ChangeLabel.Text = $"找零: ¥{changeAmount:F2}";
+                }
             }
             else
             {
