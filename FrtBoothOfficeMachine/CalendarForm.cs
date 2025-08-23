@@ -16,5 +16,13 @@ namespace FrtBoothOfficeMachine
         {
             InitializeComponent();
         }
+
+        private void CalendarForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Escape)
+            {
+                this.Close();
+            }
+        }
     }
 }

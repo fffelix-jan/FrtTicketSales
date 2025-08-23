@@ -50,11 +50,13 @@
             this.ClientSize = new System.Drawing.Size(623, 468);
             this.Controls.Add(this.MainClassicMonthCalendar);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.KeyPreview = true;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "CalendarForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "CalendarForm";
+            this.Text = "日历";
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.CalendarForm_KeyDown);
             this.ResumeLayout(false);
 
         }

@@ -407,7 +407,7 @@ namespace FrtBoothOfficeMachine
                     priceDisplay, formattedPaymentMethod,
                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     ticketData.TicketString,
-                    $"{ticketData.TicketNumber}-{ticketNumber:D2}",
+                    $"{ticketData.TicketNumber}",
                     "重印车票，请勿损坏", "Reprinted ticket, please do not damage"
                 );
             });
@@ -448,7 +448,7 @@ namespace FrtBoothOfficeMachine
                     priceDisplay, formattedPaymentMethod,
                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     ticketData.TicketString,
-                    $"{ticketData.TicketNumber}-{ticketNumber:D2}",
+                    $"{ticketData.TicketNumber}",
                     "请勿损坏车票", "Please do not damage this ticket"
                 );
             });
@@ -468,7 +468,7 @@ namespace FrtBoothOfficeMachine
                     "¥0.00", formattedPaymentMethod,
                     DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
                     "TEST-TICKET-QR-CODE",
-                    $"TEST-{DateTime.Now:yyyyMMdd}-{ticketNumber:D3}",
+                    $"TEST-{DateTime.Now:yyyyMMdd}",
                     "仅供测试，不可以用于乘车", "For testing only, cannot be used for travel"
                 );
             });

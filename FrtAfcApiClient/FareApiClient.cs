@@ -390,24 +390,50 @@ namespace FrtAfcApiClient
         }
 
         /// <summary>
-        /// Gets information about a specific ticket.
+        /// Gets information about a specific ticket using ticket number or QR code.
         /// </summary>
-        /// <param name="ticketNumber">Ticket number to look up</param>
-        /// <returns>Ticket information</returns>
-        public async Task<TicketInfo> GetTicketInfoAsync(string ticketNumber)
+        /// <param name="ticketInput">Ticket number or QR code string</param>
+        /// <returns>Complete ticket information including all details</returns>
+        public async Task<TicketInfo> GetTicketInfoAsync(string ticketInput)
         {
-            if (string.IsNullOrWhiteSpace(ticketNumber))
+            if (string.IsNullOrWhiteSpace(ticketInput))
             {
-                throw new ArgumentException("Ticket number cannot be null or empty", nameof(ticketNumber));
+                throw new ArgumentException("Ticket input cannot be null or empty", nameof(ticketInput));
             }
+
+            var requestObj = new GetTicketInfoRequest { TicketInput = ticketInput.Trim() };
 
             try
             {
-                var response = await _httpClient.GetAsync($"ticket/{ticketNumber}");
+                var response = await _httpClient.PostAsJsonAsync("getticketinfo", requestObj);
 
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
-                    throw new TicketNotFoundException($"Ticket '{ticketNumber}' not found");
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new TicketNotFoundException($"Ticket not found: {error}");
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+
+                    // Check for specific error types
+                    if (error.Contains("Invalid ticket number format"))
+                    {
+                        throw new TicketValidationException("Invalid ticket number format. Please enter a valid numeric ticket number.");
+                    }
+                    else if (error.Contains("Invalid QR code") || error.Contains("unable to decode ticket"))
+                    {
+                        throw new TicketValidationException("Invalid QR code. The scanned QR code is not a valid ticket code.");
+                    }
+                    else if (error.Contains("QR code decoding failed"))
+                    {
+                        throw new TicketValidationException("QR code decoding failed. The QR code may be damaged or corrupted.");
+                    }
+                    else
+                    {
+                        throw new FrtAfcApiException($"Ticket lookup failed: {error}");
+                    }
                 }
 
                 response.EnsureSuccessStatusCode();
@@ -421,7 +447,7 @@ namespace FrtAfcApiClient
             }
             catch (HttpRequestException ex)
             {
-                throw new FrtAfcApiException($"Failed to get ticket information for '{ticketNumber}'", ex);
+                throw new FrtAfcApiException("Failed to get ticket information", ex);
             }
         }
 
@@ -753,6 +779,52 @@ namespace FrtAfcApiClient
             }
         }
 
+        /// <summary>
+        /// Refunds a ticket using ticket number or QR code.
+        /// Only tickets in 'Paid' state (1) that are not invoiced can be refunded.
+        /// </summary>
+        /// <param name="ticketInput">Ticket number or QR code string</param>
+        /// <returns>Refund response</returns>
+        public async Task<RefundTicketResponse> RefundTicketAsync(string ticketInput)
+        {
+            if (string.IsNullOrWhiteSpace(ticketInput))
+            {
+                throw new ArgumentException("Ticket input cannot be null or empty", nameof(ticketInput));
+            }
+
+            var request = new RefundTicketRequest { TicketInput = ticketInput.Trim() };
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("refundticket", request);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new TicketNotFoundException($"Ticket not found: {error}");
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new RefundException($"Ticket refund failed: {error}");
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                var refundResponse = await response.Content.ReadFromJsonAsync<RefundTicketResponse>();
+                if (refundResponse == null)
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return refundResponse;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException("Failed to refund ticket", ex);
+            }
+        }
+
         private void ValidateUpdateDayPassPriceRequest(UpdateDayPassPriceRequest request)
         {
             var validationResults = new List<ValidationResult>();
@@ -964,16 +1036,6 @@ namespace FrtAfcApiClient
         public DateTime ReissueTime { get; set; }
     }
 
-    public class TicketInfo
-    {
-        public long TicketNumber { get; set; }
-        public int ValueCents { get; set; }
-        public string IssuingStation { get; set; } = string.Empty;
-        public DateTime IssueDateTime { get; set; }
-        public byte TicketType { get; set; }
-        public byte TicketState { get; set; }
-    }
-
     public class ValidateTicketResponse
     {
         public string TicketNumber { get; set; } = string.Empty;
@@ -1003,6 +1065,8 @@ namespace FrtAfcApiClient
         public bool CanViewTickets { get; set; }
         public bool CanValidateTickets { get; set; }
         public bool CanChangePassword { get; set; }
+        public bool CanIssueInvoices { get; set; }
+        public bool CanRefundTickets { get; set; }
         public bool IsSystemAdmin { get; set; }
     }
 
@@ -1067,6 +1131,49 @@ namespace FrtAfcApiClient
         public string Message { get; set; } = string.Empty;
     }
 
+    // Refund DTOs
+    public class RefundTicketRequest
+    {
+        [Required(ErrorMessage = "Ticket input is required")]
+        public string TicketInput { get; set; } = string.Empty;
+    }
+
+    public class RefundTicketResponse
+    {
+        public string TicketNumber { get; set; } = string.Empty;
+        public byte TicketType { get; set; }
+        public byte OriginalTicketState { get; set; }
+        public byte NewTicketState { get; set; }
+        public int ValueCents { get; set; }
+        public decimal ValueYuan { get; set; }
+        public string IssuingStation { get; set; } = string.Empty;
+        public DateTime IssueDateTime { get; set; }
+        public string RefundedBy { get; set; } = string.Empty;
+        public DateTime RefundTime { get; set; }
+        public string InputMethod { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+    }
+
+    // Ticket Info DTOs
+    public class GetTicketInfoRequest
+    {
+        [Required(ErrorMessage = "Ticket input is required")]
+        public string TicketInput { get; set; } = string.Empty;
+    }
+
+    public class TicketInfo
+    {
+        public long TicketNumber { get; set; }
+        public int ValueCents { get; set; }
+        public decimal ValueYuan { get; set; }
+        public string IssuingStation { get; set; } = string.Empty;
+        public DateTime IssueDateTime { get; set; }
+        public byte TicketType { get; set; }
+        public byte TicketState { get; set; }
+        public bool IsInvoiced { get; set; }
+        public string InputMethod { get; set; } = string.Empty;
+    }
+
     public class InvoiceException : FrtAfcApiException
     {
         public InvoiceException(string message) : base(message) { }
@@ -1094,11 +1201,6 @@ namespace FrtAfcApiClient
         public TicketNotFoundException(string message) : base(message) { }
     }
 
-    public class TicketValidationException : FrtAfcApiException
-    {
-        public TicketValidationException(string message) : base(message) { }
-    }
-
     public class PasswordChangeException : FrtAfcApiException
     {
         public PasswordChangeException(string message) : base(message) { }
@@ -1107,5 +1209,16 @@ namespace FrtAfcApiClient
     public class DebugModeDisabledException : FrtAfcApiException
     {
         public DebugModeDisabledException(string message) : base(message) { }
+    }
+
+    public class RefundException : FrtAfcApiException
+    {
+        public RefundException(string message) : base(message) { }
+    }
+
+    public class TicketValidationException : FrtAfcApiException
+    {
+        public TicketValidationException(string message) : base(message) { }
+        public TicketValidationException(string message, Exception innerException) : base(message, innerException) { }
     }
 }

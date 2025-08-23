@@ -864,5 +864,472 @@ namespace FrtBoothOfficeMachine
                 this.Cursor = Cursors.Default;
             }
         }
+
+        private async void RefundTicketToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Check if we have an authenticated API client
+                if (GlobalCredentials.ApiClient == null)
+                {
+                    MessageBox.Show("API客户端未初始化。请先登录系统。",
+                                  "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Get ticket number or QR code from user using VB.NET InputBox
+                string ticketInput = Interaction.InputBox(
+                    "请输入车票编号或扫描车票二维码：\n\n• 可直接输入车票编号\n• 或使用扫描枪扫描车票二维码",
+                    "退票",
+                    "");
+
+                // Check if user cancelled or entered empty string
+                if (string.IsNullOrWhiteSpace(ticketInput))
+                {
+                    return; // User cancelled
+                }
+
+                // Trim whitespace
+                ticketInput = ticketInput.Trim();
+
+                // Basic validation - either numeric ticket number or longer QR code
+                if (ticketInput.Length < 3)
+                {
+                    MessageBox.Show("输入无效。请输入有效的车票编号或扫描车票二维码。",
+                                  "输入错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Show confirmation dialog
+                string inputType = ticketInput.Length > 20 ? "二维码" : "车票编号";
+                var confirmResult = MessageBox.Show(
+                    $"确定要退票{inputType} {(ticketInput.Length > 20 ? "[已扫描]" : ticketInput)} 吗？\n\n" +
+                    $"注意：\n" +
+                    $"• 只有未使用且未开票的车票可以退票\n" +
+                    $"• 已开具发票的车票无法退票\n" +
+                    $"• 免费车票无法退票\n" +
+                    $"• 此操作无法撤销",
+                    "确认退票",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2); // Default to "No" for safety
+
+                if (confirmResult != DialogResult.Yes)
+                {
+                    return; // User cancelled
+                }
+
+                // Show progress message
+                this.Cursor = Cursors.WaitCursor;
+
+                try
+                {
+                    // Call the API to refund ticket
+                    var refundResponse = await GlobalCredentials.ApiClient.RefundTicketAsync(ticketInput);
+
+                    // Success - show confirmation and details
+                    string successMessage = $"退票成功！\n\n" +
+                                          $"车票编号：{refundResponse.TicketNumber}\n" +
+                                          $"车票类型：{GetTicketTypeDescription(refundResponse.TicketType)}\n" +
+                                          $"退款金额：¥{refundResponse.ValueYuan:F2}\n" +
+                                          $"签发站：{refundResponse.IssuingStation}\n" +
+                                          $"退票时间：{refundResponse.RefundTime:yyyy-MM-dd HH:mm:ss}\n" +
+                                          $"操作员：{refundResponse.RefundedBy}\n\n" +
+                                          $"请按照相关规定为乘客办理退款手续。";
+
+                    MessageBox.Show(successMessage,
+                                  "退票成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (TicketNotFoundException ex)
+                {
+                    MessageBox.Show($"车票不存在：\n\n{ex.Message}\n\n请检查输入的车票编号或二维码是否正确。",
+                                  "车票未找到", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (RefundException ex)
+                {
+                    // Check for specific refund error scenarios based on server error messages
+                    string errorMessage = ex.Message.ToLower();
+
+                    if (errorMessage.Contains("cannot be refunded") && errorMessage.Contains("paid"))
+                    {
+                        // Special message for tickets not in Paid state
+                        MessageBox.Show($"该车票无法退票！\n\n" +
+                                      $"只有处于\"已支付\"状态的车票才能退票。\n" +
+                                      $"该车票可能已被使用或处于其他状态。\n\n" +
+                                      $"如果您认为这是错误，请：\n" +
+                                      $"• 检查车票编号或二维码是否正确\n" +
+                                      $"• 核实该车票是否确实未使用\n" +
+                                      $"• 如有疑问请联系管理员",
+                                      "车票状态不符", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else if (errorMessage.Contains("already been invoiced"))
+                    {
+                        // Special message for already invoiced tickets
+                        MessageBox.Show($"该车票无法退票！\n\n" +
+                                      $"该车票已开具发票，无法办理退票。\n" +
+                                      $"已开具发票的车票不能退票。\n\n" +
+                                      $"如果需要退票，请：\n" +
+                                      $"• 先按相关规定处理发票\n" +
+                                      $"• 或联系管理员协助处理\n" +
+                                      $"• 如有疑问请联系财务部门",
+                                      "车票已开票", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else if (errorMessage.Contains("cannot refund free tickets"))
+                    {
+                        // Special message for free tickets
+                        MessageBox.Show($"无法退票！\n\n" +
+                                      $"免费车票无法办理退票。\n" +
+                                      $"只有有价车票才能办理退票业务。\n\n" +
+                                      $"如有疑问请联系管理员。",
+                                      "免费车票", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        // Regular refund exception handling - safely access message
+                        string errorDetails = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            errorDetails = ex.InnerException.Message;
+                        }
+
+                        MessageBox.Show($"无法退票：\n\n{errorDetails}\n\n" +
+                                      $"可能原因：\n" +
+                                      $"• 车票已被使用或作废\n" +
+                                      $"• 车票已开具发票\n" +
+                                      $"• 免费车票无法退票\n" +
+                                      $"• 车票状态异常",
+                                      "退票失败", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+                catch (FrtAfcApiException ex) when (ex.Message.Contains("Insufficient permissions"))
+                {
+                    MessageBox.Show("权限不足：您没有退票的权限。\n\n请联系系统管理员。",
+                                  "权限错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (FrtAfcApiException ex)
+                {
+                    // Check for specific error messages in general API exceptions
+                    string errorMessage = ex.Message.ToLower();
+
+                    if (errorMessage.Contains("cannot be refunded") && errorMessage.Contains("paid"))
+                    {
+                        MessageBox.Show($"该车票无法退票！\n\n" +
+                                      $"只有处于\"已支付\"状态的车票才能退票。\n" +
+                                      $"该车票可能已被使用或处于其他状态。\n\n" +
+                                      $"如果您认为这是错误，请：\n" +
+                                      $"• 检查车票编号或二维码是否正确\n" +
+                                      $"• 核实该车票是否确实未使用\n" +
+                                      $"• 如有疑问请联系管理员",
+                                      "车票状态不符", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else if (errorMessage.Contains("already been invoiced"))
+                    {
+                        MessageBox.Show($"该车票无法退票！\n\n" +
+                                      $"该车票已开具发票，无法办理退票。\n" +
+                                      $"已开具发票的车票不能退票。\n\n" +
+                                      $"如果需要退票，请：\n" +
+                                      $"• 先按相关规定处理发票\n" +
+                                      $"• 或联系管理员协助处理\n" +
+                                      $"• 如有疑问请联系财务部门",
+                                      "车票已开票", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else if (errorMessage.Contains("cannot refund free tickets"))
+                    {
+                        MessageBox.Show($"无法退票！\n\n" +
+                                      $"免费车票无法办理退票。\n" +
+                                      $"只有有价车票才能办理退票业务。\n\n" +
+                                      $"如有疑问请联系管理员。",
+                                      "免费车票", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"服务器错误：\n\n{ex.Message}\n\n请检查网络连接和服务器状态。",
+                                      "服务器错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Check for specific error messages in general exceptions
+                    string errorMessage = ex.Message.ToLower();
+
+                    if (errorMessage.Contains("cannot be refunded") && errorMessage.Contains("paid"))
+                    {
+                        MessageBox.Show($"该车票无法退票！\n\n" +
+                                      $"只有处于\"已支付\"状态的车票才能退票。\n" +
+                                      $"该车票可能已被使用或处于其他状态。\n\n" +
+                                      $"如果您认为这是错误，请：\n" +
+                                      $"• 检查车票编号或二维码是否正确\n" +
+                                      $"• 核实该车票是否确实未使用\n" +
+                                      $"• 如有疑问请联系管理员",
+                                      "车票状态不符", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else if (errorMessage.Contains("already been invoiced"))
+                    {
+                        MessageBox.Show($"该车票无法退票！\n\n" +
+                                      $"该车票已开具发票，无法办理退票。\n" +
+                                      $"已开具发票的车票不能退票。\n\n" +
+                                      $"如果需要退票，请：\n" +
+                                      $"• 先按相关规定处理发票\n" +
+                                      $"• 或联系管理员协助处理\n" +
+                                      $"• 如有疑问请联系财务部门",
+                                      "车票已开票", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else if (errorMessage.Contains("cannot refund free tickets"))
+                    {
+                        MessageBox.Show($"无法退票！\n\n" +
+                                      $"免费车票无法办理退票。\n" +
+                                      $"只有有价车票才能办理退票业务。\n\n" +
+                                      $"如有疑问请联系管理员。",
+                                      "免费车票", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        // Safely access exception details
+                        string errorDetails = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            errorDetails = ex.InnerException.Message;
+                        }
+
+                        MessageBox.Show($"退票时发生未知错误：\n\n{errorDetails}\n\n请联系技术支持。",
+                                      "未知错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Safely access exception details for outer catch
+                string errorDetails = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    errorDetails = ex.InnerException.Message;
+                }
+
+                MessageBox.Show($"执行退票操作时发生错误：\n\n{errorDetails}",
+                              "操作错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
+        }
+
+        private async void QueryTicketInfoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Check if we have an authenticated API client
+                if (GlobalCredentials.ApiClient == null)
+                {
+                    MessageBox.Show("API客户端未初始化。请先登录系统。",
+                                  "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Get ticket number or QR code from user using VB.NET InputBox
+                string ticketInput = Interaction.InputBox(
+                    "请输入车票编号或扫描车票二维码：\n\n• 可直接输入车票编号\n• 或使用扫描枪扫描车票二维码",
+                    "查询车票信息",
+                    "");
+
+                // Check if user cancelled or entered empty string
+                if (string.IsNullOrWhiteSpace(ticketInput))
+                {
+                    return; // User cancelled
+                }
+
+                // Trim whitespace
+                ticketInput = ticketInput.Trim();
+
+                // Basic validation - either numeric ticket number or longer QR code
+                if (ticketInput.Length < 3)
+                {
+                    MessageBox.Show("输入无效。请输入有效的车票编号或扫描车票二维码。",
+                                  "输入错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Show progress message
+                this.Cursor = Cursors.WaitCursor;
+
+                try
+                {
+                    // Call the API to get ticket info - explicitly use FrtAfcApiClient.TicketInfo
+                    var ticketInfo = await GlobalCredentials.ApiClient.GetTicketInfoAsync(ticketInput);
+
+                    // Success - show detailed ticket information
+                    string inputType = ticketInput.Length > 20 ? "二维码" : "车票编号";
+
+                    // Get station name for better display
+                    string stationDisplayName = ticketInfo.IssuingStation;
+                    try
+                    {
+                        var stationInfo = await GlobalCredentials.ApiClient.GetStationNameAsync(ticketInfo.IssuingStation);
+                        stationDisplayName = $"{stationInfo.ChineseName} ({stationInfo.StationCode})";
+                    }
+                    catch
+                    {
+                        // If we can't get station name, just use the code
+                        stationDisplayName = ticketInfo.IssuingStation;
+                    }
+
+                    // Format ticket state description
+                    string ticketStateDescription = GetTicketStateDescription(ticketInfo.TicketState);
+
+                    // Build the information message
+                    string infoMessage = $"车票信息查询成功！\n\n" +
+                                       $"查询方式：{inputType}\n" +
+                                       $"车票编号：{ticketInfo.TicketNumber}\n" +
+                                       $"车票类型：{GetTicketTypeDescription(ticketInfo.TicketType)}\n" +
+                                       $"车票状态：{ticketStateDescription}\n" +
+                                       $"车票金额：¥{ticketInfo.ValueYuan:F2}\n" +
+                                       $"签发站：{stationDisplayName}\n" +
+                                       $"签发时间：{ticketInfo.IssueDateTime:yyyy-MM-dd HH:mm:ss}\n" +
+                                       $"发票状态：{(ticketInfo.IsInvoiced ? "已开票" : "未开票")}\n" +
+                                       $"输入方式：{(ticketInfo.InputMethod == "qr_code" ? "二维码扫描" : "手动输入")}";
+
+
+                    MessageBox.Show(infoMessage,
+                                  "车票信息", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (TicketNotFoundException ex)
+                {
+                    string inputType = ticketInput.Length > 20 ? "二维码" : "车票编号";
+                    MessageBox.Show($"车票不存在！\n\n" +
+                                  $"系统中找不到{inputType}对应的车票记录。\n\n" +
+                                  $"请确认：\n" +
+                                  $"• {inputType}是否输入正确\n" +
+                                  $"• 车票编号是否有效\n" +
+                                  $"• 车票是否已被系统删除\n\n" +
+                                  $"如有疑问，请联系工作人员。",
+                                  "车票未找到", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (TicketValidationException ex)
+                {
+                    string inputType = ticketInput.Length > 20 ? "二维码" : "车票编号";
+                    
+                    if (ex.Message.Contains("Invalid ticket number format"))
+                    {
+                        MessageBox.Show($"车票编号格式错误！\n\n" +
+                                      $"车票编号必须是纯数字格式。\n\n" +
+                                      $"请检查：\n" +
+                                      $"• 车票编号是否包含字母或特殊字符\n" +
+                                      $"• 是否输入了完整的车票编号\n" +
+                                      $"• 车票编号是否正确\n\n",
+                                      "格式错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else if (ex.Message.Contains("Invalid QR code"))
+                    {
+                        MessageBox.Show($"二维码无效！\n\n" +
+                                      $"扫描的二维码不是有效的车票码。\n\n" +
+                                      $"请确认：\n" +
+                                      $"• 二维码是否为车票上的二维码\n" +
+                                      $"• 二维码是否清晰完整\n" +
+                                      $"• 扫描设备是否正常工作\n" +
+                                      $"• 是否扫描了正确的二维码\n\n" +
+                                      $"建议：尝试手动输入车票编号",
+                                      "二维码无效", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else if (ex.Message.Contains("QR code decoding failed"))
+                    {
+                        MessageBox.Show($"二维码解析失败！\n\n" +
+                                      $"二维码可能已损坏或无法识别。\n\n" +
+                                      $"可能原因：\n" +
+                                      $"• 二维码印刷不清晰或污损\n" +
+                                      $"• 二维码部分缺失或损坏\n" +
+                                      $"• 车票表面有污渍或划痕\n" +
+                                      $"• 二维码格式已过期\n\n" +
+                                      $"解决方案：请手动输入车票编号",
+                                      "解析失败", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"{inputType}验证失败！\n\n" +
+                                      $"{ex.Message}\n\n" +
+                                      $"请检查输入内容是否正确，或联系工作人员。",
+                                      "验证失败", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+                catch (FrtAfcApiException ex) when (ex.Message.Contains("Insufficient permissions"))
+                {
+                    MessageBox.Show("权限不足：您没有查询车票信息的权限。\n\n请联系系统管理员。",
+                                  "权限错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (FrtAfcApiException ex)
+                {
+                    string errorDetails = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        errorDetails = ex.InnerException.Message;
+                    }
+
+                    MessageBox.Show($"服务器错误：\n\n{errorDetails}\n\n请检查网络连接和服务器状态。",
+                                  "服务器错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    // Safely access exception details
+                    string errorDetails = ex.Message;
+                    if (ex.InnerException != null)
+                    {
+                        errorDetails = ex.InnerException.Message;
+                    }
+
+                    MessageBox.Show($"查询车票信息时发生未知错误：\n\n{errorDetails}\n\n请联系技术支持。",
+                                  "未知错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Safely access exception details for outer catch
+                string errorDetails = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    errorDetails = ex.InnerException.Message;
+                }
+
+                MessageBox.Show($"执行车票查询操作时发生错误：\n\n{errorDetails}",
+                              "操作错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
+        }
+
+        /// <summary>
+        /// Gets a human-readable description of the ticket state
+        /// </summary>
+        /// <param name="ticketState">Ticket state code</param>
+        /// <returns>Chinese description of the ticket state</returns>
+        private string GetTicketStateDescription(byte ticketState)
+        {
+            switch (ticketState)
+            {
+                case 0:
+                    return "未使用（新发）";
+                case 1:
+                    return "已支付（待使用）";
+                case 2:
+                    return "已入站";
+                case 3:
+                    return "已出站（已使用）";
+                case 4:
+                    return "已作废（重印）";
+                case 5:
+                    return "已退票";
+                default:
+                    return $"未知状态（{ticketState}）";
+            }
+        }
+
+        private void QueryStationInfoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            // Show the station information form as a dialog
+            using (var stationInfoForm = new ViewStationInformationForm())
+            {
+                stationInfoForm.ShowDialog(this);
+            }
+        }
     }
 }

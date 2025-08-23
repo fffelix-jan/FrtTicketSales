@@ -46,12 +46,12 @@
             this.ReprintDamagedTicketToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.IssueFapiaoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.退票处理RToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.RefundTicketToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.RefundICCardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.QueryToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.查询票信息检票CToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.车站信息查询NToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.QueryTicketInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.QueryStationInfoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.QueryICCardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ShiftChangeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -163,6 +163,7 @@
             // DisplayCalendarToolStripMenuItem
             // 
             this.DisplayCalendarToolStripMenuItem.Name = "DisplayCalendarToolStripMenuItem";
+            this.DisplayCalendarToolStripMenuItem.ShortcutKeys = ((System.Windows.Forms.Keys)((System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.N)));
             this.DisplayCalendarToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
             this.DisplayCalendarToolStripMenuItem.Text = "日历显示";
             this.DisplayCalendarToolStripMenuItem.Click += new System.EventHandler(this.DisplayCalendarToolStripMenuItem_Click);
@@ -194,7 +195,7 @@
             // 
             this.ProcessToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.IssueFapiaoToolStripMenuItem,
-            this.退票处理RToolStripMenuItem,
+            this.RefundTicketToolStripMenuItem,
             this.toolStripSeparator4,
             this.RefundICCardToolStripMenuItem});
             this.ProcessToolStripMenuItem.Name = "ProcessToolStripMenuItem";
@@ -208,11 +209,12 @@
             this.IssueFapiaoToolStripMenuItem.Text = "开发票 [&F]";
             this.IssueFapiaoToolStripMenuItem.Click += new System.EventHandler(this.IssueFapiaoToolStripMenuItem_Click);
             // 
-            // 退票处理RToolStripMenuItem
+            // RefundTicketToolStripMenuItem
             // 
-            this.退票处理RToolStripMenuItem.Name = "退票处理RToolStripMenuItem";
-            this.退票处理RToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.退票处理RToolStripMenuItem.Text = "退票处理 [&R]";
+            this.RefundTicketToolStripMenuItem.Name = "RefundTicketToolStripMenuItem";
+            this.RefundTicketToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.RefundTicketToolStripMenuItem.Text = "退票处理 [&R]";
+            this.RefundTicketToolStripMenuItem.Click += new System.EventHandler(this.RefundTicketToolStripMenuItem_Click);
             // 
             // toolStripSeparator4
             // 
@@ -229,25 +231,27 @@
             // QueryToolStripMenuItem
             // 
             this.QueryToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.查询票信息检票CToolStripMenuItem,
-            this.车站信息查询NToolStripMenuItem,
+            this.QueryTicketInfoToolStripMenuItem,
+            this.QueryStationInfoToolStripMenuItem,
             this.toolStripSeparator2,
             this.QueryICCardToolStripMenuItem});
             this.QueryToolStripMenuItem.Name = "QueryToolStripMenuItem";
             this.QueryToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.QueryToolStripMenuItem.Text = "查询 [&U]";
             // 
-            // 查询票信息检票CToolStripMenuItem
+            // QueryTicketInfoToolStripMenuItem
             // 
-            this.查询票信息检票CToolStripMenuItem.Name = "查询票信息检票CToolStripMenuItem";
-            this.查询票信息检票CToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.查询票信息检票CToolStripMenuItem.Text = "车票信息查询 [&C]";
+            this.QueryTicketInfoToolStripMenuItem.Name = "QueryTicketInfoToolStripMenuItem";
+            this.QueryTicketInfoToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.QueryTicketInfoToolStripMenuItem.Text = "车票信息查询 [&C]";
+            this.QueryTicketInfoToolStripMenuItem.Click += new System.EventHandler(this.QueryTicketInfoToolStripMenuItem_Click);
             // 
-            // 车站信息查询NToolStripMenuItem
+            // QueryStationInfoToolStripMenuItem
             // 
-            this.车站信息查询NToolStripMenuItem.Name = "车站信息查询NToolStripMenuItem";
-            this.车站信息查询NToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.车站信息查询NToolStripMenuItem.Text = "车站信息查询 [&N]";
+            this.QueryStationInfoToolStripMenuItem.Name = "QueryStationInfoToolStripMenuItem";
+            this.QueryStationInfoToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.QueryStationInfoToolStripMenuItem.Text = "车站信息查询 [&N]";
+            this.QueryStationInfoToolStripMenuItem.Click += new System.EventHandler(this.QueryStationInfoToolStripMenuItem_Click);
             // 
             // toolStripSeparator2
             // 
@@ -379,11 +383,11 @@
         private System.Windows.Forms.ToolStripMenuItem AboutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem IssueFapiaoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem ReprintDamagedTicketToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 查询票信息检票CToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem QueryTicketInfoToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem TestServerConnectionToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 退票处理RToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem RefundTicketToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem DisplayCalendarToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 车站信息查询NToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem QueryStationInfoToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator3;
         private System.Windows.Forms.ToolStripMenuItem TopUpICCardToolStripMenuItem;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
