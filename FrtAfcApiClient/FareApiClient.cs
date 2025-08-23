@@ -346,6 +346,50 @@ namespace FrtAfcApiClient
         }
 
         /// <summary>
+        /// Reprints a damaged ticket by generating a new one and invalidating the original.
+        /// The server will preserve the original ticket type and invoice status.
+        /// </summary>
+        /// <param name="originalTicketNumber">The ticket number of the damaged ticket</param>
+        /// <param name="issuingStation">Station where the new ticket is being issued</param>
+        /// <param name="valueCents">Value for the new ticket (optional - uses original if not specified)</param>
+        /// <returns>Reissue response with original and replacement ticket information</returns>
+        public async Task<ReissueTicketResponse> ReprintTicketAsync(string originalTicketNumber, string issuingStation, int? valueCents = null)
+        {
+            if (string.IsNullOrWhiteSpace(originalTicketNumber))
+            {
+                throw new ArgumentException("Original ticket number cannot be null or empty", nameof(originalTicketNumber));
+            }
+
+            if (string.IsNullOrWhiteSpace(issuingStation))
+            {
+                throw new ArgumentException("Issuing station cannot be null or empty", nameof(issuingStation));
+            }
+
+            ValidateStationCode(issuingStation, nameof(issuingStation));
+
+            var request = new ReissueTicketRequest
+            {
+                OriginalTicketNumber = originalTicketNumber,
+                IssuingStation = issuingStation.ToUpper(),
+                ValueCents = valueCents ?? 0 // Use 0 to indicate server should use original value
+            };
+
+            return await ReissueTicketAsync(request);
+        }
+
+        /// <summary>
+        /// Reprints a damaged ticket using the same details as the original.
+        /// The server will preserve the original ticket type and invoice status.
+        /// </summary>
+        /// <param name="originalTicketNumber">The ticket number of the damaged ticket</param>
+        /// <param name="issuingStation">Station where the new ticket is being issued</param>
+        /// <returns>Reissue response with original and replacement ticket information</returns>
+        public async Task<ReissueTicketResponse> ReprintTicketAsync(string originalTicketNumber, string issuingStation)
+        {
+            return await ReprintTicketAsync(originalTicketNumber, issuingStation, null);
+        }
+
+        /// <summary>
         /// Gets information about a specific ticket.
         /// </summary>
         /// <param name="ticketNumber">Ticket number to look up</param>
@@ -664,6 +708,51 @@ namespace FrtAfcApiClient
             }
         }
 
+        /// <summary>
+        /// Issues an invoice for a ticket using ticket number or QR code.
+        /// </summary>
+        /// <param name="ticketInput">Ticket number or QR code string</param>
+        /// <returns>Invoice issuance response</returns>
+        public async Task<IssueInvoiceResponse> IssueInvoiceAsync(string ticketInput)
+        {
+            if (string.IsNullOrWhiteSpace(ticketInput))
+            {
+                throw new ArgumentException("Ticket input cannot be null or empty", nameof(ticketInput));
+            }
+
+            var request = new IssueInvoiceRequest { TicketInput = ticketInput.Trim() };
+
+            try
+            {
+                var response = await _httpClient.PostAsJsonAsync("issueinvoice", request);
+
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new TicketNotFoundException($"Ticket not found: {error}");
+                }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new InvoiceException($"Invoice issuance failed: {error}");
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                var invoiceResponse = await response.Content.ReadFromJsonAsync<IssueInvoiceResponse>();
+                if (invoiceResponse == null)
+                {
+                    throw new FrtAfcApiException("Received null response from server");
+                }
+                return invoiceResponse;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException("Failed to issue invoice", ex);
+            }
+        }
+
         private void ValidateUpdateDayPassPriceRequest(UpdateDayPassPriceRequest request)
         {
             var validationResults = new List<ValidationResult>();
@@ -834,10 +923,6 @@ namespace FrtAfcApiClient
     {
         [Required(ErrorMessage = "Original ticket number is required")]
         public string OriginalTicketNumber { get; set; }
-
-        [Required(ErrorMessage = "Ticket type is required")]
-        [Range(0, 255, ErrorMessage = "Ticket type must be between 0 and 255")]
-        public new byte TicketType { get; set; }
     }
 
     public class ValidateTicketRequest
@@ -864,7 +949,19 @@ namespace FrtAfcApiClient
     public class ReissueTicketResponse
     {
         public string OriginalTicket { get; set; } = string.Empty;
+        public byte OriginalTicketState { get; set; }
+        public byte OriginalTicketType { get; set; }
+        public string OriginalIssuingStation { get; set; } = string.Empty;
+        public int OriginalValueCents { get; set; } // Add this line
+        public bool OriginalIsInvoiced { get; set; }
         public TicketData ReplacementTicket { get; set; }
+        public byte ReplacementTicketState { get; set; }
+        public byte ReplacementTicketType { get; set; }
+        public int ReplacementValueCents { get; set; } // Add this line
+        public bool ReplacementIsInvoiced { get; set; }
+        public string Message { get; set; } = string.Empty;
+        public string ReissuedBy { get; set; } = string.Empty;
+        public DateTime ReissueTime { get; set; }
     }
 
     public class TicketInfo
@@ -948,6 +1045,31 @@ namespace FrtAfcApiClient
         [StringLength(3, MinimumLength = 3, ErrorMessage = "Station code must be 3 characters")]
         [RegularExpression(@"^[A-Z]+$", ErrorMessage = "Station code must be uppercase letters")]
         public string IssuingStation { get; set; } = string.Empty;
+    }
+
+    public class IssueInvoiceRequest
+    {
+        [Required(ErrorMessage = "Ticket input is required")]
+        public string TicketInput { get; set; } = string.Empty;
+    }
+
+    public class IssueInvoiceResponse
+    {
+        public string TicketNumber { get; set; } = string.Empty;
+        public byte TicketType { get; set; }
+        public byte TicketState { get; set; }
+        public int ValueCents { get; set; }
+        public decimal ValueYuan { get; set; }
+        public string IssuingStation { get; set; } = string.Empty;
+        public DateTime IssueDateTime { get; set; }
+        public string InvoicedBy { get; set; } = string.Empty;
+        public DateTime InvoiceTime { get; set; }
+        public string Message { get; set; } = string.Empty;
+    }
+
+    public class InvoiceException : FrtAfcApiException
+    {
+        public InvoiceException(string message) : base(message) { }
     }
 
     // Custom Exception Classes

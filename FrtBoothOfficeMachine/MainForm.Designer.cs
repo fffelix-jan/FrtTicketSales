@@ -43,9 +43,9 @@
             this.DisplayCalendarToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PrintTicketsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.PrintFreeExitTicketToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.重打ToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.ReprintDamagedTicketToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.ProcessToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.开发票FToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.IssueFapiaoToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.退票处理RToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
             this.RefundICCardToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -171,7 +171,7 @@
             // 
             this.PrintTicketsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.PrintFreeExitTicketToolStripMenuItem,
-            this.重打ToolStripMenuItem});
+            this.ReprintDamagedTicketToolStripMenuItem});
             this.PrintTicketsToolStripMenuItem.Name = "PrintTicketsToolStripMenuItem";
             this.PrintTicketsToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.PrintTicketsToolStripMenuItem.Text = "制票 [&V]";
@@ -183,16 +183,17 @@
             this.PrintFreeExitTicketToolStripMenuItem.Text = "打印免费出站票 [&E]";
             this.PrintFreeExitTicketToolStripMenuItem.Click += new System.EventHandler(this.PrintFreeExitTicketToolStripMenuItem_Click);
             // 
-            // 重打ToolStripMenuItem
+            // ReprintDamagedTicketToolStripMenuItem
             // 
-            this.重打ToolStripMenuItem.Name = "重打ToolStripMenuItem";
-            this.重打ToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
-            this.重打ToolStripMenuItem.Text = "重打丢失票 [&R]";
+            this.ReprintDamagedTicketToolStripMenuItem.Name = "ReprintDamagedTicketToolStripMenuItem";
+            this.ReprintDamagedTicketToolStripMenuItem.Size = new System.Drawing.Size(211, 22);
+            this.ReprintDamagedTicketToolStripMenuItem.Text = "重印破损车票 [&R]";
+            this.ReprintDamagedTicketToolStripMenuItem.Click += new System.EventHandler(this.ReprintDamagedTicketToolStripMenuItem_Click);
             // 
             // ProcessToolStripMenuItem
             // 
             this.ProcessToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.开发票FToolStripMenuItem,
+            this.IssueFapiaoToolStripMenuItem,
             this.退票处理RToolStripMenuItem,
             this.toolStripSeparator4,
             this.RefundICCardToolStripMenuItem});
@@ -200,11 +201,12 @@
             this.ProcessToolStripMenuItem.Size = new System.Drawing.Size(81, 20);
             this.ProcessToolStripMenuItem.Text = "处理 [&L]";
             // 
-            // 开发票FToolStripMenuItem
+            // IssueFapiaoToolStripMenuItem
             // 
-            this.开发票FToolStripMenuItem.Name = "开发票FToolStripMenuItem";
-            this.开发票FToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
-            this.开发票FToolStripMenuItem.Text = "开发票 [&F]";
+            this.IssueFapiaoToolStripMenuItem.Name = "IssueFapiaoToolStripMenuItem";
+            this.IssueFapiaoToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.IssueFapiaoToolStripMenuItem.Text = "开发票 [&F]";
+            this.IssueFapiaoToolStripMenuItem.Click += new System.EventHandler(this.IssueFapiaoToolStripMenuItem_Click);
             // 
             // 退票处理RToolStripMenuItem
             // 
@@ -238,24 +240,24 @@
             // 查询票信息检票CToolStripMenuItem
             // 
             this.查询票信息检票CToolStripMenuItem.Name = "查询票信息检票CToolStripMenuItem";
-            this.查询票信息检票CToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
-            this.查询票信息检票CToolStripMenuItem.Text = "查询票信息/检票 [&C]";
+            this.查询票信息检票CToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
+            this.查询票信息检票CToolStripMenuItem.Text = "车票信息查询 [&C]";
             // 
             // 车站信息查询NToolStripMenuItem
             // 
             this.车站信息查询NToolStripMenuItem.Name = "车站信息查询NToolStripMenuItem";
-            this.车站信息查询NToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
+            this.车站信息查询NToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.车站信息查询NToolStripMenuItem.Text = "车站信息查询 [&N]";
             // 
             // toolStripSeparator2
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(216, 6);
+            this.toolStripSeparator2.Size = new System.Drawing.Size(194, 6);
             // 
             // QueryICCardToolStripMenuItem
             // 
             this.QueryICCardToolStripMenuItem.Name = "QueryICCardToolStripMenuItem";
-            this.QueryICCardToolStripMenuItem.Size = new System.Drawing.Size(219, 22);
+            this.QueryICCardToolStripMenuItem.Size = new System.Drawing.Size(197, 22);
             this.QueryICCardToolStripMenuItem.Text = "查询IC卡信息 [&I]";
             this.QueryICCardToolStripMenuItem.Click += new System.EventHandler(this.QueryICCardToolStripMenuItem_Click);
             // 
@@ -375,8 +377,8 @@
         private System.Windows.Forms.ToolStripMenuItem ChangePasswordAndLogOutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem LogoutToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem AboutToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 开发票FToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem 重打ToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem IssueFapiaoToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem ReprintDamagedTicketToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 查询票信息检票CToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem TestServerConnectionToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem 退票处理RToolStripMenuItem;

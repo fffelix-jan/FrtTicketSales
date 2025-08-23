@@ -29,15 +29,15 @@ namespace FrtBoothOfficeMachine
             InitializeComponent();
             _printConfig = config;
             CenterControlHorizontally(TitleLabel);
-            
+
             // Set up progress bar
             TicketProgressBar.Minimum = 0;
             TicketProgressBar.Maximum = _printConfig.TotalTickets;
             TicketProgressBar.Value = 0;
-            
+
             // Update title
             UpdateTitle(0);
-            
+
             // Handle form shown event to start printing
             this.Shown += TicketPrintDialogForm_Shown;
         }
@@ -71,13 +71,13 @@ namespace FrtBoothOfficeMachine
         /// <param name="paymentMethod">Payment method used</param>
         public static TicketPrintDialogForm CreateForRegularTickets(
             int fullFareTicketPriceCents,
-            int fullFareCount, 
-            int seniorCount, 
-            int studentCount, 
+            int fullFareCount,
+            int seniorCount,
+            int studentCount,
             string paymentMethod = "现金")
         {
             var tickets = new List<TicketInfo>();
-            
+
             // Add full fare tickets
             for (int i = 0; i < fullFareCount; i++)
             {
@@ -90,7 +90,7 @@ namespace FrtBoothOfficeMachine
                     TicketTypeCode = "全" // Full fare ticket type code
                 });
             }
-            
+
             // Add senior tickets (50% off)
             for (int i = 0; i < seniorCount; i++)
             {
@@ -103,7 +103,7 @@ namespace FrtBoothOfficeMachine
                     TicketTypeCode = "老" // Senior ticket type code
                 });
             }
-            
+
             // Add student tickets (25% off)
             for (int i = 0; i < studentCount; i++)
             {
@@ -135,12 +135,12 @@ namespace FrtBoothOfficeMachine
         /// <param name="dayPassPriceCents">Day pass price in cents</param>
         /// <param name="paymentMethod">Payment method used</param>
         public static TicketPrintDialogForm CreateForDayPass(
-            int quantity, 
-            int dayPassPriceCents, 
+            int quantity,
+            int dayPassPriceCents,
             string paymentMethod = "现金")
         {
             var tickets = new List<TicketInfo>();
-            
+
             for (int i = 0; i < quantity; i++)
             {
                 tickets.Add(new TicketInfo
@@ -196,13 +196,74 @@ namespace FrtBoothOfficeMachine
         }
 
         /// <summary>
+        /// Constructor for printing reprinted tickets (uses existing ticket data, no server contact)
+        /// </summary>
+        /// <param name="ticketData">Pre-issued ticket data from reissue response</param>
+        /// <param name="ticketType">Type of ticket being reprinted</param>
+        /// <param name="valueCents">Ticket value in cents</param>
+        /// <param name="originalStationInfo">Original issuing station information</param>
+        public static TicketPrintDialogForm CreateForReprintedTicket(
+            TicketData ticketData,
+            byte ticketType,
+            int valueCents,
+            StationInfo? originalStationInfo)
+        {
+            var tickets = new List<TicketInfo>();
+
+            // Determine ticket type details
+            string chineseType, englishType, typeCode;
+            switch (ticketType)
+            {
+                case 0:
+                    chineseType = "单程票"; englishType = "Single Journey Ticket"; typeCode = "全";
+                    break;
+                case 1:
+                    chineseType = "学生票"; englishType = "Student Ticket"; typeCode = "学";
+                    break;
+                case 2:
+                    chineseType = "长者票"; englishType = "Senior Ticket"; typeCode = "老";
+                    break;
+                case 3:
+                    chineseType = "免费出站票"; englishType = "Free Exit Ticket"; typeCode = "免";
+                    break;
+                case 4:
+                    chineseType = "一日票"; englishType = "Day Pass"; typeCode = "通";
+                    break;
+                default:
+                    chineseType = "车票"; englishType = "Ticket"; typeCode = "票";
+                    break;
+            }
+
+            tickets.Add(new TicketInfo
+            {
+                TicketType = ticketType,
+                ValueCents = valueCents,
+                ChineseTicketType = chineseType,
+                EnglishTicketType = englishType,
+                TicketTypeCode = typeCode,
+                PreIssuedTicketData = ticketData // Store the pre-issued ticket data
+            });
+
+            var config = new TicketPrintConfig
+            {
+                PrintType = PrintType.ReprintedTicket,
+                Tickets = tickets,
+                PaymentMethod = "重印",
+                TotalTickets = 1,
+                OriginalStationInfo = originalStationInfo
+            };
+
+            return new TicketPrintDialogForm(config);
+        }
+
+        /// <summary>
         /// Constructor for printing test tickets (no server contact)
         /// </summary>
         /// <param name="quantity">Number of test tickets to print</param>
         public static TicketPrintDialogForm CreateForTestTickets(int quantity = 1)
         {
             var tickets = new List<TicketInfo>();
-            
+
             for (int i = 0; i < quantity; i++)
             {
                 tickets.Add(new TicketInfo
@@ -234,16 +295,16 @@ namespace FrtBoothOfficeMachine
             try
             {
                 await StartPrintingAsync();
-                
+
                 // Close form after successful printing
                 this.DialogResult = DialogResult.OK;
                 this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"打印失败：\n\n{ex.Message}", 
+                MessageBox.Show($"打印失败：\n\n{ex.Message}",
                               "打印错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                
+
                 this.DialogResult = DialogResult.Cancel;
                 this.Close();
             }
@@ -253,18 +314,21 @@ namespace FrtBoothOfficeMachine
         {
             string currentStationCode = SimpleConfig.Get("CURRENT_STATION", "FLZ");
             StationInfo? currentStationInfo = null;
-            
-            // Get current station information for printing
-            try
+
+            // Get current station information for printing (except for reprinted tickets)
+            if (_printConfig.PrintType != PrintType.ReprintedTicket)
             {
-                currentStationInfo = await GlobalCredentials.ApiClient.GetStationNameAsync(currentStationCode);
+                try
+                {
+                    currentStationInfo = await GlobalCredentials.ApiClient.GetStationNameAsync(currentStationCode);
+                }
+                catch (Exception ex)
+                {
+                    // If we can't get current station info, use fallback
+                    Console.WriteLine($"Warning: Could not retrieve current station info: {ex.Message}");
+                }
             }
-            catch (Exception ex)
-            {
-                // If we can't get current station info, use fallback
-                Console.WriteLine($"Warning: Could not retrieve current station info: {ex.Message}");
-            }
-            
+
             int ticketsPrinted = 0;
 
             foreach (var ticket in _printConfig.Tickets)
@@ -279,6 +343,11 @@ namespace FrtBoothOfficeMachine
                     // Print test ticket without server contact
                     await PrintTestTicketAsync(ticket, ticketsPrinted + 1);
                 }
+                else if (_printConfig.PrintType == PrintType.ReprintedTicket)
+                {
+                    // Print reprinted ticket using pre-issued data
+                    await PrintReprintedTicketAsync(ticket, _printConfig.OriginalStationInfo, ticketsPrinted + 1);
+                }
                 else
                 {
                     // Contact server to issue ticket, then print
@@ -286,7 +355,7 @@ namespace FrtBoothOfficeMachine
                 }
 
                 ticketsPrinted++;
-                
+
                 // Small delay to show progress
                 await Task.Delay(100);
             }
@@ -294,10 +363,54 @@ namespace FrtBoothOfficeMachine
             // Final update
             UpdateTitle(ticketsPrinted);
             TicketProgressBar.Value = ticketsPrinted;
-            
+
             // Show completion message briefly
             SetTitleLabelTextAndCenter("打印完成！");
             await Task.Delay(500);
+        }
+
+        private async Task PrintReprintedTicketAsync(TicketInfo ticket, StationInfo? originalStationInfo, int ticketNumber)
+        {
+            if (ticket.PreIssuedTicketData == null)
+            {
+                throw new InvalidOperationException("Reprinted ticket must have pre-issued ticket data");
+            }
+
+            var ticketData = ticket.PreIssuedTicketData.Value;
+
+            // Use original station names for reprinted tickets
+            string chineseStationName, englishStationName;
+            if (originalStationInfo.HasValue)
+            {
+                chineseStationName = originalStationInfo.Value.ChineseName;
+                englishStationName = originalStationInfo.Value.EnglishName;
+            }
+            else
+            {
+                // Fallback to station code if we couldn't get station info
+                chineseStationName = "未知站";
+                englishStationName = "Unknown Station";
+            }
+
+            // Format price for display
+            string priceDisplay = $"¥{ticket.ValueCents / 100.0:F2}";
+
+            // Format payment method as TicketType/PaymentMethod
+            string formattedPaymentMethod = FormatPaymentMethod(ticket.TicketTypeCode, _printConfig.PaymentMethod);
+
+            // Print the reprinted ticket using the pre-issued data
+            await Task.Run(() =>
+            {
+                FrtTicketPrinter.TicketGenerator.PrintTicket(
+                    ticket.ChineseTicketType, ticket.EnglishTicketType,
+                    chineseStationName, englishStationName,
+                    priceDisplay, formattedPaymentMethod,
+                    DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                    ticketData.TicketString,
+                    $"{ticketData.TicketNumber}-{ticketNumber:D2}",
+                    "重印车票，请勿损坏", "Reprinted ticket, please do not damage"
+                );
+            });
         }
 
         private async Task PrintRealTicketAsync(TicketInfo ticket, string currentStationCode, StationInfo? currentStationInfo, int ticketNumber)
@@ -412,14 +525,6 @@ namespace FrtBoothOfficeMachine
         }
 
         // Configuration classes
-        private class TicketPrintConfig
-        {
-            public PrintType PrintType { get; set; }
-            public List<TicketInfo> Tickets { get; set; } = new List<TicketInfo>();
-            public string PaymentMethod { get; set; } = "现金";
-            public int TotalTickets { get; set; }
-        }
-
         private class TicketInfo
         {
             public int TicketType { get; set; }
@@ -427,6 +532,16 @@ namespace FrtBoothOfficeMachine
             public string ChineseTicketType { get; set; } = "";
             public string EnglishTicketType { get; set; } = "";
             public string TicketTypeCode { get; set; } = ""; // Single character ticket type code
+            public TicketData? PreIssuedTicketData { get; set; } = null; // For reprinted tickets
+        }
+
+        private class TicketPrintConfig
+        {
+            public PrintType PrintType { get; set; }
+            public List<TicketInfo> Tickets { get; set; } = new List<TicketInfo>();
+            public string PaymentMethod { get; set; } = "现金";
+            public int TotalTickets { get; set; }
+            public StationInfo? OriginalStationInfo { get; set; } = null; // For reprinted tickets
         }
 
         private enum PrintType
@@ -434,7 +549,8 @@ namespace FrtBoothOfficeMachine
             RegularTickets,
             DayPass,
             TestTicket,
-            FreeExit
+            FreeExit,
+            ReprintedTicket
         }
     }
 }

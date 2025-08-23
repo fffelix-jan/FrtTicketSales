@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.VisualBasic; // For Interaction.InputBox
 
 namespace FrtBoothOfficeMachine
 {
@@ -38,7 +39,7 @@ namespace FrtBoothOfficeMachine
         {
             InitializeComponent();
             UpdateClockDisplay();
-            this.Text = $"{GlobalConstants.ApplicationName} - 当前用户：{GlobalCredentials.Username}";
+            this.Text = $"{GlobalConstants.ApplicationName} - 当前用户: {GlobalCredentials.Username}";
 
             // Initialize both controls but don't add them yet
             InitializeControls();
@@ -445,7 +446,7 @@ namespace FrtBoothOfficeMachine
                     if (result == DialogResult.OK)
                     {
                         // Printing completed successfully
-                        MessageBox.Show("免费出站票打印完成！\n\n请将票据交给需要出站的乘客，\n并记录发放原因以备查询。",
+                        MessageBox.Show("免费出站票打印完成！\n\n请将车票交给需要出站的乘客，\n并记录发放原因以备查询。",
                                       "免费出站票打印完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
@@ -466,6 +467,401 @@ namespace FrtBoothOfficeMachine
                 // Handle any unexpected errors during the process
                 MessageBox.Show($"打印免费出站票时发生错误：\n\n{ex.Message}\n\n请联系技术支持。",
                               "打印错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private async void ReprintDamagedTicketToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Check if we have an authenticated API client
+                if (GlobalCredentials.ApiClient == null)
+                {
+                    MessageBox.Show("API客户端未初始化。请先登录系统。",
+                                  "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Get ticket number from user using VB.NET InputBox
+                string ticketNumber = Interaction.InputBox(
+                    "请输入需要重印的损坏车票编号：",
+                    "重印损坏车票",
+                    "");
+
+                // Check if user cancelled or entered empty string
+                if (string.IsNullOrWhiteSpace(ticketNumber))
+                {
+                    return; // User cancelled
+                }
+
+                // Trim whitespace
+                ticketNumber = ticketNumber.Trim();
+
+                // Basic validation of ticket number format
+                if (!System.Text.RegularExpressions.Regex.IsMatch(ticketNumber, @"^\d+$"))
+                {
+                    MessageBox.Show("车票编号格式无效。请输入有效的数字车票编号。",
+                                  "输入错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Get current station for reissuance
+                string currentStationCode = SimpleConfig.Get("CURRENT_STATION", "FLZ");
+
+                // Show confirmation dialog with warning
+                var confirmResult = MessageBox.Show(
+                    $"确定要重印车票编号 {ticketNumber} 吗？\n\n" +
+                    $"警告：\n" +
+                    $"• 原车票将被系统自动作废\n" +
+                    $"• 新车票将在 {currentStationCode} 站签发\n" +
+                    $"• 此操作无法撤销\n\n" +
+                    $"请确认原车票确实已损坏且无法使用。",
+                    "确认重印损坏车票",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning,
+                    MessageBoxDefaultButton.Button2); // Default to "No" for safety
+
+                if (confirmResult != DialogResult.Yes)
+                {
+                    return; // User cancelled
+                }
+
+                // Show progress message
+                this.Cursor = Cursors.WaitCursor;
+
+                try
+                {
+                    // Call the API to reprint the ticket
+                    var reissueResponse = await GlobalCredentials.ApiClient.ReprintTicketAsync(
+                        ticketNumber,
+                        currentStationCode);
+
+                    // Get original issuing station information for printing
+                    StationInfo? originalStationInfo = null;
+                    try
+                    {
+                        originalStationInfo = await GlobalCredentials.ApiClient.GetStationNameAsync(reissueResponse.OriginalIssuingStation);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Warning: Could not retrieve original issuing station info for {reissueResponse.OriginalIssuingStation}: {ex.Message}");
+                        // We'll continue with printing even if we can't get station name
+                    }
+
+                    // Create the appropriate ticket for printing based on ticket type
+                    using (var printDialog = CreatePrintDialogForReplacementTicket(reissueResponse, originalStationInfo))
+                    {
+                        var printResult = printDialog.ShowDialog(this);
+
+                        if (printResult == DialogResult.OK)
+                        {
+                            // Success - show confirmation and details including printing success
+                            string successMessage = $"车票重印和打印成功！\n\n" +
+                                                  $"原车票编号：{reissueResponse.OriginalTicket}\n" +
+                                                  $"新车票编号：{reissueResponse.ReplacementTicket.TicketNumber}\n" +
+                                                  $"车票类型：{GetTicketTypeDescription(reissueResponse.ReplacementTicketType)}\n" +
+                                                  $"原签发站：{(originalStationInfo?.ChineseName ?? reissueResponse.OriginalIssuingStation)}\n" +
+                                                  $"重印时间：{reissueResponse.ReissueTime:yyyy-MM-dd HH:mm:ss}\n" +
+                                                  $"操作员：{reissueResponse.ReissuedBy}\n\n" +
+                                                  $"原车票已自动作废，新车票已打印完成，\n请将新车票交给乘客。";
+
+                            MessageBox.Show(successMessage,
+                                          "重印和打印成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                        else
+                        {
+                            // Printing failed but reissue was successful
+                            MessageBox.Show($"车票重印成功，但打印失败！\n\n" +
+                                          $"原车票编号：{reissueResponse.OriginalTicket}\n" +
+                                          $"新车票编号：{reissueResponse.ReplacementTicket.TicketNumber}\n" +
+                                          $"车票类型：{GetTicketTypeDescription(reissueResponse.ReplacementTicketType)}\n\n" +
+                                          $"原车票已作废，但新车票打印失败。\n" +
+                                          $"请检查打印机状态，可能需要手动处理此车票。",
+                                          "打印失败", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        }
+                    }
+                }
+                catch (TicketNotFoundException ex)
+                {
+                    MessageBox.Show($"车票不存在：\n\n{ex.Message}\n\n请检查车票编号是否正确。",
+                                  "车票未找到", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (FrtAfcApiException ex) when (ex.Message.Contains("cannot be reissued"))
+                {
+                    MessageBox.Show($"车票无法重印：\n\n{ex.Message}\n\n" +
+                                  $"可能原因：\n" +
+                                  $"• 车票已被使用或作废\n" +
+                                  $"• 车票状态不允许重印\n" +
+                                  $"• 车票已过期",
+                                  "无法重印", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                catch (FrtAfcApiException ex) when (ex.Message.Contains("Insufficient permissions"))
+                {
+                    MessageBox.Show("权限不足：您没有重印车票的权限。\n\n请联系系统管理员。",
+                                  "权限错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (FrtAfcApiException ex)
+                {
+                    MessageBox.Show($"服务器错误：\n\n{ex.Message}\n\n请检查网络连接和服务器状态。",
+                                  "服务器错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"重印车票时发生未知错误：\n\n{ex.Message}\n\n请联系技术支持。",
+                                  "未知错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"执行重印操作时发生错误：\n\n{ex.Message}",
+                              "操作错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
+            }
+        }
+
+        /// <summary>
+        /// Creates the appropriate TicketPrintDialogForm for the replacement ticket based on ticket type
+        /// </summary>
+        /// <param name="reissueResponse">The reissue response from the server</param>
+        /// <param name="originalStationInfo">Original issuing station information (nullable)</param>
+        /// <returns>Configured TicketPrintDialogForm for the replacement ticket</returns>
+        private TicketPrintDialogForm CreatePrintDialogForReplacementTicket(ReissueTicketResponse reissueResponse, StationInfo? originalStationInfo)
+        {
+            // Use the actual replacement ticket value from the server response
+            int ticketValueCents = GetTicketValueFromReissueResponse(reissueResponse);
+
+            // Use the new reprinted ticket factory method with actual server data
+            return TicketPrintDialogForm.CreateForReprintedTicket(
+                reissueResponse.ReplacementTicket,
+                reissueResponse.ReplacementTicketType,
+                ticketValueCents, // Now using actual value from server
+                originalStationInfo);
+        }
+
+        /// <summary>
+        /// Gets the ticket value from the reissue response - no longer needs calculation
+        /// </summary>
+        /// <param name="reissueResponse">The reissue response from the server</param>
+        /// <returns>Actual ticket value in cents from the server</returns>
+        private int GetTicketValueFromReissueResponse(ReissueTicketResponse reissueResponse)
+        {
+            // Use the actual replacement ticket value from the server response
+            return reissueResponse.ReplacementValueCents;
+        }
+
+        /// <summary>
+        /// Gets a human-readable description of the ticket type
+        /// </summary>
+        /// <param name="ticketType">Ticket type code</param>
+        /// <returns>Chinese description of the ticket type</returns>
+        private string GetTicketTypeDescription(byte ticketType)
+        {
+            switch (ticketType)
+            {
+                case 0:
+                    return "单程票（全价）";
+                case 1:
+                    return "单程票（学生）";
+                case 2:
+                    return "单程票（长者）";
+                case 3:
+                    return "免费出站票";
+                case 4:
+                    return "一日票";
+                case 255:
+                    return "调试票";
+                default:
+                    return $"未知类型（{ticketType}）";
+            }
+        }
+
+        private async void IssueFapiaoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // Check if we have an authenticated API client
+                if (GlobalCredentials.ApiClient == null)
+                {
+                    MessageBox.Show("API客户端未初始化。请先登录系统。",
+                                  "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                // Get ticket number or QR code from user using VB.NET InputBox
+                string ticketInput = Interaction.InputBox(
+                    "请输入车票编号或扫描车票二维码：\n\n• 可直接输入车票编号\n• 或使用扫描枪扫描车票二维码",
+                    "开具发票",
+                    "");
+
+                // Check if user cancelled or entered empty string
+                if (string.IsNullOrWhiteSpace(ticketInput))
+                {
+                    return; // User cancelled
+                }
+
+                // Trim whitespace
+                ticketInput = ticketInput.Trim();
+
+                // Basic validation - either numeric ticket number or longer QR code
+                if (ticketInput.Length < 3)
+                {
+                    MessageBox.Show("输入无效。请输入有效的车票编号或扫描车票二维码。",
+                                  "输入错误", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                // Show confirmation dialog
+                string inputType = ticketInput.Length > 20 ? "二维码" : "车票编号";
+                var confirmResult = MessageBox.Show(
+                    $"确定要为{inputType} {(ticketInput.Length > 20 ? "[已扫描]" : ticketInput)} 开具发票吗？\n\n" +
+                    $"注意：\n" +
+                    $"• 每张车票只能开具一次发票\n" +
+                    $"• 免费车票无法开具发票\n" +
+                    $"• 此操作无法撤销",
+                    "确认开具发票",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question,
+                    MessageBoxDefaultButton.Button2); // Default to "No" for safety
+
+                if (confirmResult != DialogResult.Yes)
+                {
+                    return; // User cancelled
+                }
+
+                // Show progress message
+                this.Cursor = Cursors.WaitCursor;
+
+                try
+                {
+                    // Call the API to issue invoice
+                    var invoiceResponse = await GlobalCredentials.ApiClient.IssueInvoiceAsync(ticketInput);
+
+                    // Success - show confirmation and details
+                    string successMessage = $"发票开具成功！\n\n" +
+                                          $"车票编号：{invoiceResponse.TicketNumber}\n" +
+                                          $"车票类型：{GetTicketTypeDescription(invoiceResponse.TicketType)}\n" +
+                                          $"车票金额：¥{invoiceResponse.ValueYuan:F2}\n" +
+                                          $"签发站：{invoiceResponse.IssuingStation}\n" +
+                                          $"开票时间：{invoiceResponse.InvoiceTime:yyyy-MM-dd HH:mm:ss}\n" +
+                                          $"开票员：{invoiceResponse.InvoicedBy}\n\n" +
+                                          $"请按照相关规定为乘客提供发票服务。";
+
+                    MessageBox.Show(successMessage,
+                                  "发票开具成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (TicketNotFoundException ex)
+                {
+                    MessageBox.Show($"车票不存在：\n\n{ex.Message}\n\n请检查输入的车票编号或二维码是否正确。",
+                                  "车票未找到", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (InvoiceException ex)
+                {
+                    // Check if this is specifically about already invoiced ticket
+                    if (ex.Message.Contains("already been invoiced") ||
+                        (ex.InnerException != null && ex.InnerException.Message.Contains("already been invoiced")))
+                    {
+                        // Special message for already invoiced tickets
+                        MessageBox.Show($"该车票已开具发票！\n\n" +
+                                      $"系统检测到此车票已经开具过发票。\n" +
+                                      $"每张车票只能开具一次发票。\n\n" +
+                                      $"如果您认为这是错误，请：\n" +
+                                      $"• 检查车票编号或二维码是否正确\n" +
+                                      $"• 核实该车票是否确实未开票\n" +
+                                      $"• 如有疑问请联系管理员",
+                                      "车票已开票", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else
+                    {
+                        // Regular invoice exception handling - safely access message
+                        string errorDetails = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            errorDetails = ex.InnerException.Message;
+                        }
+
+                        MessageBox.Show($"无法开具发票：\n\n{errorDetails}\n\n" +
+                                      $"可能原因：\n" +
+                                      $"• 该车票已开具发票\n" +
+                                      $"• 免费车票无法开票\n" +
+                                      $"• 车票状态异常",
+                                      "发票开具失败", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                }
+                catch (FrtAfcApiException ex) when (ex.Message.Contains("Insufficient permissions"))
+                {
+                    MessageBox.Show("权限不足：您没有开具发票的权限。\n\n请联系系统管理员。",
+                                  "权限错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (FrtAfcApiException ex)
+                {
+                    // Also check for "already been invoiced" in general API exceptions
+                    if (ex.Message.Contains("already been invoiced") ||
+                        (ex.InnerException != null && ex.InnerException.Message.Contains("already been invoiced")))
+                    {
+                        // Special message for already invoiced tickets from API exception
+                        MessageBox.Show($"该车票已开具发票！\n\n" +
+                                      $"系统检测到此车票已经开具过发票。\n" +
+                                      $"每张车票只能开具一次发票。\n\n" +
+                                      $"如果您认为这是错误，请：\n" +
+                                      $"• 检查车票编号或二维码是否正确\n" +
+                                      $"• 核实该车票是否确实未开票\n" +
+                                      $"• 如有疑问请联系管理员",
+                                      "车票已开票", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"服务器错误：\n\n{ex.Message}\n\n请检查网络连接和服务器状态。",
+                                      "服务器错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Also check for "already been invoiced" in general exceptions
+                    if (ex.Message.Contains("already been invoiced") ||
+                        (ex.InnerException != null && ex.InnerException.Message.Contains("already been invoiced")))
+                    {
+                        // Special message for already invoiced tickets from general exception
+                        MessageBox.Show($"该车票已开具发票！\n\n" +
+                                      $"系统检测到此车票已经开具过发票。\n" +
+                                      $"每张车票只能开具一次发票。\n\n" +
+                                      $"如果您认为这是错误，请：\n" +
+                                      $"• 检查车票编号或二维码是否正确\n" +
+                                      $"• 核实该车票是否确实未开票\n" +
+                                      $"• 如有疑问请联系管理员",
+                                      "车票已开票", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    else
+                    {
+                        // Safely access exception details
+                        string errorDetails = ex.Message;
+                        if (ex.InnerException != null)
+                        {
+                            errorDetails = ex.InnerException.Message;
+                        }
+
+                        MessageBox.Show($"开具发票时发生未知错误：\n\n{errorDetails}\n\n请联系技术支持。",
+                                      "未知错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Safely access exception details for outer catch
+                string errorDetails = ex.Message;
+                if (ex.InnerException != null)
+                {
+                    errorDetails = ex.InnerException.Message;
+                }
+
+                MessageBox.Show($"执行发票开具操作时发生错误：\n\n{errorDetails}",
+                              "操作错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
             }
         }
     }
