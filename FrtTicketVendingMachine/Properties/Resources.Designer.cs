@@ -61,6 +61,24 @@ namespace FrtTicketVendingMachine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream Beep {
+            get {
+                return ResourceManager.GetStream("Beep", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream Fail {
+            get {
+                return ResourceManager.GetStream("Fail", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap FrtTvmAllLinesMap {
@@ -151,11 +169,30 @@ namespace FrtTicketVendingMachine.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.IO.UnmanagedMemoryStream similar to System.IO.MemoryStream.
+        /// </summary>
+        internal static System.IO.UnmanagedMemoryStream RegularTap {
+            get {
+                return ResourceManager.GetStream("RegularTap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap rsz_frt_logo {
             get {
                 object obj = ResourceManager.GetObject("rsz_frt_logo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap XSign {
+            get {
+                object obj = ResourceManager.GetObject("XSign", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

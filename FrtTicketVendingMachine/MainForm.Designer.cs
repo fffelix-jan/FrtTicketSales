@@ -11,14 +11,7 @@
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        // Now in the MainForm.cs file
 
         #region Windows Form Designer generated code
 
@@ -34,6 +27,7 @@
             this.StationSelectionPanel = new System.Windows.Forms.Panel();
             this.MainFrtFullLineMapControl = new FrtTicketVendingMachine.FrtFullLineMapControl();
             this.RightHandSelectionsRoundedPanel = new FrtTicketVendingMachine.RoundedPanel();
+            this.CountdownLabel = new System.Windows.Forms.Label();
             this.CancelButton = new FrtTicketVendingMachine.RoundedButton();
             this.LanguageToggleButton = new FrtTicketVendingMachine.RoundedButton();
             this.WelcomePanel = new System.Windows.Forms.Panel();
@@ -63,7 +57,7 @@
             this.Line1Button = new FrtTicketVendingMachine.RoundedButton();
             this.Line2Button = new FrtTicketVendingMachine.RoundedButton();
             this.ClockUpdateTimer = new System.Windows.Forms.Timer(this.components);
-            this.CancelFakeDelayTimer = new System.Windows.Forms.Timer(this.components);
+            this.CancelDelayTimer = new System.Windows.Forms.Timer(this.components);
             this.MainPanel.SuspendLayout();
             this.MapSelectionRoundedPanel.SuspendLayout();
             this.StationSelectionPanel.SuspendLayout();
@@ -122,6 +116,7 @@
             // 
             this.RightHandSelectionsRoundedPanel.BackColor = System.Drawing.Color.DodgerBlue;
             this.RightHandSelectionsRoundedPanel.BorderColor = System.Drawing.Color.White;
+            this.RightHandSelectionsRoundedPanel.Controls.Add(this.CountdownLabel);
             this.RightHandSelectionsRoundedPanel.Controls.Add(this.CancelButton);
             this.RightHandSelectionsRoundedPanel.Controls.Add(this.LanguageToggleButton);
             this.RightHandSelectionsRoundedPanel.Controls.Add(this.WelcomePanel);
@@ -135,6 +130,19 @@
             this.RightHandSelectionsRoundedPanel.Size = new System.Drawing.Size(418, 1009);
             this.RightHandSelectionsRoundedPanel.TabIndex = 1;
             this.RightHandSelectionsRoundedPanel.Thickness = 5F;
+            // 
+            // CountdownLabel
+            // 
+            this.CountdownLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.CountdownLabel.AutoSize = true;
+            this.CountdownLabel.Font = new System.Drawing.Font("Microsoft YaHei", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.CountdownLabel.ForeColor = System.Drawing.Color.White;
+            this.CountdownLabel.Location = new System.Drawing.Point(290, 883);
+            this.CountdownLabel.Name = "CountdownLabel";
+            this.CountdownLabel.Size = new System.Drawing.Size(87, 36);
+            this.CountdownLabel.TabIndex = 8;
+            this.CountdownLabel.Text = "120 s";
+            this.CountdownLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
             // CancelButton
             // 
@@ -294,6 +302,7 @@
             this.QRPayButton.Text = "FAlipay/FWeChat";
             this.QRPayButton.Thickness = 3F;
             this.QRPayButton.UseVisualStyleBackColor = false;
+            this.QRPayButton.Click += new System.EventHandler(this.QRPayButton_Click);
             // 
             // SelectTicketQuantityPanel
             // 
@@ -549,10 +558,10 @@
             this.ClockUpdateTimer.Interval = 500;
             this.ClockUpdateTimer.Tick += new System.EventHandler(this.ClockUpdateTimer_Tick);
             // 
-            // CancelFakeDelayTimer
+            // CancelDelayTimer
             // 
-            this.CancelFakeDelayTimer.Interval = 2000;
-            this.CancelFakeDelayTimer.Tick += new System.EventHandler(this.CancelFakeDelayTimer_Tick);
+            this.CancelDelayTimer.Interval = 3000;
+            this.CancelDelayTimer.Tick += new System.EventHandler(this.CancelDelayTimer_Tick);
             // 
             // MainForm
             // 
@@ -570,6 +579,7 @@
             this.MapSelectionRoundedPanel.ResumeLayout(false);
             this.StationSelectionPanel.ResumeLayout(false);
             this.RightHandSelectionsRoundedPanel.ResumeLayout(false);
+            this.RightHandSelectionsRoundedPanel.PerformLayout();
             this.WelcomePanel.ResumeLayout(false);
             this.WelcomePanel.PerformLayout();
             this.SelectPaymentMethodPanel.ResumeLayout(false);
@@ -622,7 +632,8 @@
         private FrtFullLineMapControl MainFrtFullLineMapControl;
         private RoundedButton LanguageToggleButton;
         private RoundedButton CancelButton;
-        private System.Windows.Forms.Timer CancelFakeDelayTimer;
+        private System.Windows.Forms.Timer CancelDelayTimer;
+        private System.Windows.Forms.Label CountdownLabel;
     }
 }
 

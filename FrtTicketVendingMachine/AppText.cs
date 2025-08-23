@@ -100,13 +100,56 @@ namespace FrtTicketVendingMachine
         public const string ProcessingFailedEnglish = "Processing failed: {0}";
         public const string ProcessingFailedChinese = "处理失败: {0}";
 
-        // Ticket printing constants
+        // Ticket printing constants - Updated with new structured approach
         public const string SingleJourneyTicketEnglish = "Single Journey Ticket";
         public const string SingleJourneyTicketChinese = "单程票";
 
-        public const string CashPaymentMethodEnglish = "现金/Cash";
+        public const string CashPaymentMethodEnglish = "现金";
+        public const string CashPaymentMethodChinese = "现金";
+
+        // New ticket printing progress messages
+        public const string PrintingTicketProgressEnglish = "Printing ticket... (Ticket {0} of {1})";
+        public const string PrintingTicketProgressChinese = "正在打印车票... （第{0}张，共{1}张）";
+
+        public const string PrintingTicketCompletedEnglish = "Printing completed!";
+        public const string PrintingTicketCompletedChinese = "打印完成！";
+
+        public const string PrintingFailedEnglish = "Printing failed: {0}";
+        public const string PrintingFailedChinese = "打印失败: {0}";
+
+        // Ticket footer messages
+        public const string TicketFooterMessageEnglish = "Please do not damage this ticket";
+        public const string TicketFooterMessageChinese = "请勿损坏车票";
 
         public const string ThankYouMessageEnglish = "Thank you for using FRT Transit";
         public const string ThankYouMessageChinese = "感谢您使用FRT轨道交通";
+
+        public const string TransactionCancelledEnglish = "Transaction Cancelled";
+        public const string TransactionCancelledChinese = "交易已取消";
+
+        // QR Payment (FakeAlipay) messages
+        public const string QRPaymentMethodEnglish = "支付宝";
+        public const string QRPaymentMethodChinese = "支付宝";
+
+        public const string CreatingQROrderEnglish = "Creating payment order...";
+        public const string CreatingQROrderChinese = "正在创建支付订单...";
+
+        public const string ScanQRCodeEnglish = "Please scan the QR code with your mobile payment app";
+        public const string ScanQRCodeChinese = "请使用手机支付应用扫描二维码";
+
+        public const string WaitingForPaymentEnglish = "Waiting for payment... Please complete payment on your mobile device";
+        public const string WaitingForPaymentChinese = "等待支付中... 请在手机上完成支付";
+
+        public const string QRPaymentFailedEnglish = "QR payment failed: {0}";
+        public const string QRPaymentFailedChinese = "二维码支付失败: {0}";
+
+        public const string QROrderExpiredEnglish = "Payment order has expired. Please try again.";
+        public const string QROrderExpiredChinese = "支付订单已过期，请重新尝试。";
+
+        public const string QROrderCancelledEnglish = "Payment order was cancelled.";
+        public const string QROrderCancelledChinese = "支付订单已取消。";
+
+        public const string QRPaymentSuccessEnglish = "Payment successful! Processing tickets...";
+        public const string QRPaymentSuccessChinese = "支付成功！正在处理票务...";
     }
 }

@@ -55,6 +55,7 @@ namespace FrtTicketVendingMachine
                         handButton2Image = Properties.Resources.HandButton2;
                     }
                     InstructionsPictureBox.Image = handButton1Image;
+                    AnimationTimer.Start();
                     break;
                 case AnimationType.InsertMoney:
                     // Load images once if not already loaded
@@ -75,12 +76,38 @@ namespace FrtTicketVendingMachine
                         insertCoin4Image = Properties.Resources.InsertCoin4;
                     }
                     InstructionsPictureBox.Image = insertCoin1Image;
+                    AnimationTimer.Start();
+                    break;
+                case AnimationType.ScanCode:
+                    // Stop animation for QR code display
+                    AnimationTimer.Stop();
+                    // QR code image will be set separately via QRCodeImage property
+                    break;
+                case AnimationType.TicketPrinting:
+                    // Stop animation for ticket printing
+                    AnimationTimer.Stop();
+                    // You might want to set a printing image here
                     break;
                 default:
+                    AnimationTimer.Stop();
                     break;
             }
             animationState = 1;
-            AnimationTimer.Start();
+        }
+
+        // Public property to set QR code image
+        public Image QRCodeImage
+        {
+            get { return InstructionsPictureBox.Image; }
+            set
+            {
+                InstructionsPictureBox.Image = value;
+                // Stop animation when showing QR code
+                if (value != null)
+                {
+                    AnimationTimer.Stop();
+                }
+            }
         }
 
         // Public field to change the text of the destination label
@@ -108,8 +135,8 @@ namespace FrtTicketVendingMachine
         public string TotalPriceText
         {
             get { return TotalPriceLabel.Text; }
-            set 
-            { 
+            set
+            {
                 TotalPriceLabel.Text = value;
                 showingTotalPrice = true;
                 UpdatePriceTitleLabel();
@@ -120,8 +147,8 @@ namespace FrtTicketVendingMachine
         public string PriceEachText
         {
             get { return TotalPriceLabel.Text; }
-            set 
-            { 
+            set
+            {
                 TotalPriceLabel.Text = value;
                 showingTotalPrice = false;
                 UpdatePriceTitleLabel();
@@ -147,12 +174,12 @@ namespace FrtTicketVendingMachine
         {
             if (showingTotalPrice)
             {
-                PriceTitleLabel.Text = _language == AppText.Language.Chinese ? 
+                PriceTitleLabel.Text = _language == AppText.Language.Chinese ?
                     AppText.TotalPriceChinese : AppText.TotalPriceEnglish;
             }
             else
             {
-                PriceTitleLabel.Text = _language == AppText.Language.Chinese ? 
+                PriceTitleLabel.Text = _language == AppText.Language.Chinese ?
                     AppText.PriceEachChinese : AppText.PriceEachEnglish;
             }
         }
