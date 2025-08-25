@@ -825,6 +825,43 @@ namespace FrtAfcApiClient
             }
         }
 
+        /// <summary>
+        /// Gets the current day's signing keys (3 AM to 3 AM next day, with 12 AM-3 AM logic).
+        /// </summary>
+        /// <returns>Signing key info for the current day window</returns>
+        public async Task<SigningKeyInfo> GetCurrentDaySigningKeysAsync()
+        {
+            try
+            {
+                var response = await _httpClient.GetAsync("currentdaykeys");
+                if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    throw new FrtAfcApiException($"No signing key found: {error}");
+                }
+                response.EnsureSuccessStatusCode();
+
+                var keyInfo = await response.Content.ReadFromJsonAsync<SigningKeyInfo>();
+                if (keyInfo == null)
+                {
+                    throw new FrtAfcApiException("Received null signing key info from server");
+                }
+                return keyInfo;
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new FrtAfcApiException("Failed to get current day's signing keys", ex);
+            }
+        }
+
+        public class SigningKeyInfo
+        {
+            public int KeyVersion { get; set; }
+            public DateTime KeyCreated { get; set; }
+            public string PublicKey { get; set; } = string.Empty;
+            public string XorKey { get; set; } = string.Empty; // base64
+        }
+
         private void ValidateUpdateDayPassPriceRequest(UpdateDayPassPriceRequest request)
         {
             var validationResults = new List<ValidationResult>();

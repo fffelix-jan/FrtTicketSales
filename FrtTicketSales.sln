@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FareClientTestProgram", "Fa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrtBoothOfficeMachine", "FrtBoothOfficeMachine\FrtBoothOfficeMachine.csproj", "{8FC4C7C9-CFB1-4EEB-AA24-02EE1E7089F7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrtFaregate", "FrtFaregate\FrtFaregate.csproj", "{23E116DD-E60C-4B89-8CFC-4558D7FD3537}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{8FC4C7C9-CFB1-4EEB-AA24-02EE1E7089F7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8FC4C7C9-CFB1-4EEB-AA24-02EE1E7089F7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8FC4C7C9-CFB1-4EEB-AA24-02EE1E7089F7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23E116DD-E60C-4B89-8CFC-4558D7FD3537}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23E116DD-E60C-4B89-8CFC-4558D7FD3537}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23E116DD-E60C-4B89-8CFC-4558D7FD3537}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23E116DD-E60C-4B89-8CFC-4558D7FD3537}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

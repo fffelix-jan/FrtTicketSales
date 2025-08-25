@@ -143,6 +143,7 @@
             this.CountdownLabel.TabIndex = 8;
             this.CountdownLabel.Text = "120 s";
             this.CountdownLabel.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            this.CountdownLabel.Visible = false;
             // 
             // CancelButton
             // 
