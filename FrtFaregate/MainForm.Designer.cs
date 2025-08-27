@@ -11,14 +11,7 @@
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+        // Handled in the code-behind file
 
         #region Windows Form Designer generated code
 
@@ -68,6 +61,7 @@
             this.TicketScanTextBox.Name = "TicketScanTextBox";
             this.TicketScanTextBox.Size = new System.Drawing.Size(273, 13);
             this.TicketScanTextBox.TabIndex = 3;
+            this.TicketScanTextBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TicketScanTextBox_KeyDown);
             // 
             // BottomTextLabel
             // 
@@ -89,6 +83,11 @@
             this.UserPromptPictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.UserPromptPictureBox.TabIndex = 1;
             this.UserPromptPictureBox.TabStop = false;
+            // 
+            // HideUserMessageTimer
+            // 
+            this.HideUserMessageTimer.Interval = 3000;
+            this.HideUserMessageTimer.Tick += new System.EventHandler(this.HideUserMessageTimer_Tick);
             // 
             // SecurityTimer
             // 

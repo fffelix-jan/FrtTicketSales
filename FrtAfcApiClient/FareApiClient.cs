@@ -452,6 +452,35 @@ namespace FrtAfcApiClient
         }
 
         /// <summary>
+        /// Validates a ticket at an entry faregate using ticket number or QR code.
+        /// </summary>
+        /// <param name="ticketInput">Ticket number or QR code string</param>
+        /// <param name="validatingStation">Station code where validation occurs</param>
+        /// <returns>Validation response</returns>
+        public async Task<ValidateTicketResponse> ValidateTicketAtEntryAsync(string ticketInput, string validatingStation)
+        {
+            if (string.IsNullOrWhiteSpace(ticketInput))
+            {
+                throw new ArgumentException("Ticket input cannot be null or empty", nameof(ticketInput));
+            }
+
+            if (string.IsNullOrWhiteSpace(validatingStation))
+            {
+                throw new ArgumentException("Validating station cannot be null or empty", nameof(validatingStation));
+            }
+
+            ValidateStationCode(validatingStation, nameof(validatingStation));
+
+            var request = new ValidateTicketRequest
+            {
+                TicketInput = ticketInput.Trim(),
+                ValidatingStation = validatingStation.ToUpper()
+            };
+
+            return await ValidateTicketAtEntryAsync(request);
+        }
+
+        /// <summary>
         /// Validates a ticket at an entry faregate.
         /// </summary>
         /// <param name="request">Validation request details</param>
@@ -472,7 +501,24 @@ namespace FrtAfcApiClient
                 if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    throw new TicketValidationException($"Entry ticket validation failed: {error}");
+                    
+                    // Check for specific error types
+                    if (error.Contains("Invalid ticket number format"))
+                    {
+                        throw new TicketValidationException("Invalid ticket number format. Please enter a valid numeric ticket number.");
+                    }
+                    else if (error.Contains("Invalid QR code") || error.Contains("unable to decode ticket"))
+                    {
+                        throw new TicketValidationException("Invalid QR code. The scanned QR code is not a valid ticket code.");
+                    }
+                    else if (error.Contains("QR code decoding failed"))
+                    {
+                        throw new TicketValidationException("QR code decoding failed. The QR code may be damaged or corrupted.");
+                    }
+                    else
+                    {
+                        throw new TicketValidationException($"Entry ticket validation failed: {error}");
+                    }
                 }
 
                 response.EnsureSuccessStatusCode();
@@ -488,6 +534,35 @@ namespace FrtAfcApiClient
             {
                 throw new FrtAfcApiException("Failed to validate ticket at entry", ex);
             }
+        }
+
+        /// <summary>
+        /// Validates a ticket at an exit faregate using ticket number or QR code.
+        /// </summary>
+        /// <param name="ticketInput">Ticket number or QR code string</param>
+        /// <param name="validatingStation">Station code where validation occurs</param>
+        /// <returns>Validation response</returns>
+        public async Task<ValidateTicketResponse> ValidateTicketAtExitAsync(string ticketInput, string validatingStation)
+        {
+            if (string.IsNullOrWhiteSpace(ticketInput))
+            {
+                throw new ArgumentException("Ticket input cannot be null or empty", nameof(ticketInput));
+            }
+
+            if (string.IsNullOrWhiteSpace(validatingStation))
+            {
+                throw new ArgumentException("Validating station cannot be null or empty", nameof(validatingStation));
+            }
+
+            ValidateStationCode(validatingStation, nameof(validatingStation));
+
+            var request = new ValidateTicketRequest
+            {
+                TicketInput = ticketInput.Trim(),
+                ValidatingStation = validatingStation.ToUpper()
+            };
+
+            return await ValidateTicketAtExitAsync(request);
         }
 
         /// <summary>
@@ -511,7 +586,24 @@ namespace FrtAfcApiClient
                 if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    throw new TicketValidationException($"Exit ticket validation failed: {error}");
+                    
+                    // Check for specific error types
+                    if (error.Contains("Invalid ticket number format"))
+                    {
+                        throw new TicketValidationException("Invalid ticket number format. Please enter a valid numeric ticket number.");
+                    }
+                    else if (error.Contains("Invalid QR code") || error.Contains("unable to decode ticket"))
+                    {
+                        throw new TicketValidationException("Invalid QR code. The scanned QR code is not a valid ticket code.");
+                    }
+                    else if (error.Contains("QR code decoding failed"))
+                    {
+                        throw new TicketValidationException("QR code decoding failed. The QR code may be damaged or corrupted.");
+                    }
+                    else
+                    {
+                        throw new TicketValidationException($"Exit ticket validation failed: {error}");
+                    }
                 }
 
                 response.EnsureSuccessStatusCode();
@@ -828,8 +920,8 @@ namespace FrtAfcApiClient
         /// <summary>
         /// Gets the current day's signing keys (3 AM to 3 AM next day, with 12 AM-3 AM logic).
         /// </summary>
-        /// <returns>Signing key info for the current day window</returns>
-        public async Task<SigningKeyInfo> GetCurrentDaySigningKeysAsync()
+        /// <returns>List of signing key info for the current day window</returns>
+        public async Task<List<SigningKeyInfo>> GetCurrentDaySigningKeysAsync()
         {
             try
             {
@@ -837,16 +929,16 @@ namespace FrtAfcApiClient
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    throw new FrtAfcApiException($"No signing key found: {error}");
+                    throw new FrtAfcApiException($"No signing keys found: {error}");
                 }
                 response.EnsureSuccessStatusCode();
 
-                var keyInfo = await response.Content.ReadFromJsonAsync<SigningKeyInfo>();
-                if (keyInfo == null)
+                var keyResponse = await response.Content.ReadFromJsonAsync<SigningKeysResponse>();
+                if (keyResponse == null || keyResponse.SigningKeys == null)
                 {
-                    throw new FrtAfcApiException("Received null signing key info from server");
+                    throw new FrtAfcApiException("Received null signing keys info from server");
                 }
-                return keyInfo;
+                return keyResponse.SigningKeys;
             }
             catch (HttpRequestException ex)
             {
@@ -860,6 +952,11 @@ namespace FrtAfcApiClient
             public DateTime KeyCreated { get; set; }
             public string PublicKey { get; set; } = string.Empty;
             public string XorKey { get; set; } = string.Empty; // base64
+        }
+
+        public class SigningKeysResponse
+        {
+            public List<SigningKeyInfo> SigningKeys { get; set; } = new List<SigningKeyInfo>();
         }
 
         private void ValidateUpdateDayPassPriceRequest(UpdateDayPassPriceRequest request)
@@ -1036,12 +1133,12 @@ namespace FrtAfcApiClient
 
     public class ValidateTicketRequest
     {
-        [Required(ErrorMessage = "Ticket number is required")]
-        public string TicketNumber { get; set; }
+        [Required(ErrorMessage = "Ticket input is required")]
+        public string TicketInput { get; set; } = string.Empty; // Changed from TicketNumber to TicketInput
 
         [StringLength(3, MinimumLength = 3, ErrorMessage = "Station code must be 3 characters")]
         [RegularExpression(@"^[A-Z]+$", ErrorMessage = "Station code must be uppercase letters")]
-        public string ValidatingStation { get; set; }
+        public string ValidatingStation { get; set; } = string.Empty;
     }
 
     public class ChangePasswordRequest
@@ -1078,6 +1175,11 @@ namespace FrtAfcApiClient
         public string TicketNumber { get; set; } = string.Empty;
         public string Status { get; set; } = string.Empty;
         public DateTime ValidationTime { get; set; }
+        public byte TicketType { get; set; }
+        public string IssuingStation { get; set; } = string.Empty;
+        public string ValidatingStation { get; set; } = string.Empty;
+        public byte NewTicketState { get; set; }
+        public string InputMethod { get; set; } = string.Empty; // "qr_code" or "ticket_number"
     }
 
     public class PasswordChangeResponse

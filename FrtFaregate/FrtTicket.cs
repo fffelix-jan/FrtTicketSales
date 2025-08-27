@@ -7,6 +7,7 @@ using K4os.Compression.LZ4;
 /// FrtTicket 0.1.1 (Client Edition)
 /// Provides methods for encoding and decoding FRT (Falloway Rapid Transit) tickets
 /// with cryptographic signatures and obfuscation for QR code generation.
+/// (All the server-side key management code has been commented out for this edition.)
 /// </summary>
 public static class FrtTicket
 {
