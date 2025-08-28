@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrtBoothOfficeMachine", "Fr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FrtFaregate", "FrtFaregate\FrtFaregate.csproj", "{23E116DD-E60C-4B89-8CFC-4558D7FD3537}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OfflineTicketValidationTestProgram", "OfflineTicketValidationTestProgram\OfflineTicketValidationTestProgram.csproj", "{D131FBFE-C317-4FC6-BCDB-26F2FDD96121}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{23E116DD-E60C-4B89-8CFC-4558D7FD3537}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{23E116DD-E60C-4B89-8CFC-4558D7FD3537}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{23E116DD-E60C-4B89-8CFC-4558D7FD3537}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D131FBFE-C317-4FC6-BCDB-26F2FDD96121}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D131FBFE-C317-4FC6-BCDB-26F2FDD96121}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D131FBFE-C317-4FC6-BCDB-26F2FDD96121}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D131FBFE-C317-4FC6-BCDB-26F2FDD96121}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

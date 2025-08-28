@@ -56,6 +56,7 @@
             // 
             // TicketScanTextBox
             // 
+            this.TicketScanTextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.TicketScanTextBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.TicketScanTextBox.Location = new System.Drawing.Point(339, 419);
             this.TicketScanTextBox.Name = "TicketScanTextBox";
@@ -65,6 +66,7 @@
             // 
             // BottomTextLabel
             // 
+            this.BottomTextLabel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.BottomTextLabel.AutoSize = true;
             this.BottomTextLabel.Font = new System.Drawing.Font("Microsoft YaHei", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.BottomTextLabel.Location = new System.Drawing.Point(108, 329);

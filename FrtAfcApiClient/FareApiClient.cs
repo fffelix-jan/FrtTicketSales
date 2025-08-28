@@ -918,31 +918,40 @@ namespace FrtAfcApiClient
         }
 
         /// <summary>
-        /// Gets the current day's signing keys (3 AM to 3 AM next day, with 12 AM-3 AM logic).
+        /// Gets public keys for ticket validation (SECURE - only public keys).
+        /// SECURITY: Only returns PUBLIC keys and XOR keys - NEVER private keys.
+        /// These keys can be cached locally for offline ticket validation.
         /// </summary>
-        /// <returns>List of signing key info for the current day window</returns>
-        public async Task<List<SigningKeyInfo>> GetCurrentDaySigningKeysAsync()
+        /// <returns>List of validation keys for client-side ticket validation</returns>
+        public async Task<List<ValidationKeyInfo>> GetValidationKeysAsync()
         {
             try
             {
-                var response = await _httpClient.GetAsync("currentdaykeys");
+                var response = await _httpClient.GetAsync("validationkeys");
                 if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                 {
                     var error = await response.Content.ReadAsStringAsync();
-                    throw new FrtAfcApiException($"No signing keys found: {error}");
+                    throw new FrtAfcApiException($"No validation keys found: {error}");
                 }
+
+                if (response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                {
+                    throw new FrtAfcApiException("Insufficient permissions to retrieve validation keys");
+                }
+
                 response.EnsureSuccessStatusCode();
 
-                var keyResponse = await response.Content.ReadFromJsonAsync<SigningKeysResponse>();
-                if (keyResponse == null || keyResponse.SigningKeys == null)
+                var keyResponse = await response.Content.ReadFromJsonAsync<ValidationKeysResponse>();
+                if (keyResponse == null || keyResponse.ValidationKeys == null)
                 {
-                    throw new FrtAfcApiException("Received null signing keys info from server");
+                    throw new FrtAfcApiException("Received null validation keys info from server");
                 }
-                return keyResponse.SigningKeys;
+
+                return keyResponse.ValidationKeys;
             }
             catch (HttpRequestException ex)
             {
-                throw new FrtAfcApiException("Failed to get current day's signing keys", ex);
+                throw new FrtAfcApiException("Failed to get validation keys", ex);
             }
         }
 
@@ -1311,6 +1320,24 @@ namespace FrtAfcApiClient
         public byte TicketState { get; set; }
         public bool IsInvoiced { get; set; }
         public string InputMethod { get; set; } = string.Empty;
+    }
+
+    // Key DTOs
+    public class ValidationKeyInfo
+    {
+        public int KeyVersion { get; set; }
+        public DateTime StartDateTime { get; set; }
+        public DateTime ExpiryDateTime { get; set; }
+        public string PublicKey { get; set; } = string.Empty; // Base64 without PEM wrapper - PUBLIC KEY ONLY
+        public string XorKey { get; set; } = string.Empty; // Base64
+    }
+
+    public class ValidationKeysResponse
+    {
+        public List<ValidationKeyInfo> ValidationKeys { get; set; } = new List<ValidationKeyInfo>();
+        public int TotalKeys { get; set; }
+        public DateTime RetrievedAt { get; set; }
+        public string SecurityNote { get; set; } = string.Empty;
     }
 
     public class InvoiceException : FrtAfcApiException

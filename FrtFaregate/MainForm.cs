@@ -96,8 +96,8 @@ namespace FrtFaregate
             failSound = LoadSoundFromResource(Properties.Resources.Fail);
 
             // Set the text
-            MiddleTextLabel.Text = DefaultMiddleText;
-            BottomTextLabel.Text = DefaultBottomText;
+            SetMiddleTextAndCenter(DefaultMiddleText);
+            SetBottomTextAndCenter(DefaultBottomText);
 
             // Create the event that hides the caret when the text box gains focus
             TicketScanTextBox.GotFocus += (s, e) => HideCaret(TicketScanTextBox.Handle);
@@ -113,6 +113,8 @@ namespace FrtFaregate
         /// </summary>
         private void InitializeApiClient()
         {
+            Console.WriteLine("[DEBUG] InitializeApiClient() called");
+
             try
             {
                 // Load configuration with better error handling
@@ -120,8 +122,12 @@ namespace FrtFaregate
                     Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
                     "faregate_config.txt");
 
+                Console.WriteLine($"[DEBUG] Config path: {configPath}");
+
                 if (!File.Exists(configPath))
                 {
+                    Console.WriteLine("[DEBUG] Config file doesn't exist, creating default config");
+
                     // Create default config file
                     var defaultConfig = @"API_ENDPOINT=http://127.0.0.1:5281
 API_USERNAME=testfaregate
@@ -129,25 +135,34 @@ API_PASSWORD=testpassword
 CURRENT_STATION=FLZ
 FAREGATE_DIRECTION=ENTRY";
                     File.WriteAllText(configPath, defaultConfig);
-                    Console.WriteLine($"Created default config file at: {configPath}");
+                    Console.WriteLine($"[DEBUG] Created default config file at: {configPath}");
+                }
+                else
+                {
+                    Console.WriteLine("[DEBUG] Config file exists, loading...");
                 }
 
                 SimpleConfig.Load(configPath);
                 string apiEndpoint = SimpleConfig.Get("API_ENDPOINT", "http://127.0.0.1:5281");
+                string username = SimpleConfig.Get("API_USERNAME", "testfaregate");
+                string password = SimpleConfig.Get("API_PASSWORD", "testpassword");
+
+                Console.WriteLine($"[DEBUG] API endpoint: {apiEndpoint}");
+                Console.WriteLine($"[DEBUG] API username: {username}");
+                Console.WriteLine($"[DEBUG] API password: {new string('*', password.Length)}");
 
                 // Create API client
                 apiClient = new FareApiClient(apiEndpoint);
 
                 // Set authentication
-                string username = SimpleConfig.Get("API_USERNAME", "testfaregate");
-                string password = SimpleConfig.Get("API_PASSWORD", "testpassword");
                 apiClient.SetBasicAuthentication(username, password);
 
-                Console.WriteLine($"API client initialized with endpoint: {apiEndpoint}");
+                Console.WriteLine($"[DEBUG] API client initialized with endpoint: {apiEndpoint}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Warning: Failed to initialize API client: {ex.Message}");
+                Console.WriteLine($"[DEBUG] Warning: Failed to initialize API client: {ex.Message}");
+                Console.WriteLine($"[DEBUG] Exception details: {ex}");
             }
         }
 
@@ -176,14 +191,114 @@ FAREGATE_DIRECTION=ENTRY";
         /// </summary>
         private void InitializeKeyRefreshTimer()
         {
+            Console.WriteLine("[DEBUG] InitializeKeyRefreshTimer() called");
+
             // Refresh keys on startup
+            Console.WriteLine("[DEBUG] Starting initial key refresh...");
             _ = RefreshCachedKeysAsync();
 
             // Set up timer to refresh keys every 5 minutes
             keyRefreshTimer = new Timer();
             keyRefreshTimer.Interval = 5 * 60 * 1000; // 5 minutes
-            keyRefreshTimer.Tick += async (sender, e) => await RefreshCachedKeysAsync();
+            keyRefreshTimer.Tick += async (sender, e) => {
+                Console.WriteLine("[DEBUG] Timer tick - refreshing keys...");
+                await RefreshCachedKeysAsync();
+            };
             keyRefreshTimer.Start();
+
+            Console.WriteLine("[DEBUG] Key refresh timer started (5 minute intervals)");
+        }
+
+        /// <summary>
+        /// Refreshes cached cryptographic keys from the server for offline validation
+        /// Uses the new validationkeys API endpoint
+        /// </summary>
+        private async Task RefreshCachedKeysAsync()
+        {
+            Console.WriteLine("[DEBUG] RefreshCachedKeysAsync() called");
+
+            try
+            {
+                if (apiClient == null)
+                {
+                    Console.WriteLine("[DEBUG] Warning: API client not available for key refresh");
+                    return;
+                }
+
+                Console.WriteLine("[DEBUG] Attempting to get validation keys from server...");
+
+                var validationKeys = await apiClient.GetValidationKeysAsync();
+
+                Console.WriteLine($"[DEBUG] Retrieved {validationKeys.Count} validation keys from server");
+
+                foreach (var keyInfo in validationKeys)
+                {
+                    Console.WriteLine($"[DEBUG] Processing key version {keyInfo.KeyVersion}, valid from {keyInfo.StartDateTime} to {keyInfo.ExpiryDateTime}");
+
+                    bool keyExists = cachedKeyPairs.Any(k => k.KeyVersion == keyInfo.KeyVersion);
+
+                    if (!keyExists)
+                    {
+                        try
+                        {
+                            var publicKey = FrtTicket.CreatePublicKeyFromBase64(keyInfo.PublicKey);
+                            var xorKeyBytes = Convert.FromBase64String(keyInfo.XorKey);
+
+                            var cachedKey = new CachedKeyPair
+                            {
+                                KeyVersion = keyInfo.KeyVersion,
+                                PublicKey = publicKey,
+                                XorKey = xorKeyBytes,
+                                KeyCreated = keyInfo.StartDateTime,
+                                KeyExpiry = keyInfo.ExpiryDateTime
+                            };
+
+                            cachedKeyPairs.Add(cachedKey);
+
+                            Console.WriteLine($"[DEBUG] Added cached key version {keyInfo.KeyVersion}, created: {keyInfo.StartDateTime}, expires: {cachedKey.KeyExpiry}");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[DEBUG] Error processing key version {keyInfo.KeyVersion}: {ex.Message}");
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine($"[DEBUG] Key version {keyInfo.KeyVersion} already cached, skipping");
+                    }
+                }
+
+                CleanupExpiredKeys();
+
+                if (cachedKeyPairs.Count > 0)
+                {
+                    cachedKeysLastRefresh = DateTime.Now;
+                    Console.WriteLine($"[DEBUG] Updated cachedKeysLastRefresh to: {cachedKeysLastRefresh}");
+                }
+                else
+                {
+                    Console.WriteLine("[DEBUG] No keys were successfully processed, not updating refresh time");
+                }
+
+                Console.WriteLine($"[DEBUG] Key refresh complete. Total cached keys: {cachedKeyPairs.Count}, Active keys: {cachedKeyPairs.Count(k => k.IsValid)}");
+            }
+            catch (HttpRequestException ex)
+            {
+                Console.WriteLine($"[DEBUG] Warning: Failed to refresh cached keys due to network error: {ex.Message}");
+            }
+            catch (TaskCanceledException)
+            {
+                Console.WriteLine($"[DEBUG] Warning: Key refresh timed out");
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                Console.WriteLine($"[DEBUG] Warning: Unauthorized access when refreshing keys - check faregate permissions: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DEBUG] Warning: Failed to refresh cached keys: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -242,8 +357,7 @@ FAREGATE_DIRECTION=ENTRY";
 
         /// <summary>
         /// Attempts to validate a ticket online using the API
-        /// </summary>
-        /// <param name="ticketCode">The ticket QR code</param>
+        /// /// <param name="ticketCode">The ticket QR code</param>
         /// <returns>Validation result</returns>
         private async Task<TicketValidationResult> ValidateTicketOnlineAsync(string ticketCode)
         {
@@ -324,110 +438,8 @@ FAREGATE_DIRECTION=ENTRY";
         }
 
         /// <summary>
-        /// Refreshes cached cryptographic keys from the server for offline validation
-        /// This method now handles multiple valid key pairs and maintains a collection
-        /// </summary>
-        private async Task RefreshCachedKeysAsync()
-        {
-            try
-            {
-                if (apiClient == null)
-                {
-                    Console.WriteLine("Warning: API client not available for key refresh");
-                    return;
-                }
-
-                // Get ALL current day's signing keys from the server
-                var signingKeys = await apiClient.GetCurrentDaySigningKeysAsync();
-
-                Console.WriteLine($"Retrieved {signingKeys.Count} signing keys from server");
-
-                // Process each signing key
-                foreach (var keyInfo in signingKeys)
-                {
-                    // Check if we already have this key version
-                    bool keyExists = cachedKeyPairs.Any(k => k.KeyVersion == keyInfo.KeyVersion);
-
-                    if (!keyExists)
-                    {
-                        // Parse and create new key pair
-                        var publicKey = ECDsa.Create();
-                        var publicKeyBytes = Convert.FromBase64String(keyInfo.PublicKey);
-
-                        // Import public key - handle .NET Framework compatibility
-                        if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                        {
-                            try
-                            {
-                                // For .NET Framework on Windows, try to import as ECDSA public key
-                                var cngKey = System.Security.Cryptography.CngKey.Import(
-                                    publicKeyBytes,
-                                    System.Security.Cryptography.CngKeyBlobFormat.EccPublicBlob);
-                                publicKey = new System.Security.Cryptography.ECDsaCng(cngKey);
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"Warning: Failed to import public key version {keyInfo.KeyVersion}: {ex.Message}");
-                                publicKey.Dispose();
-                                continue; // Skip this key and try the next one
-                            }
-                        }
-                        else
-                        {
-                            throw new PlatformNotSupportedException("ECDsa public key import is only supported on Windows with .NET Framework.");
-                        }
-
-                        // Create new cached key pair
-                        var cachedKey = new CachedKeyPair
-                        {
-                            KeyVersion = keyInfo.KeyVersion,
-                            PublicKey = publicKey,
-                            XorKey = Convert.FromBase64String(keyInfo.XorKey),
-                            KeyCreated = keyInfo.KeyCreated,
-                            // Keys are valid until next rotation (3 AM next day)
-                            KeyExpiry = DateTime.Now.Date.AddDays(1).AddHours(3)
-                        };
-
-                        // Add to our collection
-                        cachedKeyPairs.Add(cachedKey);
-
-                        Console.WriteLine($"Added cached key version {keyInfo.KeyVersion}, created: {keyInfo.KeyCreated}, expires: {cachedKey.KeyExpiry}");
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Key version {keyInfo.KeyVersion} already cached, skipping");
-                    }
-                }
-
-                // Clean up expired keys
-                CleanupExpiredKeys();
-
-                // Update last refresh time
-                cachedKeysLastRefresh = DateTime.Now;
-
-                Console.WriteLine($"Key refresh complete. Total cached keys: {cachedKeyPairs.Count}, Active keys: {cachedKeyPairs.Count(k => k.IsValid)}");
-            }
-            catch (HttpRequestException ex)
-            {
-                Console.WriteLine($"Warning: Failed to refresh cached keys due to network error: {ex.Message}");
-            }
-            catch (TaskCanceledException ex)
-            {
-                Console.WriteLine($"Warning: Key refresh timed out: {ex.Message}");
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                Console.WriteLine($"Warning: Unauthorized access when refreshing keys - check faregate permissions: {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Warning: Failed to refresh cached keys: {ex.Message}");
-            }
-        }
-
-        /// <summary>
         /// Gets all currently valid key pairs for offline validation
-        /// </summary>
+        /// /// </summary>
         private List<CachedKeyPair> GetValidKeys()
         {
             CleanupExpiredKeys(); // Clean up first
@@ -452,7 +464,7 @@ FAREGATE_DIRECTION=ENTRY";
         /// </summary>
         /// <param name="ticketCode">The ticket QR code</param>
         /// <returns>Validation result</returns>
-        private async Task<TicketValidationResult> ValidateTicketOfflineAsync(string ticketCode)
+        private Task<TicketValidationResult> ValidateTicketOfflineAsync(string ticketCode)
         {
             try
             {
@@ -460,7 +472,7 @@ FAREGATE_DIRECTION=ENTRY";
 
                 if (validKeys.Count == 0)
                 {
-                    return TicketValidationResult.Failed("No valid cached keys for offline validation", isDefinitive: false);
+                    return Task.FromResult(TicketValidationResult.Failed("No valid cached keys for offline validation", isDefinitive: false));
                 }
 
                 Console.WriteLine($"Attempting offline validation with {validKeys.Count} cached keys");
@@ -494,11 +506,11 @@ FAREGATE_DIRECTION=ENTRY";
                             if (!validationChecks.IsValid)
                             {
                                 Console.WriteLine($"Offline validation checks failed: {validationChecks.ErrorMessage}");
-                                return TicketValidationResult.Failed(validationChecks.ErrorMessage, isDefinitive: false);
+                                return Task.FromResult(TicketValidationResult.Failed(validationChecks.ErrorMessage, isDefinitive: false));
                             }
 
                             // If all checks pass, return success
-                            return new TicketValidationResult
+                            return Task.FromResult(new TicketValidationResult
                             {
                                 Success = true,
                                 TicketType = ticketType,
@@ -508,7 +520,7 @@ FAREGATE_DIRECTION=ENTRY";
                                 TicketNumber = ticketNumber.ToString(),
                                 InputMethod = "offline_validation",
                                 Message = $"离线验证成功 (密钥版本 {keyPair.KeyVersion})"
-                            };
+                            });
                         }
                         else
                         {
@@ -523,12 +535,12 @@ FAREGATE_DIRECTION=ENTRY";
                 }
 
                 Console.WriteLine("Failed to decode ticket with any cached keys");
-                return TicketValidationResult.Failed("Failed to decode ticket with any cached keys", isDefinitive: false);
+                return Task.FromResult(TicketValidationResult.Failed("Failed to decode ticket with any cached keys", isDefinitive: false));
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Offline validation error: {ex.Message}");
-                return TicketValidationResult.Failed($"离线验证错误: {ex.Message}", isDefinitive: false);
+                return Task.FromResult(TicketValidationResult.Failed($"离线验证错误: {ex.Message}", isDefinitive: false));
             }
         }
 
@@ -568,14 +580,26 @@ FAREGATE_DIRECTION=ENTRY";
             c.Left = (c.Parent.Width - c.Width) / 2;
         }
 
+        public void SetMiddleTextAndCenter(string text)
+        {
+            MiddleTextLabel.Text = text;
+            CenterControlHorizontally(MiddleTextLabel);
+        }
+
+        public void SetBottomTextAndCenter(string text)
+        {
+            BottomTextLabel.Text = text;
+            CenterControlHorizontally(BottomTextLabel);
+        }
+
         private void DisplayScanResult(DisplayType type, string middleText, string bottomText)
         {
             // Reset the hiding timer
             HideUserMessageTimer.Stop();
 
             // Switch the text
-            MiddleTextLabel.Text = middleText;
-            BottomTextLabel.Text = bottomText;
+            SetMiddleTextAndCenter(middleText);
+            SetBottomTextAndCenter(bottomText);
 
             // Switch the icon based on success or fail
             switch (type)
@@ -606,6 +630,127 @@ FAREGATE_DIRECTION=ENTRY";
         private void SecurityTimer_Tick(object sender, EventArgs e)
         {
             TicketScanTextBox.Focus();
+            
+            // Update CornerLabel with date/time and status codes
+            UpdateCornerLabel();
+        }
+
+        /// <summary>
+        /// Updates the CornerLabel with current date/time and status codes
+        /// </summary>
+        private void UpdateCornerLabel()
+        {
+            var statusText = DateTime.Now.ToString("yyyy-MM-dd HH:mm");
+            var statusCodes = new List<string>();
+
+            Console.WriteLine($"[DEBUG] UpdateCornerLabel called at {DateTime.Now}");
+
+            // Check for network connectivity
+            bool networkAvailable = IsNetworkAvailable();
+            Console.WriteLine($"[DEBUG] Network availability check result: {networkAvailable}");
+            if (!networkAvailable)
+            {
+                statusCodes.Add("NN");
+                Console.WriteLine("[DEBUG] Added NN status code");
+            }
+
+            // Check for valid keys
+            bool hasKeys = HasValidKeys();
+            Console.WriteLine($"[DEBUG] Valid keys check result: {hasKeys}");
+            if (!hasKeys)
+            {
+                statusCodes.Add("NK");
+                Console.WriteLine("[DEBUG] Added NK status code");
+            }
+
+            // Combine date/time with status codes
+            if (statusCodes.Count > 0)
+            {
+                statusText += " " + string.Join(" ", statusCodes);
+                Console.WriteLine($"[DEBUG] Final status text with codes: '{statusText}'");
+            }
+            else
+            {
+                Console.WriteLine($"[DEBUG] No status codes, final text: '{statusText}'");
+            }
+
+            CornerLabel.Text = statusText;
+            Console.WriteLine($"[DEBUG] CornerLabel.Text set to: '{CornerLabel.Text}'");
+        }
+
+        /// <summary>
+        /// Checks if network connectivity is available by testing API client
+        /// </summary>
+        private bool IsNetworkAvailable()
+        {
+            Console.WriteLine("[DEBUG] IsNetworkAvailable() called");
+
+            try
+            {
+                if (apiClient == null)
+                {
+                    Console.WriteLine("[DEBUG] API client is null - returning false");
+                    return false;
+                }
+
+                Console.WriteLine("[DEBUG] API client exists, checking last refresh time");
+
+                // Use a simple connectivity check - this is a non-blocking approach
+                // We check if the last key refresh was successful within reasonable time
+                var timeSinceLastRefresh = DateTime.Now - cachedKeysLastRefresh;
+
+                Console.WriteLine($"[DEBUG] cachedKeysLastRefresh: {cachedKeysLastRefresh}");
+                Console.WriteLine($"[DEBUG] Current time: {DateTime.Now}");
+                Console.WriteLine($"[DEBUG] Time since last refresh: {timeSinceLastRefresh.TotalMinutes:F2} minutes");
+
+                // If we haven't successfully refreshed keys in over 10 minutes, consider network down
+                // Also check if we never successfully refreshed (DateTime.MinValue)
+                bool isNetworkUp = cachedKeysLastRefresh != DateTime.MinValue && timeSinceLastRefresh.TotalMinutes <= 10;
+
+                Console.WriteLine($"[DEBUG] cachedKeysLastRefresh == DateTime.MinValue: {cachedKeysLastRefresh == DateTime.MinValue}");
+                Console.WriteLine($"[DEBUG] timeSinceLastRefresh.TotalMinutes <= 10: {timeSinceLastRefresh.TotalMinutes <= 10}");
+                Console.WriteLine($"[DEBUG] Final network availability result: {isNetworkUp}");
+
+                return isNetworkUp;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DEBUG] Exception in IsNetworkAvailable(): {ex.Message}");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Checks if we have valid cached keys available
+        /// </summary>
+        private bool HasValidKeys()
+        {
+            Console.WriteLine("[DEBUG] HasValidKeys() called");
+
+            try
+            {
+                Console.WriteLine($"[DEBUG] Total cached key pairs: {cachedKeyPairs.Count}");
+
+                var validKeys = cachedKeyPairs.Where(k => k.IsValid).ToList();
+                Console.WriteLine($"[DEBUG] Valid key pairs: {validKeys.Count}");
+
+                // Log details about each key
+                for (int i = 0; i < cachedKeyPairs.Count; i++)
+                {
+                    var key = cachedKeyPairs[i];
+                    Console.WriteLine($"[DEBUG] Key {i}: Version={key.KeyVersion}, Created={key.KeyCreated}, Expiry={key.KeyExpiry}, IsValid={key.IsValid}, Now={DateTime.Now}");
+                }
+
+                bool hasValidKeys = validKeys.Count > 0;
+                Console.WriteLine($"[DEBUG] HasValidKeys result: {hasValidKeys}");
+
+                return hasValidKeys;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[DEBUG] Exception in HasValidKeys(): {ex.Message}");
+                return false;
+            }
         }
 
         // Scan code
@@ -779,8 +924,8 @@ FAREGATE_DIRECTION=ENTRY";
         {
             // Reset to default text and image
             HideUserMessageTimer.Stop();
-            MiddleTextLabel.Text = DefaultMiddleText;
-            BottomTextLabel.Text = DefaultBottomText;
+            SetMiddleTextAndCenter(DefaultMiddleText);
+            SetBottomTextAndCenter(DefaultBottomText);
             UserPromptPictureBox.Image = tapCardImage;
         }
 
@@ -789,14 +934,19 @@ FAREGATE_DIRECTION=ENTRY";
         /// </summary>
         private void CleanupExpiredKeys()
         {
+            Console.WriteLine("[DEBUG] CleanupExpiredKeys() called");
+
             var expiredKeys = cachedKeyPairs.Where(k => !k.IsValid).ToList();
+            Console.WriteLine($"[DEBUG] Found {expiredKeys.Count} expired keys to clean up");
 
             foreach (var expiredKey in expiredKeys)
             {
-                Console.WriteLine($"Removing expired key version {expiredKey.KeyVersion}");
+                Console.WriteLine($"[DEBUG] Removing expired key version {expiredKey.KeyVersion} (expired at {expiredKey.KeyExpiry})");
                 expiredKey.Dispose();
                 cachedKeyPairs.Remove(expiredKey);
             }
+
+            Console.WriteLine($"[DEBUG] Cleanup complete. Remaining keys: {cachedKeyPairs.Count}");
         }
 
         /// <summary>
